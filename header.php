@@ -1,0 +1,152 @@
+    <!-- Modern Header -->
+    <div class="navbar-container">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-hexagon-fill text-primary-accent"></i>
+                    TECH<span>MEDIA</span>
+                </a>
+                
+                <!-- Desktop Navigation -->
+                <div class="collapse navbar-collapse desktop-nav">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-center">
+                        <li class="nav-item"><a class="nav-link" id="home" href="index.php">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" id="about-us" href="about-us.php">About</a></li>
+                        
+                        <!-- Categories Dropdown (Full Width) -->
+                        <li class="nav-item dropdown position-static">
+                            <a class="nav-link dropdown-toggle" id="categories" href="#" data-bs-toggle="dropdown">Browse Companies</a>
+                            <div class="dropdown-menu">
+                                <div class="container">
+                                    <div class="row p-4">
+                                        <div class="col-md-3">
+                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-code me-2"></i>Software & Dev</h6>
+                                            <a class="dropdown-item" href="categories.php">Web Development</a>
+                                            <a class="dropdown-item" href="#">Mobile Apps</a>
+                                            <a class="dropdown-item" href="#">SaaS Platforms</a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-microchip me-2"></i>Hardware & IoT</h6>
+                                            <a class="dropdown-item" href="#">Robotics</a>
+                                            <a class="dropdown-item" href="#">Smart Home</a>
+                                            <a class="dropdown-item" href="#">Networking</a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-brain me-2"></i>Data & AI</h6>
+                                            <a class="dropdown-item" href="#">Machine Learning</a>
+                                            <a class="dropdown-item" href="#">Data Analytics</a>
+                                            <a class="dropdown-item" href="#">Cloud Computing</a>
+                                        </div>
+                                        <div class="col-md-3 border-start border-secondary d-none d-md-block">
+                                            <div class="text-center p-3">
+                                                <i class="fas fa-rocket fa-3x mb-3 text-secondary"></i>
+                                                <p class="small text-muted">Explore over 500+ categories in the Nigerian Tech Space.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- Events Dropdown (Full Width) -->
+                        <li class="nav-item dropdown position-static">
+                            <a class="nav-link dropdown-toggle" id="events" href="#" data-bs-toggle="dropdown">Events</a>
+                            <div class="dropdown-menu">
+                                <div class="container">
+                                    <div class="row p-4">
+                                        <div class="col-md-3">
+                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-calendar-alt me-2"></i>Conferences</h6>
+                                            <a class="dropdown-item" href="events.php">Tech Summits</a>
+                                            <a class="dropdown-item" href="#">Industry Forums</a>
+                                            <a class="dropdown-item" href="#">Annual Gatherings</a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-laptop-code me-2"></i>Hackathons</h6>
+                                            <a class="dropdown-item" href="#">Coding Competitions</a>
+                                            <a class="dropdown-item" href="#">App Development</a>
+                                            <a class="dropdown-item" href="#">Blockchain Events</a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-chalkboard-teacher me-2"></i>Workshops</h6>
+                                            <a class="dropdown-item" href="#">Skill Development</a>
+                                            <a class="dropdown-item" href="#">Technical Training</a>
+                                            <a class="dropdown-item" href="#">Hands-on Sessions</a>
+                                        </div>
+                                        <div class="col-md-3 border-start border-secondary d-none d-md-block">
+                                            <div class="text-center p-3">
+                                                <i class="fas fa-users fa-3x mb-3 text-secondary"></i>
+                                                <p class="small text-muted">Find networking opportunities and industry events.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="nav-item"><a class="nav-link" id="news" href="news.php">News</a></li>
+                    </ul>
+                    <div class="d-flex mt-3 mt-lg-0">
+                        <a href="get-listed.php"><button class="btn-get-listed">Get Listed</button></a>
+                    </div>
+                </div>
+                
+                <!-- Mobile Menu Toggle -->
+                <button class="mobile-menu-toggle navbar-toggler border-0" type="button">
+                    <i class="fas fa-bars text-primary-accent" style="font-size: 1.5rem;"></i>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-container" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-hexagon-fill text-primary-accent"></i>
+                TECH<span>MEDIA</span>
+            </a>
+            <button class="mobile-menu-close border-0 bg-transparent">
+                <i class="fas fa-times text-primary-accent" style="font-size: 1.5rem;"></i>
+            </button>
+        </div>
+        
+        <a href="index.php" id="home-responsive" class="mobile-nav-link">Home</a>
+        <a href="about-us.php" id="about-us-responsive" class="mobile-nav-link">About</a>
+        
+        <div class="mobile-dropdown">
+            <a href="#" id="categories-mobile" class="mobile-nav-link d-flex justify-content-between align-items-center">
+                Browse Companies
+                <i class="fas fa-chevron-down"></i>
+            </a>
+            <div class="mobile-dropdown-content">
+                <a href="categories.php" class="mobile-nav-link">Web Development</a>
+                <a href="#" class="mobile-nav-link">Mobile Apps</a>
+                <a href="#" class="mobile-nav-link">SaaS Platforms</a>
+                <a href="#" class="mobile-nav-link">Robotics</a>
+                <a href="#" class="mobile-nav-link">Smart Home</a>
+                <a href="#" class="mobile-nav-link">Networking</a>
+                <a href="#" class="mobile-nav-link">Machine Learning</a>
+                <a href="#" class="mobile-nav-link">Data Analytics</a>
+                <a href="#" class="mobile-nav-link">Cloud Computing</a>
+            </div>
+        </div>
+        
+        <div class="mobile-dropdown">
+            <a href="#" id="events-mobile" class="mobile-nav-link d-flex justify-content-between align-items-center">
+                Events
+                <i class="fas fa-chevron-down"></i>
+            </a>
+            <div class="mobile-dropdown-content">
+                <a href="#" class="mobile-nav-link">Conferences</a>
+                <a href="#" class="mobile-nav-link">Hackathons</a>
+                <a href="#" class="mobile-nav-link">Workshops</a>
+                <a href="#" class="mobile-nav-link">Webinars</a>
+            </div>
+        </div>
+        
+        <a href="news.php" id="news-mobile" class="mobile-nav-link">News</a>
+        
+        <div class="mt-4 pt-4 border-top border-secondary">
+            <button class="btn-get-listed w-100">Get Listed</button>
+        </div>
+    </div>
