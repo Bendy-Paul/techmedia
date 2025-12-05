@@ -54,6 +54,14 @@ try {
                             </select>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Category Type</label>
+                            <select name="type" class="form-select">
+                                <option value="article">Article</option>
+                                <option value="company">Company</option>
+                                <option value="event">Event</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Category Name</label>
                             <input type="text" name="name" class="form-control" placeholder="e.g. Fintech" required>
                         </div>

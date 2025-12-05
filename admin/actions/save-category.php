@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     // 1. Sanitize Input
     $name = trim($_POST['name']);
+    $type = trim($_POST['type']);
     $parent_id = trim($_POST['parent_id']);
     $icon_class = trim($_POST['icon_class']);
 
@@ -37,8 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $slug .= '-' . rand(1, 99);
             }
 
-            $stmt = $pdo->prepare("INSERT INTO categories (name, slug, icon_class, parent_id) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$name, $slug, $icon_class, $parent_id]);
+            $stmt = $pdo->prepare("INSERT INTO categories (name, type, slug, icon_class, parent_id) VALUES (?, ?, ?, ?, ?)");
+            $stmt->execute([$name, $type, $slug, $icon_class, $parent_id]);
 
             header("Location: ../categories.php?status=success");
             exit();

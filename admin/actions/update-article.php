@@ -12,10 +12,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $title = trim($_POST['title']);
     $content = $_POST['content'];
     $status = $_POST['status'];
+    $feature_status = isset($_POST['is_featured']) ? 1 : 0;
 
     // Handle Image Upload
     $img_sql = "";
-    $params = [$title, $content, $status];
+    $params = [$title, $content, $status, $feature_status];
+
+     // Check if user uploaded a NEW file
 
     if (!empty($_FILES['featured_image_upload']['name'])) {
         $upload_dir = '../../uploads/articles/';
@@ -32,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $pdo->beginTransaction();
 
         // 1. Update Main Article
-        $stmt = $pdo->prepare("UPDATE articles SET title = ?, content = ?, status = ? $img_sql WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE articles SET title = ?, content = ?, status = ? $img_sql, is_featured = ? WHERE id = ?");
         $stmt->execute($params);
 
         // 2. Update Companies (Reset & Re-insert)
@@ -51,6 +54,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $tag_stmt = $pdo->prepare("INSERT INTO article_tags (article_id, tag_id) VALUES (?, ?)");
             foreach ($_POST['tags'] as $tid) {
                 $tag_stmt->execute([$id, $tid]);
+            }
+        }
+
+        $pdo->prepare("DELETE FROM article_categories WHERE article_id = ?")->execute([$id]);
+        if (!empty($_POST['categories'])) {
+            $cat_stmt = $pdo->prepare("INSERT INTO article_categories (article_id, category_id) VALUES (?, ?)");
+            foreach ($_POST['categories'] as $cat_id) {
+                $cat_stmt->execute([$id, $cat_id]);
             }
         }
 

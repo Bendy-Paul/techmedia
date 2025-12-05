@@ -1,3 +1,25 @@
+<?php
+include_once('./includes/wertyuytre.php');
+$sql = "
+    SELECT 
+        s.id,
+        s.name as state_name,
+        s.state_code as state_code,
+        COUNT(DISTINCT comp.id) as company_count,
+        COUNT(DISTINCT c.id) as city_count
+    FROM states s
+    LEFT JOIN cities c ON s.id = c.state_id
+    LEFT JOIN companies comp ON c.id = comp.city_id
+    GROUP BY s.id, s.name
+    ORDER BY company_count DESC
+";
+
+$result = $pdo->query($sql)->fetchAll();
+$highest_count = $result[0]['company_count'];
+
+
+echo $result[0]['state_name'];
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,7 +28,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tech Media Directory | Nigeria's Tech Ecosystem</title>
 
-    <?php include_once('links.php'); ?>
+    <?php 
+        include_once('links.php'); 
+        // Now you can access it like:
+        foreach ($result as $state) {
+            // echo $state['state_name'] . ": " . $state['company_count'] . " companies<br>";
+            echo '<style>
+                #' . 'NG-' . strtoupper(substr($state['state_code'], 0, 2)) . ' {';
+
+                if($state['company_count'] == $highest_count) {
+                    echo 'fill:  var(--primary-accent);'; // Darkest color for the highest count
+                } elseif ($state['company_count'] >= $highest_count * 0.75) {
+                    echo 'fill:  var(--primary-accent-75);'; // Medium color for mid count
+                } elseif ($state['company_count'] >= $highest_count * 0.5) {
+                    echo 'fill: var(--primary-accent-50);'; // Lighter color for low count
+                } elseif ($state['company_count'] <= $highest_count * 0.25)  {
+                    echo 'fill: var(--primary-accent-25);'; // Lightest color for the lowest count
+                }
+
+            echo ' }  
+            </style>';
+        }
+
+    ?>
+
 
 </head>
 
@@ -20,7 +65,7 @@
     </script>
 
     <!-- Main Content -->
-    
+
     <main class="main-content">
         <!-- Hero Section -->
         <section class="hero-section">
@@ -313,7 +358,8 @@
             </div>
         </section>
 
-        <!-- Recent Listings Slider -->
+
+        <!-- Recent Listings Slider (Dynamic) -->
         <section class="section-padding" style="background: #f1f5f9;">
             <div class="container">
                 <div class="d-flex justify-content-between align-items-end mb-4">
@@ -321,111 +367,89 @@
                         <h2 class="fw-bold">Recently Listed</h2>
                         <p class="text-muted">New tech companies joining the directory</p>
                     </div>
-                    <a href="#" class="text-primary-accent text-decoration-none fw-bold">View All <i class="fas fa-arrow-right"></i></a>
+                    <a href="categories.php" class="text-primary-accent text-decoration-none fw-bold">View All <i class="fas fa-arrow-right"></i></a>
                 </div>
 
                 <div class="owl-carousel owl-theme" id="listings-carousel">
-                    <!-- Item 1 -->
-                    <div class="item">
-                        <div class="listing-card">
-                            <img src="https://placehold.co/600x400/f1f5f9/2563eb?text=Nova+Pay" class="listing-img" alt="Company">
-                            <div class="listing-body">
-                                <span class="listing-tag">Fintech</span>
-                                <h5 class="fw-bold">Nova Pay Systems</h5>
-                                <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt text-primary-accent"></i> Lagos, NG</p>
-                                <p class="small text-dark">Revolutionizing payments for small businesses in Africa.</p>
+                    <?php
+                    $recent = $pdo->query("
+                        SELECT c.id, c.name, c.slug, c.logo_url, c.tagline, cities.name as city_name 
+                        FROM companies c 
+                        LEFT JOIN cities ON c.city_id = cities.id 
+                        ORDER BY c.created_at DESC LIMIT 6
+                    ")->fetchAll();
+
+                    foreach ($recent as $comp):
+                    ?>
+                        <div class="item">
+                            <div class="listing-card">
+                                <div class="bg-white p-4 rounded-top d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <?php if ($comp['logo_url']): ?>
+                                        <img src="<?= htmlspecialchars($comp['logo_url']) ?>" alt="<?= htmlspecialchars($comp['name']) ?>" style="max-height: 100px; width: auto;">
+                                    <?php else: ?>
+                                        <i class="fas fa-building fa-3x text-muted"></i>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="listing-body p-3">
+                                    <h5 class="fw-bold"><?= htmlspecialchars($comp['name']) ?></h5>
+                                    <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt text-primary-accent"></i> <?= htmlspecialchars($comp['city_name'] ?? 'Nigeria') ?></p>
+                                    <p class="small text-dark text-truncate"><?= htmlspecialchars($comp['tagline'] ?? '') ?></p>
+                                    <a href="company.php?slug=<?= $comp['slug'] ?>" class="btn btn-sm btn-outline-primary w-100 mt-2">View Profile</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- Item 2 -->
-                    <div class="item">
-                        <div class="listing-card">
-                            <img src="https://placehold.co/600x400/f1f5f9/2563eb?text=AgriTech" class="listing-img" alt="Company">
-                            <div class="listing-body">
-                                <span class="listing-tag">AgriTech</span>
-                                <h5 class="fw-bold">FarmCrowdy 2.0</h5>
-                                <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt text-primary-accent"></i> Abuja, NG</p>
-                                <p class="small text-dark">Connecting farmers with sponsors digitally.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Item 3 -->
-                    <div class="item">
-                        <div class="listing-card">
-                            <img src="https://placehold.co/600x400/f1f5f9/2563eb?text=Health" class="listing-img" alt="Company">
-                            <div class="listing-body">
-                                <span class="listing-tag">HealthTech</span>
-                                <h5 class="fw-bold">MediLife Africa</h5>
-                                <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt text-primary-accent"></i> Port Harcourt, NG</p>
-                                <p class="small text-dark">Telemedicine solutions for rural areas.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Item 4 -->
-                    <div class="item">
-                        <div class="listing-card">
-                            <img src="https://placehold.co/600x400/f1f5f9/2563eb?text=EduTech" class="listing-img" alt="Company">
-                            <div class="listing-body">
-                                <span class="listing-tag">EduTech</span>
-                                <h5 class="fw-bold">LearnNaija</h5>
-                                <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt text-primary-accent"></i> Ibadan, NG</p>
-                                <p class="small text-dark">Accessible coding bootcamps for teens.</p>
-                            </div>
-                        </div>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </section>
 
-        <!-- Articles Section -->
+
+        <!-- Latest News (Dynamic) -->
         <section class="section-padding" id="articles">
             <div class="container">
                 <h2 class="fw-bold mb-5 text-center">Tech Insights & News</h2>
                 <div class="row">
-                    <div class="col-lg-6 mb-4" data-aos="fade-right">
-                        <div class="card bg-transparent border-0 h-100">
-                            <div class="position-relative">
-                                <img src="https://placehold.co/800x400/f1f5f9/2563eb?text=Tech+Insights" class="img-fluid rounded-4 mb-3 border border-secondary border-opacity-25 w-100" alt="News">
-                                <span class="position-absolute top-0 start-0 m-3 badge bg-primary">FEATURED</span>
-                            </div>
-                            <span class="text-secondary small text-uppercase fw-bold"><i class="fas fa-chart-line me-1"></i> Analysis</span>
-                            <h3 class="mt-2 fw-bold">The Rise of AI Startups in Yaba</h3>
-                            <p class="text-muted">How Artificial Intelligence is changing the landscape of the 'Yabacon Valley' ecosystem. We interviewed 50 founders...</p>
-                            <a href="#" class="text-primary-accent text-decoration-none fw-bold">Read Article <i class="fas fa-arrow-right ms-1"></i></a>
-                        </div>
-                    </div>
-                    <div class="col-lg-6" data-aos="fade-left">
-                        <!-- Small Article 1 -->
-                        <div class="d-flex mb-4 border-bottom border-secondary border-opacity-10 pb-3">
-                            <img src="https://placehold.co/120x120/f1f5f9/2563eb" class="rounded-3 me-3" alt="Thumb" style="width:100px; height:100px; object-fit:cover;">
-                            <div>
-                                <span class="text-muted small">Events • 2 hrs ago</span>
-                                <h5 class="mb-2 fw-bold">Highlights from Lagos Tech Fest</h5>
-                                <a href="#" class="small text-primary-accent text-decoration-none">Read More</a>
+
+                    <?php
+                    $news = $pdo->query("SELECT * FROM articles WHERE status='published' ORDER BY published_at DESC LIMIT 3")->fetchAll();
+                    $featured_news = $pdo->query("SELECT * FROM articles WHERE status='published' AND is_featured='1' ORDER BY published_at DESC LIMIT 1")->fetchAll();
+                    empty($featured_news) ? null : $featured = $featured_news[0];
+                    if ($news):
+                        // First article as Featured (Large)
+                    ?>
+                        <div class="col-lg-6 mb-4" data-aos="fade-right">
+                            <div class="card bg-transparent border-0 h-100">
+                                <div class="position-relative">
+                                    <img src="<?= htmlspecialchars($featured['featured_image_url'] ?? "https://placehold.co/800x400/f1f5f9/2563eb?text=Tech+Media") ?>" class="img-fluid rounded-4 mb-3 border border-secondary border-opacity-25 w-100" style="height: 350px; object-fit: cover;">
+                                    <span class="position-absolute top-0 start-0 m-3 badge bg-primary">FEATURED</span>
+                                </div>
+                                <span class="text-secondary small text-uppercase fw-bold"><i class="fas fa-chart-line me-1"></i> Analysis</span>
+                                <h3 class="mt-2 fw-bold"><?= htmlspecialchars($featured['title']) ?></h3>
+                                <p class="text-muted text-truncate"><?= strip_tags($featured['content']) ?></p>
+                                <a href="article.php?slug=<?= $featured['slug'] ?>" class="text-primary-accent fw-bold">Read Article <i class="fas fa-arrow-right ms-1"></i></a>
                             </div>
                         </div>
-                        <!-- Small Article 2 -->
-                        <div class="d-flex mb-4 border-bottom border-secondary border-opacity-10 pb-3">
-                            <img src="https://placehold.co/120x120/f1f5f9/2563eb" class="rounded-3 me-3" alt="Thumb" style="width:100px; height:100px; object-fit:cover;">
-                            <div>
-                                <span class="text-muted small">Policy • Yesterday</span>
-                                <h5 class="mb-2 fw-bold">New Startup Act: What it means for you</h5>
-                                <a href="#" class="small text-primary-accent text-decoration-none">Read More</a>
-                            </div>
+
+                        <div class="col-lg-6" data-aos="fade-left">
+                            <?php
+                            // Remaining articles as list
+                            for ($i = 1; $i < count($news); $i++):
+                                $post = $news[$i];
+                            ?>
+                                <div class="d-flex mb-4 border-bottom pb-3">
+                                    <img src=" <?= htmlspecialchars($post['featured_image_url'] ?? "https://placehold.co/800x400/f1f5f9/2563eb?text=Tech+Media") ?>" class="rounded-3 me-3" style="width:100px; height:100px; object-fit:cover;">
+                                    <div>
+                                        <span class="text-muted small"><?= date('M d, Y', strtotime($post['published_at'])) ?></span>
+                                        <h5 class="mb-2 fw-bold"><a href="article.php?slug=<?= $post['slug'] ?>" class="text-dark text-decoration-none"><?= htmlspecialchars($post['title']) ?></a></h5>
+                                    </div>
+                                </div>
+                            <?php endfor; ?>
                         </div>
-                        <!-- Small Article 3 -->
-                        <div class="d-flex">
-                            <img src="https://placehold.co/120x120/f1f5f9/2563eb" class="rounded-3 me-3" alt="Thumb" style="width:100px; height:100px; object-fit:cover;">
-                            <div>
-                                <span class="text-muted small">Investment • 2 Days ago</span>
-                                <h5 class="mb-2 fw-bold">Venture Capital trends in Q4 2025</h5>
-                                <a href="#" class="small text-primary-accent text-decoration-none">Read More</a>
-                            </div>
-                        </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </section>
+
 
         <!-- FAQ Section -->
         <section class="section-padding bg-glass">
@@ -561,7 +585,7 @@
                         items: 2
                     },
                     1000: {
-                        items: 3
+                        items: 4
                     }
                 }
             });

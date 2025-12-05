@@ -1,4 +1,7 @@
-    <!-- Event Ticker / Top Banner -->
+<?php
+include_once('./includes/wertyuytre.php')
+?> 
+<!-- Event Ticker / Top Banner -->
     <div id="top-ticker">
         <div class="container h-100 position-relative">
             <!-- Ticker Item 1 -->

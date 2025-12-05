@@ -164,6 +164,11 @@ try {
                                     <label class="form-label small fw-bold text-muted">State Name</label>
                                     <input type="text" name="name" class="form-control" placeholder="e.g. Lagos" required>
                                 </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">State Code</label>
+                                    <input type="text" name="statecode" class="form-control" placeholder="e.g. LG" required>
+                                </div>
                                 <button type="submit" class="btn btn-primary w-100">Add State</button>
                             </form>
                         </div>
@@ -232,6 +237,11 @@ try {
                                     <label class="form-label small fw-bold text-muted">City Name</label>
                                     <input type="text" name="name" class="form-control" placeholder="e.g. Ikeja" required>
                                 </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">City Code</label>
+                                    <input type="text" name="citycode" class="form-control" placeholder="e.g. IK" required>
+                                </div>
+                                
                                 <button type="submit" class="btn btn-primary w-100">Add City</button>
                             </form>
                         </div>

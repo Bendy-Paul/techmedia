@@ -4,7 +4,7 @@ require 'includes/header.php';
 require 'includes/sidebar.php';
 
 // Fetch Categories & Locations for Dropdowns
-$categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
+$categories = $pdo->query("SELECT * FROM categories WHERE type='company' ORDER BY name ASC")->fetchAll();
 $cities = $pdo->query("SELECT * FROM cities ORDER BY name ASC")->fetchAll();
 ?>
 

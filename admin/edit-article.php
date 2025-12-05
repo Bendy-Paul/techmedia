@@ -32,7 +32,13 @@ $sel_tags = $pdo->prepare("SELECT tag_id FROM article_tags WHERE article_id = ?"
 $sel_tags->execute([$id]);
 $selected_tags = $sel_tags->fetchAll(PDO::FETCH_COLUMN);
 
+// Selected Categories
+$stmt_cat = $pdo->prepare("SELECT category_id FROM article_categories WHERE article_id = ?");
+$stmt_cat->execute([$id]);
+$selected_cats = $stmt_cat->fetchAll(PDO::FETCH_COLUMN);
+
 // Fetch All Options
+$all_categories = $pdo->query("SELECT * FROM categories WHERE type='article' ORDER BY name ASC")->fetchAll();
 $companies = $pdo->query("SELECT id, name FROM companies ORDER BY name ASC")->fetchAll();
 $events = $pdo->query("SELECT id, title FROM events ORDER BY title ASC")->fetchAll();
 $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
@@ -64,12 +70,72 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
                         </div>
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Tagged Companies</h6></div>
+                            <div class="card-body">
+                                <div class="border rounded p-2 bg-light" style="max-height: 200px; overflow-y: auto;">
+                                    <?php foreach($companies as $company): ?>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="companies[]" value="<?= $company['id'] ?>" id="comp_<?= $company['id'] ?>"
+                                            <?= in_array($company['id'], $selected_companies) ? 'checked' : '' ?>>
+                                            <label class="form-check-label small" for="comp_<?= $company['id'] ?>">
+                                                <?= htmlspecialchars($company['name']) ?>
+                                            </label>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Tagged Events</h6></div>
+                            <div class="card-body">
+                                <div class="border rounded p-2 bg-light" style="max-height: 200px; overflow-y: auto;">
+                                    <?php foreach($events as $event): ?>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="events[]" value="<?= $event['id'] ?>" id="comp_<?= $event['id'] ?>"
+                                            <?= in_array($event['id'], $selected_events) ? 'checked' : '' ?>>
+                                            <label class="form-check-label small" for="comp_<?= $event['id'] ?>">
+                                                <?= htmlspecialchars($event['title']) ?>
+                                            </label>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Publishing</h6></div>
                     <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" name="is_featured" value="1" <?= $article['is_featured'] ? 'checked' : '' ?>  id="featureCheck">
+                                <label class="form-check-label" for="featureCheck">Feature</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted">Categories</label>
+                            <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
+                                <?php foreach($all_categories as $cat): ?>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="categories[]" value="<?= $cat['id'] ?>" id="cat_<?= $cat['id'] ?>"
+                                        <?= in_array($cat['id'], $selected_cats) ? 'checked' : '' ?>>
+                                        <label class="form-check-label" for="cat_<?= $cat['id'] ?>">
+                                            <?= htmlspecialchars($cat['name']) ?>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>                        
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted">Status</label>
                             <select name="status" class="form-select">
@@ -107,40 +173,6 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Tagged Companies</h6></div>
-                    <div class="card-body">
-                        <div class="border rounded p-2 bg-light" style="max-height: 200px; overflow-y: auto;">
-                            <?php foreach($companies as $company): ?>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="companies[]" value="<?= $company['id'] ?>" id="comp_<?= $company['id'] ?>"
-                                    <?= in_array($company['id'], $selected_companies) ? 'checked' : '' ?>>
-                                    <label class="form-check-label small" for="comp_<?= $company['id'] ?>">
-                                        <?= htmlspecialchars($company['name']) ?>
-                                    </label>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Tagged Events</h6></div>
-                    <div class="card-body">
-                        <div class="border rounded p-2 bg-light" style="max-height: 200px; overflow-y: auto;">
-                            <?php foreach($events as $event): ?>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="events[]" value="<?= $event['id'] ?>" id="comp_<?= $event['id'] ?>"
-                                    <?= in_array($event['id'], $selected_events) ? 'checked' : '' ?>>
-                                    <label class="form-check-label small" for="comp_<?= $event['id'] ?>">
-                                        <?= htmlspecialchars($event['title']) ?>
-                                    </label>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Topic Tags -->
                 <div class="card border-0 shadow-sm mb-4">

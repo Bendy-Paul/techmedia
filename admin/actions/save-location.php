@@ -27,21 +27,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         } elseif ($type === 'state') {
             // Validate
             $name = trim($_POST['name']);
+            $code = trim($_POST['statecode']);
             $country_id = (int)$_POST['country_id'];
 
             if (!empty($name) && $country_id > 0) {
-                $stmt = $pdo->prepare("INSERT INTO states (name, country_id) VALUES (?, ?)");
-                $stmt->execute([$name, $country_id]);
+                $stmt = $pdo->prepare("INSERT INTO states (name, state_code, country_id) VALUES (?, ?, ?)");
+                $stmt->execute([$name, $code, $country_id]);
             }
 
         } elseif ($type === 'city') {
             // Validate
             $name = trim($_POST['name']);
+            $code = trim($_POST['citycode']);
             $state_id = (int)$_POST['state_id'];
 
             if (!empty($name) && $state_id > 0) {
-                $stmt = $pdo->prepare("INSERT INTO cities (name, state_id) VALUES (?, ?)");
-                $stmt->execute([$name, $state_id]);
+                $stmt = $pdo->prepare("INSERT INTO cities (name, city_code, state_id) VALUES (?, ?, ?)");
+                $stmt->execute([$name, $code, $state_id]);
             }
         }
 

@@ -19,6 +19,10 @@
             --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --featured-glow: 0 10px 30px rgba(37, 99, 235, 0.15);
+
+            --primary-accent-75: #467dca;
+            --primary-accent-50: #7899c7;
+            --primary-accent-25: #a9b7ca;
         }
 
         body {

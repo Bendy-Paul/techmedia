@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $content = $_POST['content'];
     $status = $_POST['status'];
     $author_id = $_SESSION['user_id'];
+    $feature_status = isset($_POST['is_featured']) ? 1 : 0;
     
     // Generate Slug
     function create_slug($string) {
@@ -45,10 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $pdo->beginTransaction();
 
         // 3. Insert Article
-        $sql = "INSERT INTO articles (author_id, title, slug, content, featured_image_url, status, published_at) 
-                VALUES (?, ?, ?, ?, ?, ?, NOW())";
+        $sql = "INSERT INTO articles (author_id, title, slug, content, featured_image_url, status, published_at, is_featured) 
+                VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$author_id, $title, $slug, $content, $featured_image_url, $status]);
+        $stmt->execute([$author_id, $title, $slug, $content, $featured_image_url, $status, $feature_status]);
         $article_id = $pdo->lastInsertId();
 
         // 4. Handle Company Tags (Junction Table)
@@ -63,6 +64,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $event_stmt = $pdo->prepare("INSERT INTO article_events (article_id, event_id) VALUES (?, ?)");
             foreach ($_POST['events'] as $eveny_id) {
                 $event_stmt->execute([$article_id, $eveny_id]);
+            }
+        }
+
+            if (!empty($_POST['categories'])) {
+            $cat_stmt = $pdo->prepare("INSERT INTO article_categories (article_id, category_id) VALUES (?, ?)");
+            foreach ($_POST['categories'] as $cat_id) {
+                $cat_stmt->execute([$article_id, $cat_id]);
             }
         }
 

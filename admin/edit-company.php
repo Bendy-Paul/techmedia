@@ -22,7 +22,7 @@ $social = json_decode($company['social_links'] ?? '{}', true);
 $stats = json_decode($company['profile_stats'] ?? '{}', true);
 
 // Dropdowns
-$all_categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
+$all_categories = $pdo->query("SELECT * FROM categories WHERE type='company' ORDER BY name ASC")->fetchAll();
 $cities = $pdo->query("SELECT * FROM cities ORDER BY name ASC")->fetchAll();
 
 // Selected Categories
