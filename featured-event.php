@@ -1,9 +1,68 @@
+<?php
+require 'includes/wertyuytre.php';
+
+// 1. Get Slug & Validate
+if (!isset($_GET['slug']) || empty($_GET['slug'])) {
+    header("Location: 404.html");
+    exit();
+}
+
+$slug = $_GET['slug'];
+
+// 2. Fetch Event Data
+$stmt = $pdo->prepare("
+    SELECT e.*, 
+           c.name as city_name,
+           comp.name as organizer_name,
+           comp.slug as organizer_slug,
+           comp.logo_url as organizer_logo
+    FROM events e
+    LEFT JOIN cities c ON e.city_id = c.id
+    LEFT JOIN companies comp ON e.organizer_company_id = comp.id
+    WHERE e.slug = ?
+");
+$stmt->execute([$slug]);
+$event = $stmt->fetch();
+
+// 3. Validate Existence
+if (!$event) {
+    header("Location: 404.html");
+    exit();
+}
+
+// 4. Redirect DOWNGRADE if NOT Featured
+if ($event['is_featured'] == 0) {
+    header("Location: event.php?slug=" . urlencode($slug));
+    exit();
+}
+
+// 5. Fetch Related Data
+// Speakers
+$spkStmt = $pdo->prepare("SELECT * FROM event_speakers WHERE event_id = ?");
+$spkStmt->execute([$event['id']]);
+$speakers = $spkStmt->fetchAll();
+
+// Gallery
+$galStmt = $pdo->prepare("SELECT * FROM event_galleries WHERE event_id = ?");
+$galStmt->execute([$event['id']]);
+$gallery = $galStmt->fetchAll();
+
+// Parse JSONs
+$socials = json_decode($event['social_links'] ?? '{}', true);
+$community = json_decode($event['community_links'] ?? '{}', true);
+
+// Calculate Duration (Approx)
+$start = new DateTime($event['start_datetime']);
+$end = new DateTime($event['end_datetime']);
+$duration = $start->diff($end);
+$duration_str = $duration->days > 0 ? $duration->days . " Days" : $duration->h . " Hours";
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nigeria Tech Summit 2025 | Featured Event | Tech Media Directory</title>
+    <title><?= htmlspecialchars($event['title']) ?> | Featured Event | Tech Media Directory</title>
     
     <?php include_once('links.php'); ?>
     <style>
@@ -26,7 +85,7 @@
             background-size: cover;
         }
 
-                .community-link {
+        .community-link {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -42,7 +101,6 @@
             background: rgba(37, 99, 235, 0.1);
             color: var(--primary-accent);
         }
-
 
         .event-hero-content {
             position: relative;
@@ -95,6 +153,10 @@
             font-size: 2rem;
             color: var(--primary-accent);
             margin: 0 auto 15px;
+            overflow: hidden;
+        }
+        .organizer-avatar img {
+            width: 100%; height: 100%; object-fit: cover;
         }
 
         /* Media Elements */
@@ -119,6 +181,9 @@
             justify-content: center;
             color: var(--text-muted);
             font-size: 3rem;
+        }
+        .gallery-item img {
+            width: 100%; height: 100%; object-fit: cover;
         }
         .social-icon {
             width: 40px;
@@ -159,25 +224,28 @@
             <div class="row align-items-center">
                 <div class="col-lg-8" data-aos="fade-right">
                     <span class="featured-event-badge"><i class="fas fa-crown"></i> FEATURED EVENT</span>
-                    <h1 class="display-4 fw-bold mb-3">Nigeria Tech Summit 2025</h1>
-                    <p class="lead mb-4">Africa's largest gathering of tech innovators, investors, and policymakers. Join 5,000+ attendees for three days of networking, learning, and collaboration.</p>
+                    <h1 class="display-4 fw-bold mb-3"><?= htmlspecialchars($event['title']) ?></h1>
+                    <p class="lead mb-4"><?= htmlspecialchars($event['description']) ?></p> <!-- Assuming short description in DB or use substr -->
                     <div class="d-flex flex-wrap gap-4 mb-4">
-                        <span><i class="fas fa-calendar me-2"></i> Nov 15-17, 2025</span>
-                        <span><i class="fas fa-map-marker-alt me-2"></i> Landmark Centre, Lagos</span>
-                        <span><i class="fas fa-users me-2"></i> 5,000+ Expected Participants</span>
-                        <span><i class="fas fa-clock me-2"></i> 3 Days</span>
+                        <span><i class="fas fa-calendar me-2"></i> <?= date('M d-y', strtotime($event['start_datetime'])) ?></span>
+                        <span><i class="fas fa-map-marker-alt me-2"></i> <?= $event['is_virtual'] ? 'Online' : htmlspecialchars($event['location_name']) ?></span>
+                        <span><i class="fas fa-clock me-2"></i> <?= $duration_str ?></span>
                     </div>
                     <div class="d-flex gap-3">
-                        <a href="#" class="btn btn-light btn-lg">Get Tickets</a>
-                        <a href="#" class="btn btn-outline-light btn-lg">Save to Calendar</a>
+                        <?php if($event['ticket_url']): ?>
+                        <a href="<?= htmlspecialchars($event['ticket_url']) ?>" target="_blank" class="btn btn-light btn-lg">Get Tickets</a>
+                        <?php endif; ?>
+                        <!-- <a href="#" class="btn btn-outline-light btn-lg">Save to Calendar</a> -->
                     </div>
                 </div>
                 <div class="col-lg-4 text-center" data-aos="fade-left">
                     <div class="ticket-card">
-                        <h3 class="fw-bold mb-3">Premium Pass</h3>
-                        <h2 class="display-4 fw-bold mb-3">₦75,000</h2>
-                        <p class="mb-4">Full access to all sessions, workshops, networking events, and exclusive after-party</p>
-                        <a href="#" class="btn btn-light btn-lg w-100">Buy Now</a>
+                        <h3 class="fw-bold mb-3">Ticket Price</h3>
+                        <h2 class="display-4 fw-bold mb-3"><?= $event['price'] > 0 ? '₦'.number_format($event['price']) : 'Free' ?></h2>
+                        <p class="mb-4">Full access to all sessions and networking events.</p>
+                        <?php if($event['ticket_url']): ?>
+                        <a href="<?= htmlspecialchars($event['ticket_url']) ?>" target="_blank" class="btn btn-light btn-lg w-100">Buy Now</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -188,125 +256,55 @@
         <div class="row">
             <!-- Main Content -->
             <div class="col-lg-8">
-                <!-- Event Video -->
-                <div class="info-card mb-4" data-aos="fade-up">
-                    <h3 class="fw-bold mb-4">Event Highlights</h3>
-                    <div class="video-container">
-                        <i class="fas fa-play-circle"></i>
-                    </div>
-                    <p class="mt-3 text-muted">Watch the highlights from last year's summit to get a taste of what to expect.</p>
-                </div>
-                
                 <!-- Event Details -->
                 <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="100">
                     <h3 class="fw-bold mb-4">About the Summit</h3>
-                    <p class="mb-3">The Nigeria Tech Summit is the premier gathering for technology professionals, entrepreneurs, investors, and policymakers across Africa. Now in its 8th year, the summit brings together the brightest minds to shape the future of technology in Nigeria and beyond.</p>
-                    <p class="mb-3">This year's theme is "Building the Digital Future: Innovation, Inclusion, and Impact." We'll explore how technology can drive economic growth, create opportunities, and solve pressing challenges across the continent.</p>
-                    <p>With over 200 speakers, 100+ exhibitors, and 5,000+ attendees, the Nigeria Tech Summit is the place to connect, learn, and discover the next big thing in African tech.</p>
-                </div>
-
-                <!-- Event Schedule -->
-                <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="200">
-                    <h3 class="fw-bold mb-4">Event Schedule</h3>
-                    <div class="row">
-                        <div class="col-md-4 mb-4">
-                            <h5 class="fw-bold text-primary-accent">Day 1</h5>
-                            <p class="fw-bold mb-1">Opening Keynote</p>
-                            <p class="text-muted small mb-2">9:00 AM - 10:30 AM</p>
-                            <p class="fw-bold mb-1">Startup Pitch Competition</p>
-                            <p class="text-muted small mb-2">11:00 AM - 1:00 PM</p>
-                            <p class="fw-bold mb-1">AI & Machine Learning Track</p>
-                            <p class="text-muted small mb-0">2:00 PM - 5:00 PM</p>
-                        </div>
-                        <div class="col-md-4 mb-4">
-                            <h5 class="fw-bold text-primary-accent">Day 2</h5>
-                            <p class="fw-bold mb-1">Fintech Innovation Panel</p>
-                            <p class="text-muted small mb-2">9:30 AM - 11:00 AM</p>
-                            <p class="fw-bold mb-1">Women in Tech Leadership</p>
-                            <p class="text-muted small mb-2">11:30 AM - 1:00 PM</p>
-                            <p class="fw-bold mb-1">Blockchain & Web3 Workshop</p>
-                            <p class="text-muted small mb-0">2:30 PM - 5:00 PM</p>
-                        </div>
-                        <div class="col-md-4 mb-4">
-                            <h5 class="fw-bold text-primary-accent">Day 3</h5>
-                            <p class="fw-bold mb-1">Investor Connect</p>
-                            <p class="text-muted small mb-2">10:00 AM - 12:00 PM</p>
-                            <p class="fw-bold mb-1">Closing Ceremony</p>
-                            <p class="text-muted small mb-2">2:00 PM - 4:00 PM</p>
-                            <p class="fw-bold mb-1">Networking After-Party</p>
-                            <p class="text-muted small mb-0">6:00 PM - 10:00 PM</p>
-                        </div>
+                    <div style="white-space: pre-line;">
+                        <?= htmlspecialchars($event['description']) ?>
                     </div>
                 </div>
 
-
                 <!-- Speakers -->
+                <?php if(count($speakers) > 0): ?>
                 <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="100">
                     <h3 class="fw-bold mb-4">Featured Speakers</h3>
                     <div class="row">
+                        <?php foreach($speakers as $spk): ?>
                         <div class="col-md-6 mb-4">
                             <div class="d-flex">
                                 <div class="organizer-avatar" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                                    <i class="fas fa-user"></i>
+                                    <?php if($spk['image_url']): ?>
+                                        <img src="<?= htmlspecialchars($spk['image_url']) ?>" alt="<?= htmlspecialchars($spk['name']) ?>">
+                                    <?php else: ?>
+                                        <i class="fas fa-user"></i>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="ms-3">
-                                    <h5 class="fw-bold mb-1">Dr. Adeola Johnson</h5>
-                                    <p class="text-muted small mb-1">Lead AI Researcher, MedTech Labs</p>
-                                    <p class="small text-muted mb-0">Expert in medical imaging and diagnostic AI systems</p>
+                                    <h5 class="fw-bold mb-1"><?= htmlspecialchars($spk['name']) ?></h5>
+                                    <p class="text-muted small mb-1"><?= htmlspecialchars($spk['position']) ?></p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6 mb-4">
-                            <div class="d-flex">
-                                <div class="organizer-avatar" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <h5 class="fw-bold mb-1">Chinedu Okoro</h5>
-                                    <p class="text-muted small mb-1">Data Scientist, HealthTech NG</p>
-                                    <p class="small text-muted mb-0">Building predictive models for patient outcomes</p>
-                                </div>
-                            </div>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
+                <?php endif; ?>
 
                 <!-- Gallery -->
+                <?php if(count($gallery) > 0): ?>
                 <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="200">
                     <h3 class="fw-bold mb-4">Past Event Gallery</h3>
                     <div class="row g-3">
+                        <?php foreach($gallery as $img): ?>
                         <div class="col-md-4">
                             <div class="gallery-item">
-                                <i class="fas fa-image"></i>
+                                <img src="<?= htmlspecialchars($img['image_url']) ?>" alt="Gallery" style="width:100%; height:100%; object-fit:cover;">
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="gallery-item">
-                                <i class="fas fa-image"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="gallery-item">
-                                <i class="fas fa-image"></i>
-                            </div>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
-
-                <!-- Articles -->
-                <div class="info-card" data-aos="fade-up" data-aos-delay="300">
-                    <h3 class="fw-bold mb-4">Related Articles</h3>
-                    <div class="border-start border-primary border-3 ps-3 mb-4">
-                        <h5 class="fw-bold">How AI is Transforming Healthcare in Nigeria</h5>
-                        <p class="text-muted small mb-2">Exploring the impact of machine learning on medical diagnosis and treatment in Nigerian hospitals.</p>
-                        <span class="text-muted small">Published: March 10, 2025</span>
-                    </div>
-                    <div class="border-start border-primary border-3 ps-3">
-                        <h5 class="fw-bold">The Rise of AI Communities in Lagos</h5>
-                        <p class="text-muted small mb-2">How meetups and communities are driving AI innovation in Nigeria's tech capital.</p>
-                        <span class="text-muted small">Published: February 28, 2025</span>
-                    </div>
-                </div>
+                <?php endif; ?>
             </div>
             
             <!-- Sidebar -->
@@ -316,100 +314,90 @@
                     <h4 class="fw-bold mb-4">Event Information</h4>
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Date & Time</h6>
-                        <p class="mb-0">November 15-17, 2025<br>9:00 AM - 6:00 PM Daily</p>
+                        <p class="mb-0">
+                            <?= date('F d, Y', strtotime($event['start_datetime'])) ?><br>
+                            <?= date('h:i A', strtotime($event['start_datetime'])) ?> - <?= date('h:i A', strtotime($event['end_datetime'])) ?>
+                        </p>
                     </div>
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Location</h6>
-                        <p class="mb-0">Landmark Centre<br>3-5 Water Corporation Drive<br>Victoria Island, Lagos</p>
+                        <p class="mb-0"><?= $event['is_virtual'] ? 'Online Event' : htmlspecialchars($event['location_name']) ?></p>
                     </div>
                     <div class="mb-3">
-                        <h6 class="text-muted mb-1">Expected Participants</h6>
-                        <p class="mb-0">5,000+</p>
-                    </div>
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-1">Contact Information</h6>
-                        <p class="mb-0">info@nigeriatechsummit.ng<br>+234 801 234 5678</p>
-                    </div>
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-1">Event Categories</h6>
-                        <div class="d-flex flex-wrap gap-2 mt-2">
-                            <span class="badge bg-primary">Conference</span>
-                            <span class="badge bg-primary">Networking</span>
-                            <span class="badge bg-primary">Technology</span>
-                            <span class="badge bg-primary">Innovation</span>
-                        </div>
+                        <h6 class="text-muted mb-1">Event Type</h6>
+                        <span class="badge bg-primary"><?= ucfirst($event['event_type']) ?></span>
                     </div>
                 </div>
                 
                 <!-- Organizers -->
+                <?php if($event['organizer_company_id']): ?>
                 <div class="info-card mb-4" data-aos="fade-left" data-aos-delay="100">
                     <h4 class="fw-bold mb-4">Event Organizers</h4>
                     <div class="organizer-card">
                         <div class="organizer-avatar">
-                            <i class="fas fa-user-tie"></i>
+                            <?php if(!empty($event['organizer_logo'])): ?>
+                                <img src="<?= htmlspecialchars($event['organizer_logo']) ?>" alt="Organizer">
+                            <?php else: ?>
+                                <i class="fas fa-user-tie"></i>
+                            <?php endif; ?>
                         </div>
-                        <h5 class="fw-bold mb-1">Tech Events NG</h5>
-                        <p class="text-muted small">Premier technology event organizers in Nigeria</p>
-                        <a href="#" class="btn btn-outline-primary btn-sm">View Profile</a>
+                        <h5 class="fw-bold mb-1"><?= htmlspecialchars($event['organizer_name']) ?></h5>
+                        <a href="listed.php?slug=<?= htmlspecialchars($event['organizer_slug']) ?>" class="btn btn-outline-primary btn-sm mt-2">View Profile</a>
                     </div>
                 </div>
+                <?php endif; ?>
 
-            <!-- Community Links -->
+                <!-- Community Links (Dynamic) -->
+                <?php if(!empty($community)): ?>
                 <div class="info-card mb-4" data-aos="fade-left" data-aos-delay="200">
                     <h4 class="fw-bold mb-4">Join Our Community</h4>
-                    <a href="#" class="community-link">
+                    <?php if(!empty($community['whatsapp'])): ?>
+                    <a href="<?= htmlspecialchars($community['whatsapp']) ?>" class="community-link" target="_blank">
                         <i class="fab fa-whatsapp text-success"></i>
-                        <div>
-                            <h6 class="fw-bold mb-1">WhatsApp Group</h6>
-                            <p class="text-muted small mb-0">Join 500+ members for daily discussions</p>
-                        </div>
+                        <div><h6 class="fw-bold mb-1">WhatsApp Group</h6></div>
                     </a>
-                    <a href="#" class="community-link">
+                    <?php endif; ?>
+                    <?php if(!empty($community['telegram'])): ?>
+                    <a href="<?= htmlspecialchars($community['telegram']) ?>" class="community-link" target="_blank">
                         <i class="fab fa-telegram text-primary"></i>
-                        <div>
-                            <h6 class="fw-bold mb-1">Telegram Channel</h6>
-                            <p class="text-muted small mb-0">Get updates and event announcements</p>
-                        </div>
+                        <div><h6 class="fw-bold mb-1">Telegram Channel</h6></div>
                     </a>
-                    <a href="#" class="community-link">
+                    <?php endif; ?>
+                    <?php if(!empty($community['newsletter'])): ?>
+                    <a href="<?= htmlspecialchars($community['newsletter']) ?>" class="community-link" target="_blank">
                         <i class="fas fa-envelope text-danger"></i>
-                        <div>
-                            <h6 class="fw-bold mb-1">Newsletter</h6>
-                            <p class="text-muted small mb-0">Monthly digest of AI news and events</p>
-                        </div>
+                        <div><h6 class="fw-bold mb-1">Newsletter</h6></div>
                     </a>
+                    <?php endif; ?>
                 </div>
+                <?php endif; ?>
                 
                 <!-- Social Media -->
+                <?php if(!empty($socials)): ?>
                 <div class="info-card mb-4" data-aos="fade-left" data-aos-delay="200">
                     <h4 class="fw-bold mb-4">Follow the Event</h4>
                     <div class="d-flex gap-3 justify-content-center">
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
+                        <?php if(!empty($socials['twitter'])): ?><a href="<?= $socials['twitter'] ?>" class="social-icon"><i class="fab fa-twitter"></i></a><?php endif; ?>
+                        <?php if(!empty($socials['linkedin'])): ?><a href="<?= $socials['linkedin'] ?>" class="social-icon"><i class="fab fa-linkedin-in"></i></a><?php endif; ?>
+                        <?php if(!empty($socials['instagram'])): ?><a href="<?= $socials['instagram'] ?>" class="social-icon"><i class="fab fa-instagram"></i></a><?php endif; ?>
+                        <?php if(!empty($socials['facebook'])): ?><a href="<?= $socials['facebook'] ?>" class="social-icon"><i class="fab fa-facebook-f"></i></a><?php endif; ?>
                     </div>
                 </div>
+                <?php endif; ?>
                 
                 <!-- Location Map -->
+                <?php if(!$event['is_virtual']): ?>
                 <div class="info-card" data-aos="fade-left" data-aos-delay="300">
                     <h4 class="fw-bold mb-4">Location Map</h4>
                     <div class="bg-light rounded-3 p-3 mb-3 text-center">
                         <i class="fas fa-map-marked-alt text-primary-accent" style="font-size: 3rem;"></i>
-                        <p class="mt-2 mb-0">Landmark Centre, Victoria Island, Lagos</p>
+                        <p class="mt-2 mb-0"><?= htmlspecialchars($event['location_name']) ?></p>
                     </div>
-                    <a href="#" class="btn btn-outline-primary w-100">
+                    <a href="https://maps.google.com/?q=<?= urlencode($event['location_name'] . ' ' . $event['city_name']) ?>" target="_blank" class="btn btn-outline-primary w-100">
                         <i class="fas fa-map me-2"></i> View on Map
                     </a>
                 </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

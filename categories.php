@@ -1,13 +1,36 @@
+<?php
+include_once('./includes/wertyuytre.php');
+$category_id = $_GET['slug'] ?? 'web-development';
+$category = $pdo->prepare("SELECT * FROM categories WHERE slug = ? AND type='company'");
+$category->execute([$category_id]);
+$category = $category->fetch();
+if (!$category) {
+    header("Location: 404.html");
+    exit();
+}
+$child_cat = $pdo->prepare("SELECT * FROM categories WHERE parent_id = ? ORDER BY name ASC LIMIT 4");
+$child_cat->execute([$category['id']]);
+$child_cat = $child_cat->fetchAll();
+
+
+$listed_companies = $pdo->prepare("SELECT * FROM companies comp LEFT JOIN company_categories comp_cat ON comp.id = comp_cat.company_id WHERE category_id = ? ORDER BY name ASC");
+$listed_companies->execute([$category['id']]);
+
+$featured_companies = $pdo->prepare("SELECT * FROM companies comp LEFT JOIN company_categories comp_cat ON comp.id = comp_cat.company_id WHERE category_id = ? AND is_featured = 1 ORDER BY name ASC");
+$featured_companies->execute([$category['id']]);
+?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Development Companies | Tech Media Directory</title>
-    
+
     <?php include_once('links.php'); ?>
 
 </head>
+
 <body>
 
     <?php include_once('event-ticker.php'); ?>
@@ -26,20 +49,19 @@
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="index.html" class="text-primary-accent">Home</a></li>
                             <li class="breadcrumb-item"><a href="#" class="text-primary-accent">Categories</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Web Development</li>
+                            <li class="breadcrumb-item active" aria-current="page"><?php echo htmlspecialchars($category['name']); ?></li>
                         </ol>
                     </nav>
-                    <h1 class="display-4 fw-bold mb-4" data-aos="fade-up" data-aos-delay="200">Web Development Companies</h1>
-                    <p class="lead text-muted mb-4" data-aos="fade-up" data-aos-delay="300">Discover Nigeria's top web development agencies, freelancers, and tech teams building the digital future of Africa.</p>
+                    <h1 class="display-4 fw-bold mb-4" data-aos="fade-up" data-aos-delay="200"><?php echo htmlspecialchars($category['name']); ?> Companies</h1>
+                    <p class="lead text-white mb-4" data-aos="fade-up" data-aos-delay="300">Discover Nigeria's top <?php echo htmlspecialchars($category['name']); ?> agencies, freelancers, and tech teams building the digital future of Africa.</p>
                     <div class="d-flex flex-wrap gap-2" data-aos="fade-up" data-aos-delay="400">
-                        <span class="badge bg-light text-dark border">Frontend Development</span>
-                        <span class="badge bg-light text-dark border">Backend Development</span>
-                        <span class="badge bg-light text-dark border">E-commerce Solutions</span>
-                        <span class="badge bg-light text-dark border">CMS Development</span>
+                        <?php foreach ($child_cat as $child) { ?>
+                            <span class="badge bg-light text-dark border"><?php echo htmlspecialchars($child['name']); ?></span>
+                        <?php } ?>
                     </div>
                 </div>
                 <div class="col-lg-4 text-center d-none d-lg-block" data-aos="zoom-in" data-aos-delay="500">
-                    <i class="fas fa-laptop-code text-primary-accent" style="font-size: 10rem; opacity: 0.7;"></i>
+                    <i class="<?php echo htmlspecialchars($category['icon_class']); ?> text-white" style="font-size: 10rem; opacity: 0.7;"></i>
                 </div>
             </div>
         </div>
@@ -59,161 +81,70 @@
 
             <div class="row g-4">
                 <!-- Featured Company 1 -->
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                    <div class="featured-card">
-                        <span class="featured-badge">Featured</span>
-                        <div class="featured-body">
-                            <span class="verified-badge"><i class="fas fa-check-circle"></i> Verified Partner</span>
-                            <div class="company-logo">
-                                <i class="fas fa-code"></i>
-                            </div>
-                            <h4 class="fw-bold mb-2">Code Crafters NG</h4>
-                            <p class="text-muted small mb-3">Full-service web development agency specializing in custom web applications and e-commerce solutions for enterprises and startups.</p>
-                            
-                            <div class="featured-stats">
-                                <div class="stat-item">
+                <?php
+                foreach ($featured_companies as $company) {
+                    $projects_count = $pdo->prepare("SELECT COUNT(*) as project_count FROM company_projects WHERE company_id = ?");
+                    $projects_count->execute([$company['id']]);
+                ?>
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                        <div class="featured-card">
+                            <span class="featured-badge">Featured</span>
+                            <div class="featured-body">
+                                <span class="verified-badge"><i class="fas fa-check-circle"></i> Verified Partner</span>
+                                <div class="company-logo">
+                                    <img src="<?= htmlspecialchars($company['logo_url']) ?>" alt="<?= htmlspecialchars($company['name']) ?>" style="height: 100%; width: auto;">
+
+                                </div>
+                                <h4 class="fw-bold mb-2"><?= htmlspecialchars($company['name']) ?></h4>
+                                <p class="text-muted small mb-3"><?= htmlspecialchars($company['tagline']) ?></p>
+
+                                <div class="featured-stats">
+                                    <!-- <div class="stat-item">
                                     <span class="stat-value">4.9/5</span>
                                     <span class="stat-label">Client Rating</span>
+                                </div> -->
+                                    <div class="stat-item">
+                                        <span class="stat-value"><?= htmlspecialchars($company['year_founded'] ?? '2026') ?></span>
+                                        <span class="stat-label">Founded</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value"><?= htmlspecialchars($projects_count->fetchColumn()) ?></span>
+                                        <span class="stat-label">Projects</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">₦<?= htmlspecialchars($company['starting_cost']) ?>+</span>
+                                        <span class="stat-label">Avg Budget</span>
+                                    </div>
                                 </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">48h</span>
-                                    <span class="stat-label">Avg Response</span>
+
+                                <div class="tech-stack">
+                                    <?php
+                                    $tech_tags = $pdo->prepare("SELECT * FROM company_categories cc JOIN companies cp ON cc.company_id = cp.id JOIN categories cat ON cc.category_id = cat.id WHERE cc.company_id = ?");
+                                    $tech_tags->execute([$company['id']]);
+                                    foreach ($tech_tags as $tag) {
+                                    ?>
+                                        <span class="tech-tag"><?= htmlspecialchars($tag['name']) ?></span>
+                                    <?php } ?>
                                 </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">150+</span>
-                                    <span class="stat-label">Projects</span>
+
+                                <div class="company-meta">
+                                    <div class="meta-item">
+                                        <i class="fas fa-map-marker-alt text-primary-accent"></i>
+                                        <span><?= htmlspecialchars($company['starting_cost']) ?>, Nigeria</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-users text-primary-accent"></i>
+                                        <span><?= htmlspecialchars($company['team_size']) ?> employees</span>
+                                    </div>
                                 </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">₦2M+</span>
-                                    <span class="stat-label">Avg Budget</span>
-                                </div>
+                                <a href="premium-listed.php?slug=<?= htmlspecialchars($company['slug']) ?>"><button class="btn-featured">View Profile</button></a>
                             </div>
-                            
-                            <div class="tech-stack">
-                                <span class="tech-tag">React</span>
-                                <span class="tech-tag">Node.js</span>
-                                <span class="tech-tag">MongoDB</span>
-                                <span class="tech-tag">AWS</span>
-                            </div>
-                            
-                            <div class="company-meta">
-                                <div class="meta-item">
-                                    <i class="fas fa-map-marker-alt text-primary-accent"></i>
-                                    <span>Lagos, Nigeria</span>
-                                </div>
-                                <div class="meta-item">
-                                    <i class="fas fa-users text-primary-accent"></i>
-                                    <span>15-50 employees</span>
-                                </div>
-                            </div>
-                            <a href="premium-listed.php"><button class="btn-featured">View Profile</button></a>
                         </div>
                     </div>
-                </div>
-                <!-- Featured Company 2 -->
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="featured-card">
-                        <span class="featured-badge">Featured</span>
-                        <div class="featured-body">
-                            <span class="verified-badge"><i class="fas fa-check-circle"></i> Verified Partner</span>
-                            <div class="company-logo">
-                                <i class="fas fa-magic"></i>
-                            </div>
-                            <h4 class="fw-bold mb-2">Web Wizards Ltd</h4>
-                            <p class="text-muted small mb-3">Creative web solutions with focus on UX/UI design and responsive web development for modern businesses.</p>
-                            
-                            <div class="featured-stats">
-                                <div class="stat-item">
-                                    <span class="stat-value">4.7/5</span>
-                                    <span class="stat-label">Client Rating</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">24h</span>
-                                    <span class="stat-label">Avg Response</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">80+</span>
-                                    <span class="stat-label">Projects</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">₦1.5M+</span>
-                                    <span class="stat-label">Avg Budget</span>
-                                </div>
-                            </div>
-                            
-                            <div class="tech-stack">
-                                <span class="tech-tag">Vue.js</span>
-                                <span class="tech-tag">Laravel</span>
-                                <span class="tech-tag">MySQL</span>
-                                <span class="tech-tag">DigitalOcean</span>
-                            </div>
-                            
-                            <div class="company-meta">
-                                <div class="meta-item">
-                                    <i class="fas fa-map-marker-alt text-primary-accent"></i>
-                                    <span>Abuja, Nigeria</span>
-                                </div>
-                                <div class="meta-item">
-                                    <i class="fas fa-users text-primary-accent"></i>
-                                    <span>10-30 employees</span>
-                                </div>
-                            </div>
-                            <button class="btn-featured">View Profile</button>
-                        </div>
-                    </div>
-                </div>
-                <!-- Featured Company 3 -->
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                    <div class="featured-card">
-                        <span class="featured-badge">Featured</span>
-                        <div class="featured-body">
-                            <span class="verified-badge"><i class="fas fa-check-circle"></i> Verified Partner</span>
-                            <div class="company-logo">
-                                <i class="fas fa-cube"></i>
-                            </div>
-                            <h4 class="fw-bold mb-2">Digital Builders Inc</h4>
-                            <p class="text-muted small mb-3">Enterprise web solutions and digital transformation for large corporations and government agencies.</p>
-                            
-                            <div class="featured-stats">
-                                <div class="stat-item">
-                                    <span class="stat-value">4.8/5</span>
-                                    <span class="stat-label">Client Rating</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">72h</span>
-                                    <span class="stat-label">Avg Response</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">200+</span>
-                                    <span class="stat-label">Projects</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">₦5M+</span>
-                                    <span class="stat-label">Avg Budget</span>
-                                </div>
-                            </div>
-                            
-                            <div class="tech-stack">
-                                <span class="tech-tag">Angular</span>
-                                <span class="tech-tag">.NET</span>
-                                <span class="tech-tag">SQL Server</span>
-                                <span class="tech-tag">Azure</span>
-                            </div>
-                            
-                            <div class="company-meta">
-                                <div class="meta-item">
-                                    <i class="fas fa-map-marker-alt text-primary-accent"></i>
-                                    <span>Lagos, Nigeria</span>
-                                </div>
-                                <div class="meta-item">
-                                    <i class="fas fa-users text-primary-accent"></i>
-                                    <span>50-100 employees</span>
-                                </div>
-                            </div>
-                            <button class="btn-featured">View Profile</button>
-                        </div>
-                    </div>
-                </div>
+                <?php
+                }
+                ?>
+
             </div>
         </div>
     </section>
@@ -280,68 +211,36 @@
 
             <!-- Company Listings -->
             <div class="row g-4">
+                <?php
+                foreach ($listed_companies as $listed_company) {
+                ?>
                 <!-- Company 1 -->
                 <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
                     <div class="company-card">
                         <div class="company-body">
                             <div class="company-logo-sm">
-                                <i class="fas fa-desktop"></i>
+                                <img src="<?= htmlspecialchars($listed_company['logo_url']) ?>" alt="<?= htmlspecialchars($listed_company['name']) ?>" style="height: 100%; width: auto;">
                             </div>
-                            <h5 class="fw-bold mb-2">Dev Studio NG</h5>
+                            <h5 class="fw-bold mb-2"><?= htmlspecialchars($listed_company['name']); ?></h5>
                             <div class="align-items-center mb-2">
-                                <span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span><br>
-                                <span class="badge bg-light text-dark border ms-2">Lagos</span>
+                                <?= $listed_company['is_verified'] ? '<span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span>' : '<span class="verified-badge bg-light text-black"><i class="fas fa-times-circle"></i> Unverified</span>' ?><br>
+                                <span class="badge bg-light text-dark border ms-2"><?= htmlspecialchars($listed_company['location'] ?? 'Lagos') ?></span>
                             </div>
-                            <p class="text-muted small mb-3">Specializing in React and Node.js applications for startups and SMEs.</p>
+                            <p class="text-muted small mb-3"><?= htmlspecialchars($listed_company['tagline']) ?></p>
                             <div class="d-flex justify-content-between text-muted small">
-                                <span><i class="fas fa-users me-1"></i> 5-15 employees</span>
+                                <span><i class="fas fa-users me-1"></i> <?= htmlspecialchars($listed_company['team_size']) ?> employees</span>
                                 <span><i class="fas fa-star me-1 text-warning"></i> 4.5</span>
                             </div>
-                            <a href="listed.php"><button class="btn-view-profile">View Profile</button></a>
+                            <a href="listed.php?slug=<?= htmlentities($listed_company['slug']) ?>"><button class="btn-view-profile">View Profile</button></a>
                         </div>
                     </div>
                 </div>
-                <!-- Company 2 -->
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="company-card">
-                        <div class="company-body">
-                            <div class="company-logo-sm">
-                                <i class="fas fa-lightbulb"></i>
-                            </div>
-                            <h5 class="fw-bold mb-2">Web Innovate Ltd</h5>
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="badge bg-light text-dark border">Abuja</span>
-                            </div>
-                            <p class="text-muted small mb-3">Creative agency focused on innovative web solutions and digital experiences.</p>
-                            <div class="d-flex justify-content-between text-muted small">
-                                <span><i class="fas fa-users me-1"></i> 20-50 employees</span>
-                                <span><i class="fas fa-star me-1 text-warning"></i> 4.3</span>
-                            </div>
-                            <button class="btn-view-profile">View Profile</button>
-                        </div>
-                    </div>
-                </div>
-                <!-- Company 3 -->
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                    <div class="company-card">
-                        <div class="company-body">
-                            <div class="company-logo-sm">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <h5 class="fw-bold mb-2">Tech Squad Africa</h5>
-                            <div class="align-items-center mb-2">
-                                <span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span><br>
-                                <span class="badge bg-light text-dark border ms-2">Port Harcourt</span>
-                            </div>
-                            <p class="text-muted small mb-3">Full-stack development team with expertise in Laravel and Vue.js.</p>
-                            <div class="d-flex justify-content-between text-muted small">
-                                <span><i class="fas fa-users me-1"></i> 10-25 employees</span>
-                                <span><i class="fas fa-star me-1 text-warning"></i> 4.7</span>
-                            </div>
-                            <button class="btn-view-profile">View Profile</button>
-                        </div>
-                    </div>
-                </div>
+
+                <?php
+                }
+                ?>
+
+
             </div>
 
             <!-- Pagination -->
@@ -377,4 +276,5 @@
     <?php include_once('footer.php'); ?>
 
 </body>
+
 </html>

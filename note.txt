@@ -1,0 +1,19 @@
+
+                                        <div class="col-md-3">
+                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-calendar-alt me-2"></i>Conferences</h6>
+                                            <a class="dropdown-item" href="events.php">Tech Summits</a>
+                                            <a class="dropdown-item" href="#">Industry Forums</a>
+                                            <a class="dropdown-item" href="#">Annual Gatherings</a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-laptop-code me-2"></i>Hackathons</h6>
+                                            <a class="dropdown-item" href="#">Coding Competitions</a>
+                                            <a class="dropdown-item" href="#">App Development</a>
+                                            <a class="dropdown-item" href="#">Blockchain Events</a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-chalkboard-teacher me-2"></i>Workshops</h6>
+                                            <a class="dropdown-item" href="#">Skill Development</a>
+                                            <a class="dropdown-item" href="#">Technical Training</a>
+                                            <a class="dropdown-item" href="#">Hands-on Sessions</a>
+                                        </div>

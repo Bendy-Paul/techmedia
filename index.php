@@ -18,7 +18,6 @@ $result = $pdo->query($sql)->fetchAll();
 $highest_count = $result[0]['company_count'];
 
 
-echo $result[0]['state_name'];
 ?>
 <!DOCTYPE html>
 <html lang="en">

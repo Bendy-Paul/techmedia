@@ -6,41 +6,41 @@
                     <i class="bi bi-hexagon-fill text-primary-accent"></i>
                     TECH<span>MEDIA</span>
                 </a>
-                
+
                 <!-- Desktop Navigation -->
                 <div class="collapse navbar-collapse desktop-nav">
                     <ul class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-center">
                         <li class="nav-item"><a class="nav-link" id="home" href="index.php">Home</a></li>
                         <li class="nav-item"><a class="nav-link" id="about-us" href="about-us.php">About</a></li>
-                        
+
                         <!-- Categories Dropdown (Full Width) -->
                         <li class="nav-item dropdown position-static">
                             <a class="nav-link dropdown-toggle" id="categories" href="#" data-bs-toggle="dropdown">Browse Companies</a>
                             <div class="dropdown-menu">
                                 <div class="container">
-                                    <div class="row p-4">
-                                        <div class="col-md-3">
-                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-code me-2"></i>Software & Dev</h6>
-                                            <a class="dropdown-item" href="categories.php">Web Development</a>
-                                            <a class="dropdown-item" href="#">Mobile Apps</a>
-                                            <a class="dropdown-item" href="#">SaaS Platforms</a>
+                                    <div class="row p-3">
+                                        <div class="row col-md-10">
+                                            <?php
+                                            $parent_categories = $pdo->query("SELECT * FROM categories WHERE parent_id=0 AND type='company' ORDER BY name ASC LIMIT 6")->fetchAll();
+                                            foreach ($parent_categories as $parent) {
+                                                $child_categories = $pdo->prepare("SELECT * FROM categories WHERE parent_id = ? ORDER BY name ASC LIMIT 4");
+                                                $child_categories->execute([$parent['id']]);
+                                                $child_categories = $child_categories->fetchAll();
+                                            ?>
+                                                <div class="col-md-4 mb-4">
+                                                    <h6 class="text-primary-accent mb-1 text-uppercase fw-bold"><i class="<?php echo $parent['icon_class']; ?> me-2"></i><?php echo htmlspecialchars($parent['name']); ?></h6>
+                                                    <?php foreach ($child_categories as $child) { ?>
+                                                        <a class="dropdown-item" href="categories.php?slug=<?php echo $child['slug']; ?>"><?php echo htmlspecialchars($child['name']); ?></a>
+                                                    <?php } ?>
+                                                </div>
+
+                                            <?php } ?>
                                         </div>
-                                        <div class="col-md-3">
-                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-microchip me-2"></i>Hardware & IoT</h6>
-                                            <a class="dropdown-item" href="#">Robotics</a>
-                                            <a class="dropdown-item" href="#">Smart Home</a>
-                                            <a class="dropdown-item" href="#">Networking</a>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-brain me-2"></i>Data & AI</h6>
-                                            <a class="dropdown-item" href="#">Machine Learning</a>
-                                            <a class="dropdown-item" href="#">Data Analytics</a>
-                                            <a class="dropdown-item" href="#">Cloud Computing</a>
-                                        </div>
-                                        <div class="col-md-3 border-start border-secondary d-none d-md-block">
-                                            <div class="text-center p-3">
+                                        <div class="col-md-2 border-start border-secondary d-none d-md-block">
+                                            <div class="text-center">
                                                 <i class="fas fa-rocket fa-3x mb-3 text-secondary"></i>
-                                                <p class="small text-muted">Explore over 500+ categories in the Nigerian Tech Space.</p>
+                                                <p class="small text-muted">Explore over 50+ categories in the Nigerian Tech Space.</p>
+                                                <a href="all-categories.php" class="btn btn-outline-primary btn-sm">View All</a>
                                             </div>
                                         </div>
                                     </div>
@@ -54,26 +54,26 @@
                             <div class="dropdown-menu">
                                 <div class="container">
                                     <div class="row p-4">
-                                        <div class="col-md-3">
-                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-calendar-alt me-2"></i>Conferences</h6>
-                                            <a class="dropdown-item" href="events.php">Tech Summits</a>
-                                            <a class="dropdown-item" href="#">Industry Forums</a>
-                                            <a class="dropdown-item" href="#">Annual Gatherings</a>
+
+                                        <div class="row col-md-10">
+                                            <?php
+                                            $parent_categories = $pdo->query("SELECT * FROM categories WHERE parent_id=0 AND type='event' ORDER BY name ASC LIMIT 6")->fetchAll();
+                                            foreach ($parent_categories as $parent) {
+                                                $child_categories = $pdo->prepare("SELECT * FROM categories WHERE parent_id = ? ORDER BY name ASC LIMIT 4");
+                                                $child_categories->execute([$parent['id']]);
+                                                $child_categories = $child_categories->fetchAll();
+                                            ?>
+                                                <div class="col-md-4 mb-4">
+                                                    <h6 class="text-primary-accent mb-1 text-uppercase fw-bold"><i class="<?php echo $parent['icon_class']; ?> me-2"></i><?php echo htmlspecialchars($parent['name']); ?></h6>
+                                                    <?php foreach ($child_categories as $child) { ?>
+                                                        <a class="dropdown-item" href="events.php?slug=<?php echo $child['slug']; ?>"><?php echo htmlspecialchars($child['name']); ?></a>
+                                                    <?php } ?>
+                                                </div>
+
+                                            <?php } ?>
                                         </div>
-                                        <div class="col-md-3">
-                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-laptop-code me-2"></i>Hackathons</h6>
-                                            <a class="dropdown-item" href="#">Coding Competitions</a>
-                                            <a class="dropdown-item" href="#">App Development</a>
-                                            <a class="dropdown-item" href="#">Blockchain Events</a>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <h6 class="text-primary-accent mb-3 text-uppercase fw-bold"><i class="fas fa-chalkboard-teacher me-2"></i>Workshops</h6>
-                                            <a class="dropdown-item" href="#">Skill Development</a>
-                                            <a class="dropdown-item" href="#">Technical Training</a>
-                                            <a class="dropdown-item" href="#">Hands-on Sessions</a>
-                                        </div>
-                                        <div class="col-md-3 border-start border-secondary d-none d-md-block">
-                                            <div class="text-center p-3">
+                                        <div class="col-md-2 border-start border-secondary d-none d-md-block">
+                                            <div class="text-center p-2">
                                                 <i class="fas fa-users fa-3x mb-3 text-secondary"></i>
                                                 <p class="small text-muted">Find networking opportunities and industry events.</p>
                                             </div>
@@ -89,7 +89,7 @@
                         <a href="get-listed.php"><button class="btn-get-listed">Get Listed</button></a>
                     </div>
                 </div>
-                
+
                 <!-- Mobile Menu Toggle -->
                 <button class="mobile-menu-toggle navbar-toggler border-0" type="button">
                     <i class="fas fa-bars text-primary-accent" style="font-size: 1.5rem;"></i>
@@ -109,10 +109,10 @@
                 <i class="fas fa-times text-primary-accent" style="font-size: 1.5rem;"></i>
             </button>
         </div>
-        
+
         <a href="index.php" id="home-responsive" class="mobile-nav-link">Home</a>
         <a href="about-us.php" id="about-us-responsive" class="mobile-nav-link">About</a>
-        
+
         <div class="mobile-dropdown">
             <a href="#" id="categories-mobile" class="mobile-nav-link d-flex justify-content-between align-items-center">
                 Browse Companies
@@ -130,7 +130,7 @@
                 <a href="#" class="mobile-nav-link">Cloud Computing</a>
             </div>
         </div>
-        
+
         <div class="mobile-dropdown">
             <a href="#" id="events-mobile" class="mobile-nav-link d-flex justify-content-between align-items-center">
                 Events
@@ -143,9 +143,9 @@
                 <a href="#" class="mobile-nav-link">Webinars</a>
             </div>
         </div>
-        
+
         <a href="news.php" id="news-mobile" class="mobile-nav-link">News</a>
-        
+
         <div class="mt-4 pt-4 border-top border-secondary">
             <button class="btn-get-listed w-100">Get Listed</button>
         </div>

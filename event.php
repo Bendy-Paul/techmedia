@@ -1,9 +1,55 @@
+<?php
+require 'includes/wertyuytre.php';
+
+// 1. Get Slug & Validate
+if (!isset($_GET['slug']) || empty($_GET['slug'])) {
+    header("Location: 404.html");
+    exit();
+}
+
+$slug = $_GET['slug'];
+
+// 2. Fetch Event Data
+$stmt = $pdo->prepare("
+    SELECT e.*, 
+           c.name as city_name,
+           comp.name as organizer_name,
+           comp.slug as organizer_slug,
+           comp.logo_url as organizer_logo
+    FROM events e
+    LEFT JOIN cities c ON e.city_id = c.id
+    LEFT JOIN companies comp ON e.organizer_company_id = comp.id
+    WHERE e.slug = ?
+");
+$stmt->execute([$slug]);
+$event = $stmt->fetch();
+
+// 3. Validate Existence
+if (!$event) {
+    header("Location: 404.html");
+    exit();
+}
+
+// 4. Redirect UPGRADE if Featured
+if ($event['is_featured'] == 1) {
+    header("Location: featured-event.php?slug=" . urlencode($slug));
+    exit();
+}
+
+// 5. Fetch Related Data (Speakers, Socials, Community)
+$spkStmt = $pdo->prepare("SELECT * FROM event_speakers WHERE event_id = ?");
+$spkStmt->execute([$event['id']]);
+$speakers = $spkStmt->fetchAll();
+
+$socials = json_decode($event['social_links'] ?? '{}', true);
+$community = json_decode($event['community_links'] ?? '{}', true);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lagos AI & Machine Learning Meetup | Tech Media Directory</title>
+    <title><?= htmlspecialchars($event['title']) ?> | Tech Media Directory</title>
     
     <?php include_once('links.php'); ?>
 
@@ -64,7 +110,9 @@
             font-size: 2rem;
             color: var(--primary-accent);
             margin: 0 auto 15px;
+            overflow: hidden;
         }
+        .organizer-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
         /* Media Elements */
         .gallery-item {
@@ -131,25 +179,35 @@
         <div class="container event-hero-content">
             <div class="row align-items-center">
                 <div class="col-lg-8" data-aos="fade-right">
-                    <span class="badge bg-primary mb-3">Meetup</span>
-                    <h1 class="display-4 fw-bold mb-3">Lagos AI & Machine Learning Meetup</h1>
-                    <p class="lead text-muted mb-4">Monthly gathering for AI enthusiasts, researchers, and practitioners to share knowledge and network.</p>
+                    <span class="badge bg-primary mb-3 text-capitalize"><?= htmlspecialchars($event['event_type']) ?></span>
+                    <h1 class="display-4 fw-bold mb-3"><?= htmlspecialchars($event['title']) ?></h1>
+                    <p class="lead text-muted mb-4"><?= htmlspecialchars(substr(strip_tags($event['description']), 0, 150)) ?>...</p>
                     <div class="d-flex flex-wrap gap-4 mb-4">
-                        <span><i class="fas fa-calendar me-2 text-primary-accent"></i> April 20, 2025</span>
-                        <span><i class="fas fa-map-marker-alt me-2 text-primary-accent"></i> Co-Creation Hub, Yaba, Lagos</span>
-                        <span><i class="fas fa-users me-2 text-primary-accent"></i> 150+ Expected Participants</span>
-                        <span><i class="fas fa-clock me-2 text-primary-accent"></i> 3 Hours</span>
+                        <span><i class="fas fa-calendar me-2 text-primary-accent"></i> <?= date('F d, Y', strtotime($event['start_datetime'])) ?></span>
+                        <span><i class="fas fa-map-marker-alt me-2 text-primary-accent"></i> <?= $event['is_virtual'] ? 'Online' : htmlspecialchars($event['location_name']) ?></span>
+                        <!-- <span><i class="fas fa-users me-2 text-primary-accent"></i> 150+ Expected Participants</span> -->
+                        <span><i class="fas fa-clock me-2 text-primary-accent"></i> <?= date('h:i A', strtotime($event['start_datetime'])) ?></span>
                     </div>
                     <div class="d-flex gap-3">
-                        <a href="#" class="btn btn-primary btn-lg">RSVP Now</a>
-                        <a href="#" class="btn btn-outline-primary btn-lg">Save to Calendar</a>
+                        <?php if($event['ticket_url']): ?>
+                        <a href="<?= htmlspecialchars($event['ticket_url']) ?>" class="btn btn-primary btn-lg" target="_blank">Get Tickets</a>
+                        <?php endif; ?>
+                        <!-- <a href="#" class="btn btn-outline-primary btn-lg">Save to Calendar</a> -->
                     </div>
                 </div>
                 <div class="col-lg-4 text-center" data-aos="fade-left">
                     <div class="ticket-card">
-                        <h3 class="fw-bold mb-3">Free Admission</h3>
-                        <p class="mb-4">This event is free to attend. RSVP required due to limited space.</p>
-                        <a href="#" class="btn btn-primary btn-lg w-100">RSVP Now</a>
+                        <h3 class="fw-bold mb-3">Ticket Price</h3>
+                        <p class="mb-4">
+                            <?php if($event['price'] > 0): ?>
+                                ₦<?= number_format($event['price']) ?>
+                            <?php else: ?>
+                                Free Admission
+                            <?php endif; ?>
+                        </p>
+                        <?php if($event['ticket_url']): ?>
+                        <a href="<?= htmlspecialchars($event['ticket_url']) ?>" class="btn btn-primary btn-lg w-100" target="_blank">Register Now</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -163,222 +221,105 @@
                 <!-- Event Details -->
                 <div class="info-card mb-4" data-aos="fade-up">
                     <h3 class="fw-bold mb-4">Event Details</h3>
-                    <p class="mb-3">Join us for our monthly AI & Machine Learning Meetup where we explore the latest developments in artificial intelligence and its practical applications.</p>
-                    <p class="mb-3">This month's theme is "AI in Healthcare: Transforming Diagnosis and Treatment." We'll have presentations from leading researchers and practitioners working at the intersection of AI and healthcare.</p>
-                    <p class="mb-4">Whether you're a seasoned data scientist or just getting started with AI, this meetup offers valuable insights, networking opportunities, and hands-on learning experiences.</p>
-                    
-                    <h5 class="fw-bold mt-4 mb-3">Agenda</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-3">
-                            <div class="d-flex">
-                                <span class="badge bg-primary me-3">6:00 PM</span>
-                                <div>
-                                    <h6 class="fw-bold mb-1">Registration & Networking</h6>
-                                    <p class="text-muted small mb-0">Arrive, check in, and connect with fellow attendees</p>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="mb-3">
-                            <div class="d-flex">
-                                <span class="badge bg-primary me-3">6:30 PM</span>
-                                <div>
-                                    <h6 class="fw-bold mb-1">Welcome & Introductions</h6>
-                                    <p class="text-muted small mb-0">Meetup organizers and community updates</p>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="mb-3">
-                            <div class="d-flex">
-                                <span class="badge bg-primary me-3">6:45 PM</span>
-                                <div>
-                                    <h6 class="fw-bold mb-1">Keynote: AI in Medical Imaging</h6>
-                                    <p class="text-muted small mb-0">Dr. Adeola Johnson, Lead AI Researcher at MedTech Labs</p>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="mb-3">
-                            <div class="d-flex">
-                                <span class="badge bg-primary me-3">7:30 PM</span>
-                                <div>
-                                    <h6 class="fw-bold mb-1">Lightning Talks</h6>
-                                    <p class="text-muted small mb-0">Community presentations on AI projects</p>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="mb-0">
-                            <div class="d-flex">
-                                <span class="badge bg-primary me-3">8:15 PM</span>
-                                <div>
-                                    <h6 class="fw-bold mb-1">Networking & Refreshments</h6>
-                                    <p class="text-muted small mb-0">Continue conversations and connections</p>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-
-
-<!-- 
-                Speakers 
-                <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="100">
-                    <h3 class="fw-bold mb-4">Featured Speakers</h3>
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="d-flex">
-                                <div class="organizer-avatar" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <h5 class="fw-bold mb-1">Dr. Adeola Johnson</h5>
-                                    <p class="text-muted small mb-1">Lead AI Researcher, MedTech Labs</p>
-                                    <p class="small text-muted mb-0">Expert in medical imaging and diagnostic AI systems</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-4">
-                            <div class="d-flex">
-                                <div class="organizer-avatar" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <h5 class="fw-bold mb-1">Chinedu Okoro</h5>
-                                    <p class="text-muted small mb-1">Data Scientist, HealthTech NG</p>
-                                    <p class="small text-muted mb-0">Building predictive models for patient outcomes</p>
-                                </div>
-                            </div>
-                        </div>
+                    <div style="white-space: pre-line;">
+                        <?= htmlspecialchars($event['description']) ?>
                     </div>
                 </div>
-
-                Gallery 
-                <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="200">
-                    <h3 class="fw-bold mb-4">Past Event Gallery</h3>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="gallery-item">
-                                <i class="fas fa-image"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="gallery-item">
-                                <i class="fas fa-image"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="gallery-item">
-                                <i class="fas fa-image"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
-
+                
                 <!-- Social Media -->
+                <?php if(!empty($socials)): ?>
                 <div class="info-card mb-4" data-aos="fade-left" data-aos-delay="300" style="position: sticky; top: 100px;">
                     <h4 class="fw-bold mb-4">Follow Us</h4>
                     <div class="d-flex gap-3 justify-content-center">
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-youtube"></i>
-                        </a>
+                        <?php if(!empty($socials['twitter'])): ?><a href="<?= $socials['twitter'] ?>" class="social-icon"><i class="fab fa-twitter"></i></a><?php endif; ?>
+                        <?php if(!empty($socials['linkedin'])): ?><a href="<?= $socials['linkedin'] ?>" class="social-icon"><i class="fab fa-linkedin-in"></i></a><?php endif; ?>
+                        <?php if(!empty($socials['instagram'])): ?><a href="<?= $socials['instagram'] ?>" class="social-icon"><i class="fab fa-instagram"></i></a><?php endif; ?>
+                        <?php if(!empty($socials['facebook'])): ?><a href="<?= $socials['facebook'] ?>" class="social-icon"><i class="fab fa-facebook-f"></i></a><?php endif; ?>
                     </div>
                 </div>
+                <?php endif; ?>
                 
             </div>
             
             <!-- Sidebar -->
             <div class="col-lg-4">
                 <!-- Location Map -->
+                <?php if(!$event['is_virtual']): ?>
                 <div class="info-card mb-4" data-aos="fade-left" data-aos-delay="400">
                     <h4 class="fw-bold mb-4">Location Map</h4>
                     <div class="bg-light rounded-3 p-3 mb-3 text-center">
                         <i class="fas fa-map-marked-alt text-primary-accent" style="font-size: 3rem;"></i>
-                        <p class="mt-2 mb-0">Co-Creation Hub, Yaba, Lagos</p>
+                        <p class="mt-2 mb-0"><?= htmlspecialchars($event['location_name']) ?></p>
                     </div>
-                    <a href="#" class="btn btn-outline-primary w-100">
+                    <a href="https://maps.google.com/?q=<?= urlencode($event['location_name'] . ' ' . $event['city_name']) ?>" target="_blank" class="btn btn-outline-primary w-100">
                         <i class="fas fa-map me-2"></i> View on Map
                     </a>
                 </div>
+                <?php endif; ?>
 
                 <!-- Event Info -->
                 <div class="info-card mb-4" data-aos="fade-left">
                     <h4 class="fw-bold mb-4">Event Information</h4>
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Date & Time</h6>
-                        <p class="mb-0">April 20, 2025<br>6:00 PM - 9:00 PM</p>
+                        <p class="mb-0">
+                            <?= date('M d, Y', strtotime($event['start_datetime'])) ?><br>
+                            <?= date('h:i A', strtotime($event['start_datetime'])) ?> - <?= date('h:i A', strtotime($event['end_datetime'])) ?>
+                        </p>
                     </div>
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Location</h6>
-                        <p class="mb-0">Co-Creation Hub<br>294 Herbert Macaulay Way<br>Yaba, Lagos</p>
+                        <p class="mb-0"><?= $event['is_virtual'] ? 'Online' : htmlspecialchars($event['location_name']) ?></p>
                     </div>
                     <div class="mb-3">
-                        <h6 class="text-muted mb-1">Expected Participants</h6>
-                        <p class="mb-0">150+</p>
-                    </div>
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-1">Contact Information</h6>
-                        <p class="mb-0">hello@lagosaiml.com<br>+234 901 876 5432</p>
-                    </div>
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-1">Event Categories</h6>
-                        <div class="d-flex flex-wrap gap-2 mt-2">
-                            <span class="badge bg-primary">AI</span>
-                            <span class="badge bg-primary">Machine Learning</span>
-                            <span class="badge bg-primary">Healthcare</span>
-                            <span class="badge bg-primary">Technology</span>
-                        </div>
-                    </div>
-                    <div class="mb-0">
-                        <h6 class="text-muted mb-1">Event Duration</h6>
-                        <p class="mb-0">3 Hours</p>
+                        <h6 class="text-muted mb-1">Event Category</h6>
+                        <span class="badge bg-primary"><?= ucfirst($event['event_type']) ?></span>
                     </div>
                 </div>
                 
                 <!-- Organizers -->
+                <?php if($event['organizer_company_id']): ?>
                 <div class="info-card mb-4" data-aos="fade-left" data-aos-delay="100">
                     <h4 class="fw-bold mb-4">Event Organizers</h4>
                     <div class="organizer-card">
                         <div class="organizer-avatar">
-                            <i class="fas fa-users"></i>
+                            <?php if(!empty($event['organizer_logo'])): ?>
+                                <img src="<?= htmlspecialchars($event['organizer_logo']) ?>" alt="Organizer">
+                            <?php else: ?>
+                                <i class="fas fa-users"></i>
+                            <?php endif; ?>
                         </div>
-                        <h5 class="fw-bold mb-1">Lagos AI Community</h5>
-                        <p class="text-muted small">Largest AI and machine learning community in Lagos</p>
-                        <a href="#" class="btn btn-outline-primary btn-sm">View Profile</a>
+                        <h5 class="fw-bold mb-1"><?= htmlspecialchars($event['organizer_name']) ?></h5>
+                        <!-- <p class="text-muted small">Largest AI and machine learning community in Lagos</p> -->
+                        <a href="listed.php?slug=<?= htmlspecialchars($event['organizer_slug']) ?>" class="btn btn-outline-primary btn-sm">View Profile</a>
                     </div>
                 </div>
+                <?php endif; ?>
                 
                 <!-- Community Links -->
+                <?php if(!empty($community)): ?>
                 <div class="info-card mb-4" data-aos="fade-left" data-aos-delay="200">
                     <h4 class="fw-bold mb-4">Join Our Community</h4>
-                    <a href="#" class="community-link">
+                    <?php if(!empty($community['whatsapp'])): ?>
+                    <a href="<?= htmlspecialchars($community['whatsapp']) ?>" class="community-link" target="_blank">
                         <i class="fab fa-whatsapp text-success"></i>
-                        <div>
-                            <h6 class="fw-bold mb-1">WhatsApp Group</h6>
-                            <p class="text-muted small mb-0">Join 500+ members for daily discussions</p>
-                        </div>
+                        <div><h6 class="fw-bold mb-1">WhatsApp Group</h6></div>
                     </a>
-                    <a href="#" class="community-link">
+                    <?php endif; ?>
+                    <?php if(!empty($community['telegram'])): ?>
+                    <a href="<?= htmlspecialchars($community['telegram']) ?>" class="community-link" target="_blank">
                         <i class="fab fa-telegram text-primary"></i>
-                        <div>
-                            <h6 class="fw-bold mb-1">Telegram Channel</h6>
-                            <p class="text-muted small mb-0">Get updates and event announcements</p>
-                        </div>
+                        <div><h6 class="fw-bold mb-1">Telegram Channel</h6></div>
                     </a>
-                    <a href="#" class="community-link">
+                    <?php endif; ?>
+                    <?php if(!empty($community['newsletter'])): ?>
+                    <a href="<?= htmlspecialchars($community['newsletter']) ?>" class="community-link" target="_blank">
                         <i class="fas fa-envelope text-danger"></i>
-                        <div>
-                            <h6 class="fw-bold mb-1">Newsletter</h6>
-                            <p class="text-muted small mb-0">Monthly digest of AI news and events</p>
-                        </div>
+                        <div><h6 class="fw-bold mb-1">Newsletter</h6></div>
                     </a>
+                    <?php endif; ?>
                 </div>
+                <?php endif; ?>
                 
             </div>
         </div>

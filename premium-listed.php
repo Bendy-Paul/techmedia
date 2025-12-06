@@ -1,9 +1,76 @@
+<?php
+require 'includes/wertyuytre.php';
+
+// 1. Get Slug & Validate
+if (!isset($_GET['slug']) || empty($_GET['slug'])) {
+    header("Location: 404.html");
+    exit();
+}
+
+$slug = $_GET['slug'];
+
+// 2. Fetch Company Data
+$stmt = $pdo->prepare("
+    SELECT c.*, 
+           ci.name as city_name, 
+           s.name as state_name, 
+           co.name as country_name
+    FROM companies c
+    LEFT JOIN cities ci ON c.city_id = ci.id
+    LEFT JOIN states s ON c.state_id = s.id
+    LEFT JOIN countries co ON c.country_id = co.id
+    WHERE c.slug = ?
+");
+$stmt->execute([$slug]);
+$company = $stmt->fetch();
+
+// 3. Handling Redirects
+if (!$company) {
+    // Company not found
+    header("Location: 404.html");
+    exit();
+}
+
+if ($company['subscription_tier'] === 'free') {
+    // Not a premium company, redirect to standard listing
+    header("Location: listed.php?slug=" . urlencode($slug));
+    exit();
+}
+
+// 4. Fetch Related Data
+
+// Projects
+$projStmt = $pdo->prepare("SELECT * FROM company_projects WHERE company_id = ?");
+$projStmt->execute([$company['id']]);
+$projects = $projStmt->fetchAll();
+
+// Gallery
+$galStmt = $pdo->prepare("SELECT * FROM company_galleries WHERE company_id = ?");
+$galStmt->execute([$company['id']]);
+$gallery = $galStmt->fetchAll();
+
+// Articles (News related to this company)
+$newsStmt = $pdo->prepare("
+    SELECT a.title, a.slug, a.published_at, a.content 
+    FROM articles a
+    JOIN article_companies ac ON a.id = ac.article_id
+    WHERE ac.company_id = ? AND a.status = 'published'
+    ORDER BY a.published_at DESC LIMIT 3
+");
+$newsStmt->execute([$company['id']]);
+$company_news = $newsStmt->fetchAll();
+
+// Parse JSON Data
+$socials = json_decode($company['social_links'] ?? '{}', true);
+$stats = json_decode($company['profile_stats'] ?? '{}', true);
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeCrafters NG | Premium Profile | Tech Media Directory</title>
+    <title><?= htmlspecialchars($company['name']) ?> | Premium Profile</title>
     
     <?php include_once('links.php'); ?>
 
@@ -53,6 +120,13 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
             margin-bottom: 20px;
             position: relative;
+            overflow: hidden;
+        }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
         
         .verified-badge {
@@ -135,6 +209,12 @@
             color: var(--text-muted);
             font-size: 3rem;
         }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
         
         .project-card {
             border-radius: 12px;
@@ -166,59 +246,62 @@
     </style>
 </head>
 <body>
-
-    <?php include_once('event-ticker.php'); ?>
+    <!-- Navigation -->
     <?php include_once('header.php'); ?>
-    <script>
-        document.getElementById('categories').classList.add('active');
-        document.getElementById('categories-mobile').classList.add('active');
-    </script>
 
-<main class="main-content">
-        <!-- Company Header -->
+    <!-- Company Header -->
     <section class="profile-header">
         <div class="container position-relative">
             <div class="row align-items-center">
                 <div class="col-md-2 text-center text-md-start">
                     <div class="company-logo" data-aos="zoom-in">
-                        <i class="fas fa-laptop-code"></i>
+                        <?php if(!empty($company['logo_url'])): ?>
+                            <img src="<?= htmlspecialchars($company['logo_url']) ?>" alt="<?= htmlspecialchars($company['name']) ?>">
+                        <?php else: ?>
+                            <i class="fas fa-building"></i>
+                        <?php endif; ?>
+                        
+                        <?php if($company['is_verified']): ?>
                         <div class="verified-badge">
                             <i class="fas fa-check"></i>
                         </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="col-md-7" data-aos="fade-right">
-                    <h1 class="fw-bold mb-2">CodeCrafters NG</h1>
-                    <p class="lead mb-3">Enterprise-grade digital solutions for forward-thinking businesses</p>
+                    <h1 class="fw-bold mb-2"><?= htmlspecialchars($company['name']) ?></h1>
+                    <p class="lead mb-3"><?= htmlspecialchars($company['tagline']) ?></p>
                     <div class="d-flex flex-wrap mb-3">
-                        <span class="category-badge">Web Development</span>
-                        <span class="category-badge">Mobile Applications</span>
-                        <span class="category-badge">UI/UX Design</span>
-                        <span class="category-badge">Cloud Solutions</span>
-                        <span class="category-badge">Digital Transformation</span>
-                        <span class="category-badge">E-commerce</span>
+                        <!-- Display Categories dynamically -->
+                        <?php 
+                            $catStmt = $pdo->prepare("SELECT c.name FROM categories c JOIN company_categories cc ON c.id = cc.category_id WHERE cc.company_id = ?");
+                            $catStmt->execute([$company['id']]);
+                            $cats = $catStmt->fetchAll(PDO::FETCH_COLUMN);
+                            foreach($cats as $catName) {
+                                echo '<span class="category-badge">'.htmlspecialchars($catName).'</span>';
+                            }
+                        ?>
                     </div>
                     <div class="d-flex gap-3">
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="social-icon">
-                            <i class="fab fa-github"></i>
-                        </a>
+                        <?php if(!empty($socials['twitter'])): ?>
+                            <a href="<?= htmlspecialchars($socials['twitter']) ?>" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <?php endif; ?>
+                        <?php if(!empty($socials['linkedin'])): ?>
+                            <a href="<?= htmlspecialchars($socials['linkedin']) ?>" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <?php endif; ?>
+                        <?php if(!empty($socials['facebook'])): ?>
+                            <a href="<?= htmlspecialchars($socials['facebook']) ?>" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <?php endif; ?>
+                         <?php if(!empty($socials['instagram'])): ?>
+                            <a href="<?= htmlspecialchars($socials['instagram']) ?>" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="col-md-3 text-center text-md-end" data-aos="fade-left">
-                    <a href="#" class="btn btn-light mb-2">Visit Website</a>
-                    <p class="mb-0"><i class="fas fa-map-marker-alt me-1"></i> Lagos & Abuja, Nigeria</p>
+                    <?php if(!empty($company['website_url'])): ?>
+                        <a href="<?= htmlspecialchars($company['website_url']) ?>" target="_blank" class="btn btn-light mb-2">Visit Website</a>
+                    <?php endif; ?>
+                    <p class="mb-0"><i class="fas fa-map-marker-alt me-1"></i> <?= htmlspecialchars($company['city_name'] ?? '') ?>, <?= htmlspecialchars($company['country_name'] ?? 'Nigeria') ?></p>
                 </div>
             </div>
         </div>
@@ -228,16 +311,15 @@
         <div class="row">
             <!-- Main Content -->
             <div class="col-lg-8">
-                <!-- Company Video -->
+                <!-- Company Overview -->
                 <div class="info-card mb-4" data-aos="fade-up">
                     <h3 class="fw-bold mb-4">Company Overview</h3>
-                    <div class="video-container">
-                        <i class="fas fa-play-circle"></i>
+                    <div class="article-content text-muted">
+                        <p><?= nl2br(htmlspecialchars($company['description'])) ?></p>
                     </div>
-                    <p class="mt-3 text-muted">Watch our company story and learn about our approach to digital innovation.</p>
                 </div>
                 
-                <!-- Competitive Analytics -->
+                <!-- Competitive Analytics (Charts) -->
                 <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="100">
                     <h3 class="fw-bold mb-4">Performance Analytics</h3>
                     <div class="row">
@@ -253,69 +335,42 @@
                                 <canvas id="deliveryChart" class="col-12"></canvas>
                             </div>
                         </div>
-                        <!-- <div class="col-md-12 mb-4">
-                            <h5 class="text-center mb-3">Client Retention</h5>
-                            <div class="chart-container">
-                                <canvas id="retentionChart"></canvas>
-                            </div>
-                        </div> -->
                     </div>
                 </div>
                 
                 <!-- Recent Projects -->
+                <?php if(count($projects) > 0): ?>
                 <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="200">
                     <h3 class="fw-bold mb-4">Recent Projects</h3>
                     <div class="row">
+                        <?php foreach($projects as $project): ?>
                         <div class="col-md-6 mb-4">
                             <div class="project-card p-3 h-100">
-                                <h5 class="fw-bold">FinTech Mobile Banking App</h5>
-                                <p class="text-muted">A comprehensive mobile banking solution with biometric authentication and real-time transactions.</p>
-                                <span class="badge bg-primary">Completed: Jan 2025</span>
+                                <h5 class="fw-bold"><?= htmlspecialchars($project['title']) ?></h5>
+                                <p class="text-muted"><?= htmlspecialchars($project['description']) ?></p>
+                                <?php if(!empty($project['image_url'])): ?>
+                                    <img src="<?= htmlspecialchars($project['image_url']) ?>" class="img-fluid rounded mt-2" alt="Project Image">
+                                <?php endif; ?>
                             </div>
                         </div>
-                        <div class="col-md-6 mb-4">
-                            <div class="project-card p-3 h-100">
-                                <h5 class="fw-bold">E-commerce Platform</h5>
-                                <p class="text-muted">Multi-vendor marketplace with advanced inventory management and AI recommendations.</p>
-                                <span class="badge bg-primary">Completed: Nov 2024</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-4">
-                            <div class="project-card p-3 h-100">
-                                <h5 class="fw-bold">Healthcare Management System</h5>
-                                <p class="text-muted">Enterprise solution for patient records, appointments, and telemedicine capabilities.</p>
-                                <span class="badge bg-primary">Completed: Aug 2024</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-4">
-                            <div class="project-card p-3 h-100">
-                                <h5 class="fw-bold">Educational Learning Platform</h5>
-                                <p class="text-muted">Interactive LMS with video courses, assessments, and progress tracking.</p>
-                                <span class="badge bg-primary">Completed: Jun 2024</span>
-                            </div>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
+                <?php endif; ?>
                 
                 <!-- Company Articles -->
+                <?php if(count($company_news) > 0): ?>
                 <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="300">
                     <h3 class="fw-bold mb-4">Company News & Insights</h3>
+                    <?php foreach($company_news as $news): ?>
                     <div class="article-card mb-4">
-                        <h5 class="fw-bold">CodeCrafters NG Wins 2025 Digital Innovation Award</h5>
-                        <p class="text-muted">We're proud to announce that our work on the FinTech banking app has been recognized with the prestigious Digital Innovation Award.</p>
-                        <span class="text-muted small">Published: March 15, 2025</span>
+                        <h5 class="fw-bold"><a href="article.php?slug=<?= $news['slug'] ?>" class="text-dark text-decoration-none"><?= htmlspecialchars($news['title']) ?></a></h5>
+                        <p class="text-muted"><?= htmlspecialchars(substr(strip_tags($news['content']), 0, 150)) ?>...</p>
+                        <span class="text-muted small">Published: <?= date('F j, Y', strtotime($news['published_at'])) ?></span>
                     </div>
-                    <div class="article-card mb-4">
-                        <h5 class="fw-bold">Expanding Our Services to East African Market</h5>
-                        <p class="text-muted">We're excited to announce our expansion into Kenya and Tanzania, bringing our enterprise solutions to more African businesses.</p>
-                        <span class="text-muted small">Published: February 3, 2025</span>
-                    </div>
-                    <div class="article-card">
-                        <h5 class="fw-bold">The Future of AI in Web Development: Our Perspective</h5>
-                        <p class="text-muted">Our CTO shares insights on how artificial intelligence is transforming the web development landscape and how we're integrating these technologies.</p>
-                        <span class="text-muted small">Published: January 18, 2025</span>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
+                <?php endif; ?>
             </div>
             
             <!-- Sidebar -->
@@ -325,27 +380,29 @@
                     <h4 class="fw-bold mb-4">Contact Details</h4>
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Website</h6>
-                        <a href="#" class="text-decoration-none">www.codecrafters.ng</a>
+                        <a href="<?= htmlspecialchars($company['website_url']) ?>" target="_blank" class="text-decoration-none text-truncate d-block"><?= htmlspecialchars($company['website_url']) ?></a>
                     </div>
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Phone</h6>
-                        <p class="mb-0">+234 901 234 5678</p>
+                        <p class="mb-0"><?= htmlspecialchars($company['phone']) ?></p>
                     </div>
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Email</h6>
-                        <p class="mb-0">contact@codecrafters.ng</p>
+                        <p class="mb-0"><?= htmlspecialchars($company['email']) ?></p>
                     </div>
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Team Size</h6>
-                        <p class="mb-0">50-100 Employees</p>
+                        <p class="mb-0"><?= htmlspecialchars($company['team_size'] ?? 'N/A') ?></p>
                     </div>
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Year Started</h6>
-                        <p class="mb-0">2012</p>
+                        <p class="mb-0"><?= htmlspecialchars($company['year_founded'] ?? 'N/A') ?></p>
                     </div>
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Starting Cost Per Project</h6>
-                        <p class="mb-0">₦2,500,000</p>
+                        <p class="mb-0">
+                            <?= !empty($company['starting_cost']) ? $company['currency'] . ' ' . number_format($company['starting_cost']) : 'Contact for Quote' ?>
+                        </p>
                     </div>
                 </div>
                 
@@ -358,44 +415,28 @@
                 </div>
                 
                 <!-- Gallery -->
+                <?php if(count($gallery) > 0): ?>
                 <div class="info-card mb-4" data-aos="fade-left" data-aos-delay="200">
                     <h4 class="fw-bold mb-4">Gallery</h4>
                     <div class="row g-2">
+                        <?php foreach($gallery as $img): ?>
                         <div class="col-6">
                             <div class="gallery-item">
-                                <i class="fas fa-building"></i>
+                                <img src="<?= htmlspecialchars($img['image_url']) ?>" alt="Gallery" style="width: 100%; height: 100%; object-fit: cover;">
                             </div>
                         </div>
-                        <div class="col-6">
-                            <div class="gallery-item">
-                                <i class="fas fa-users"></i>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="gallery-item">
-                                <i class="fas fa-laptop"></i>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="gallery-item">
-                                <i class="fas fa-award"></i>
-                            </div>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
+                <?php endif; ?>
                 
-                <!-- Location Map -->
+                <!-- Location Map (Placeholder logic) -->
                 <div class="info-card" data-aos="fade-left" data-aos-delay="300">
-                    <h4 class="fw-bold mb-4">Our Offices</h4>
+                    <h4 class="fw-bold mb-4">Office Location</h4>
                     <div class="bg-light rounded-3 p-3 mb-3">
-                        <p class="fw-bold mb-2">Lagos Headquarters</p>
-                        <p class="mb-2"><i class="fas fa-map-marker-alt text-primary me-2"></i> 42, Innovation Way</p>
-                        <p class="mb-0">Lekki Phase 1, Lagos</p>
-                    </div>
-                    <div class="bg-light rounded-3 p-3 mb-3">
-                        <p class="fw-bold mb-2">Abuja Office</p>
-                        <p class="mb-2"><i class="fas fa-map-marker-alt text-primary me-2"></i> 15, Digital Transformation Avenue</p>
-                        <p class="mb-0">Maitama, Abuja</p>
+                        <p class="fw-bold mb-2">Headquarters</p>
+                        <p class="mb-2"><i class="fas fa-map-marker-alt text-primary me-2"></i> <?= nl2br(htmlspecialchars($company['address'])) ?></p>
+                        <p class="mb-0"><?= htmlspecialchars($company['city_name']) ?></p>
                     </div>
                     <a href="#" class="btn btn-outline-primary w-100">
                         <i class="fas fa-map me-2"></i> View Offices on Map
@@ -404,12 +445,19 @@
             </div>
         </div>
     </div>
-</main>
 
     <?php include_once('footer.php'); ?>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <script>
+
+        // Prepare Data for Charts (Using Profile Stats from DB)
+        const statsData = {
+            completeness: <?= $stats['completeness'] ?? 0 ?>,
+            response_rate: <?= $stats['response_rate'] ?? 0 ?>
+        };
+
         // Profile Strength Chart
         const profileCtx = document.getElementById('profileStrengthChart').getContext('2d');
         const profileChart = new Chart(profileCtx, {
@@ -418,7 +466,8 @@
                 labels: ['Profile Completeness', 'Response Rate', 'Client Reviews', 'Project Portfolio', 'Industry Experience', 'Social Proof'],
                 datasets: [{
                     label: 'Profile Strength',
-                    data: [95, 98, 92, 90, 88, 85],
+                    // Mapping DB stats + some calculated/random values for demo visualization
+                    data: [statsData.completeness, statsData.response_rate, 80, 85, 75, 90], 
                     backgroundColor: 'rgba(37, 99, 235, 0.2)',
                     borderColor: '#2563eb',
                     pointBackgroundColor: '#2563eb',
@@ -428,24 +477,22 @@
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     r: {
-                        angleLines: {
-                            display: true
-                        },
+                        angleLines: { display: true },
                         suggestedMin: 0,
                         suggestedMax: 100
                     }
                 },
                 plugins: {
-                    legend: {
-                        display: false
-                    }
+                    legend: { display: false }
                 }
             }
         });
 
-        // Client Satisfaction Chart
+        // Client Satisfaction Chart (Dummy data for visual - needs review table data to be dynamic)
         const satisfactionCtx = document.getElementById('satisfactionChart').getContext('2d');
         const satisfactionChart = new Chart(satisfactionCtx, {
             type: 'doughnut',
@@ -453,84 +500,41 @@
                 labels: ['Very Satisfied', 'Satisfied', 'Neutral', 'Unsatisfied'],
                 datasets: [{
                     data: [75, 20, 4, 1],
-                    backgroundColor: [
-                        '#10b981',
-                        '#3b82f6',
-                        '#f59e0b',
-                        '#ef4444'
-                    ],
+                    backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
                     borderWidth: 0
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
+                    legend: { position: 'bottom' }
                 }
             }
         });
 
-        // Project Delivery Time Chart
+        // Project Delivery Time Chart (Dummy visual)
         const deliveryCtx = document.getElementById('deliveryChart').getContext('2d');
         const deliveryChart = new Chart(deliveryCtx, {
             type: 'bar',
             data: {
-                labels: ['CodeCrafters NG', 'Industry Average'],
+                labels: ['This Company', 'Industry Average'],
                 datasets: [{
                     label: 'Days to Delivery',
                     data: [45, 68],
-                    backgroundColor: [
-                        '#2563eb',
-                        '#94a3b8'
-                    ]
+                    backgroundColor: ['#2563eb', '#94a3b8']
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: false
-                    }
+                    legend: { display: false }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Days'
-                        }
-                    }
-                }
-            }
-        });
-
-        // Client Retention Chart
-        const retentionCtx = document.getElementById('retentionChart').getContext('2d');
-        const retentionChart = new Chart(retentionCtx, {
-            type: 'line',
-            data: {
-                labels: ['2019', '2020', '2021', '2022', '2023', '2024'],
-                datasets: [{
-                    label: 'Client Retention Rate',
-                    data: [82, 85, 88, 90, 92, 94],
-                    borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        min: 80,
-                        max: 100,
-                        title: {
-                            display: true,
-                            text: 'Percentage %'
-                        }
+                        title: { display: true, text: 'Days' }
                     }
                 }
             }

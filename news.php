@@ -1,3 +1,76 @@
+<?php
+require 'includes/wertyuytre.php';
+
+// --- 1. Setup & Helpers ---
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$limit = 6; // Articles per page
+$offset = ($page - 1) * $limit;
+$search = $_GET['s'] ?? '';
+$cat_filter = $_GET['cat'] ?? '';
+
+// --- 2. Fetch Featured Article ---
+// Only show on first page and when no specific search/filter is applied
+$featured = null;
+if ($page == 1 && empty($search) && empty($cat_filter)) {
+    $fStmt = $pdo->query("SELECT * FROM articles WHERE status='published' AND is_featured=1 ORDER BY published_at DESC LIMIT 1");
+    $featured = $fStmt->fetch();
+}
+
+// --- 3. Build Query for Main List ---
+$params = [];
+$sql = "SELECT a.*, u.full_name as author_name 
+        FROM articles a 
+        LEFT JOIN users u ON a.author_id = u.id 
+        WHERE a.status = 'published'";
+
+// Exclude featured article from the main list if it exists
+if ($featured) {
+    $sql .= " AND a.id != " . $featured['id'];
+}
+
+// Search Filter
+if (!empty($search)) {
+    $sql .= " AND (a.title LIKE ? OR a.content LIKE ?)";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
+}
+
+// Category Filter
+if (!empty($cat_filter)) {
+    $sql .= " AND a.id IN (
+        SELECT article_id FROM article_categories ac 
+        JOIN categories c ON ac.category_id = c.id 
+        WHERE c.slug = ?
+    )";
+    $params[] = $cat_filter;
+}
+
+$sql .= " ORDER BY a.published_at DESC LIMIT $limit OFFSET $offset";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$articles = $stmt->fetchAll();
+
+// --- 4. Pagination Count ---
+$countSql = "SELECT COUNT(*) FROM articles a WHERE a.status='published'";
+if ($featured) $countSql .= " AND a.id != " . $featured['id'];
+// For simplicity in this snippet, let's just run a count query that mimics the main one without limit
+$countParams = $params; // Copy params
+$countStmt = $pdo->prepare(str_replace("SELECT a.*, u.full_name as author_name", "SELECT COUNT(*)", substr($sql, 0, strpos($sql, "ORDER BY"))));
+$countStmt->execute($countParams);
+$total_articles = $countStmt->fetchColumn();
+$total_pages = ceil($total_articles / $limit);
+
+
+// --- 5. Sidebar Data ---
+$cats = $pdo->query("SELECT * FROM categories WHERE type='article' ORDER BY name ASC")->fetchAll();
+// Fallback if no 'article' types defined yet
+if (empty($cats)) {
+    $cats = $pdo->query("SELECT * FROM categories ORDER BY name ASC LIMIT 10")->fetchAll();
+}
+$tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 15")->fetchAll();
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -102,6 +175,8 @@
             padding: 8px 20px;
             margin: 5px;
             transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
         }
         .filter-btn:hover, .filter-btn.active {
             background: var(--primary-accent);
@@ -153,8 +228,8 @@
                     <h1 class="display-4 fw-bold mb-4">Tech News & Insights</h1>
                     <p class="lead text-muted mb-4">Stay updated with the latest trends, innovations, and stories from Nigeria's booming tech ecosystem.</p>
                     <div class="input-group input-group-lg mx-auto" style="max-width: 500px;">
-                        <input type="text" class="form-control" placeholder="Search articles...">
-                        <button class="btn btn-primary" type="button"><i class="fas fa-search"></i></button>
+                        <input type="text" class="form-control" placeholder="Search articles..." value="<?= htmlspecialchars($search) ?>" onkeypress="if(event.key === 'Enter') window.location.href='?s='+this.value">
+                        <button class="btn btn-primary" type="button" onclick="window.location.href='?s='+this.previousElementSibling.value"><i class="fas fa-search"></i></button>
                     </div>
                 </div>
             </div>
@@ -168,38 +243,49 @@
                 <!-- Category Filter -->
                 <div class="category-filter" data-aos="fade-up">
                     <h5 class="fw-bold mb-3">Filter by Category</h5>
-                    <div class="d-flex flex-wrap">
-                        <button class="filter-btn active">All</button>
-                        <button class="filter-btn">Startups</button>
-                        <button class="filter-btn">Funding</button>
-                        <button class="filter-btn">Policy</button>
-                        <button class="filter-btn">Innovation</button>
-                        <button class="filter-btn">Events</button>
-                        <button class="filter-btn">Interviews</button>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="news.php" class="filter-btn <?= empty($cat_filter) ? 'active' : '' ?>">All</a>
+                        <?php foreach($cats as $cat): ?>
+                            <a href="?cat=<?= htmlspecialchars($cat['slug']) ?>" class="filter-btn <?= $cat_filter == $cat['slug'] ? 'active' : '' ?>">
+                                <?= htmlspecialchars($cat['name']) ?>
+                            </a>
+                        <?php endforeach; ?>
                     </div>
                 </div>
 
                 <!-- Featured Article -->
+                <?php if ($featured): ?>
                 <div class="news-card mb-5" data-aos="fade-up" data-aos-delay="100">
-                    <img src="https://placehold.co/800x400/f1f5f9/2563eb?text=Featured+Tech+News" class="news-img" alt="Featured Article">
+                    <?php 
+                        $featImg = !empty($featured['featured_image_url']) ? $featured['featured_image_url'] : 'https://placehold.co/800x400/f1f5f9/2563eb?text=Featured+Tech+News';
+                    ?>
+                    <img src="<?= htmlspecialchars($featImg) ?>" class="news-img" alt="<?= htmlspecialchars($featured['title']) ?>">
                     <div class="news-body">
-                        <span class="news-category">Featured • Innovation</span>
-                        <h2 class="fw-bold mb-3">Nigerian AI Startup Secures $5M Funding to Revolutionize Agriculture</h2>
-                        <p class="text-muted mb-3">AgriTech Solutions NG has developed an AI-powered platform that helps farmers optimize crop yields using satellite imagery and machine learning algorithms.</p>
+                        <span class="news-category">Featured</span>
+                        <h2 class="fw-bold mb-3"><?= htmlspecialchars($featured['title']) ?></h2>
+                        <p class="text-muted mb-3"><?= htmlspecialchars(substr(strip_tags($featured['content']), 0, 160)) ?>...</p>
+                        
+                        <!-- Featured Article Tags -->
+                        <?php
+                            $ftStmt = $pdo->prepare("SELECT t.name FROM tags t JOIN article_tags at ON t.id = at.tag_id WHERE at.article_id = ? LIMIT 4");
+                            $ftStmt->execute([$featured['id']]);
+                            $fTags = $ftStmt->fetchAll(PDO::FETCH_COLUMN);
+                        ?>
                         <div class="news-tags">
-                            <span class="news-tag">#AI</span>
-                            <span class="news-tag">#Agriculture</span>
-                            <span class="news-tag">#Funding</span>
-                            <span class="news-tag">#MachineLearning</span>
+                            <?php foreach($fTags as $tag): ?>
+                                <span class="news-tag">#<?= htmlspecialchars($tag) ?></span>
+                            <?php endforeach; ?>
                         </div>
+                        
                         <div class="news-meta">
-                            <span><i class="fas fa-user me-1"></i> By Chinedu Okoro</span>
-                            <span><i class="fas fa-calendar me-1"></i> March 15, 2025</span>
-                            <span><i class="fas fa-clock me-1"></i> 5 min read</span>
+                            <span><i class="fas fa-user me-1"></i> By <?= htmlspecialchars($featured['author_name'] ?? 'Editorial') ?></span>
+                            <span><i class="fas fa-calendar me-1"></i> <?= date('F j, Y', strtotime($featured['published_at'])) ?></span>
+                            <span><i class="fas fa-clock me-1"></i> <?= ceil(str_word_count(strip_tags($featured['content'])) / 200) ?> min read</span>
                         </div>
-                        <a href="article.php" class="btn btn-primary mt-3">Read Full Article</a>
+                        <a href="article.php?slug=<?= htmlspecialchars($featured['slug']) ?>" class="btn btn-primary mt-3">Read Full Article</a>
                     </div>
                 </div>
+                <?php endif; ?>
             </div>
 
             <!-- Sidebar -->
@@ -208,12 +294,14 @@
                 <div class="sidebar-widget" data-aos="fade-left" data-aos-delay="200">
                     <h5 class="fw-bold mb-4">Categories</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="#" class="text-decoration-none d-flex justify-content-between"><span>Startups</span> <span class="text-muted">24</span></a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none d-flex justify-content-between"><span>Funding</span> <span class="text-muted">18</span></a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none d-flex justify-content-between"><span>Policy</span> <span class="text-muted">12</span></a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none d-flex justify-content-between"><span>Innovation</span> <span class="text-muted">31</span></a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none d-flex justify-content-between"><span>Events</span> <span class="text-muted">15</span></a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none d-flex justify-content-between"><span>Interviews</span> <span class="text-muted">9</span></a></li>
+                        <?php foreach($cats as $cat): ?>
+                        <li class="mb-2">
+                            <a href="?cat=<?= htmlspecialchars($cat['slug']) ?>" class="text-decoration-none d-flex justify-content-between">
+                                <span><?= htmlspecialchars($cat['name']) ?></span> 
+                                <!-- Optional: Add count logic if desired -->
+                            </a>
+                        </li>
+                        <?php endforeach; ?>
                     </ul>
                 </div>
 
@@ -221,16 +309,9 @@
                 <div class="sidebar-widget" data-aos="fade-left" data-aos-delay="300">
                     <h5 class="fw-bold mb-4">Popular Tags</h5>
                     <div class="tag-cloud">
-                        <a href="#" class="tag-item">AI</a>
-                        <a href="#" class="tag-item">Fintech</a>
-                        <a href="#" class="tag-item">Funding</a>
-                        <a href="#" class="tag-item">Blockchain</a>
-                        <a href="#" class="tag-item">Startups</a>
-                        <a href="#" class="tag-item">E-commerce</a>
-                        <a href="#" class="tag-item">AgriTech</a>
-                        <a href="#" class="tag-item">HealthTech</a>
-                        <a href="#" class="tag-item">EdTech</a>
-                        <a href="#" class="tag-item">Mobile</a>
+                        <?php foreach($tags as $tag): ?>
+                            <a href="?s=<?= urlencode($tag['name']) ?>" class="tag-item"><?= htmlspecialchars($tag['name']) ?></a>
+                        <?php endforeach; ?>
                     </div>
                 </div>
 
@@ -248,117 +329,77 @@
     </div>
 
     <section class="news-section container">
-                        <!-- News Grid -->
-                <div class="row g-4">
-                    <!-- Article 1 -->
+        <!-- News Grid -->
+        <div class="row g-4">
+            <?php if (count($articles) > 0): ?>
+                <?php foreach($articles as $article): ?>
                     <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                        <div class="news-card">
-                            <img src="https://placehold.co/600x400/f1f5f9/2563eb?text=Startup+Funding" class="news-img" alt="Article">
+                        <div class="news-card h-100">
+                            <?php 
+                                $artImg = !empty($article['featured_image_url']) ? $article['featured_image_url'] : 'https://placehold.co/600x400/f1f5f9/2563eb?text=News';
+                            ?>
+                            <img src="<?= htmlspecialchars($artImg) ?>" class="news-img" alt="<?= htmlspecialchars($article['title']) ?>">
                             <div class="news-body">
-                                <span class="news-category">Funding</span>
-                                <h4 class="fw-bold mb-2">Fintech Startup PayNaija Raises $8M Series A</h4>
-                                <p class="text-muted small mb-3">The round was led by international venture capital firms looking to tap into Nigeria's growing digital payments market.</p>
+                                <span class="news-category">News</span>
+                                <h4 class="fw-bold mb-2"><?= htmlspecialchars($article['title']) ?></h4>
+                                <p class="text-muted small mb-3"><?= htmlspecialchars(substr(strip_tags($article['content']), 0, 120)) ?>...</p>
+                                
+                                <?php
+                                    $tStmt = $pdo->prepare("SELECT t.name FROM tags t JOIN article_tags at ON t.id = at.tag_id WHERE at.article_id = ? LIMIT 3");
+                                    $tStmt->execute([$article['id']]);
+                                    $artTags = $tStmt->fetchAll(PDO::FETCH_COLUMN);
+                                ?>
                                 <div class="news-tags">
-                                    <span class="news-tag">#Fintech</span>
-                                    <span class="news-tag">#Funding</span>
-                                    <span class="news-tag">#Payments</span>
+                                    <?php foreach($artTags as $tag): ?>
+                                        <span class="news-tag">#<?= htmlspecialchars($tag) ?></span>
+                                    <?php endforeach; ?>
                                 </div>
+                                
                                 <div class="news-meta">
-                                    <span><i class="fas fa-calendar me-1"></i> March 12, 2025</span>
-                                    <span><i class="fas fa-clock me-1"></i> 3 min read</span>
+                                    <span><i class="fas fa-calendar me-1"></i> <?= date('M d, Y', strtotime($article['published_at'])) ?></span>
+                                    <span><i class="fas fa-clock me-1"></i> <?= ceil(str_word_count(strip_tags($article['content'])) / 200) ?> min</span>
                                 </div>
-                                <a href="article.html" class="btn btn-outline-primary btn-sm mt-2">Read More</a>
+                                <a href="article.php?slug=<?= htmlspecialchars($article['slug']) ?>" class="btn btn-outline-primary btn-sm mt-2">Read More</a>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Article 2 -->
-                    <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
-                        <div class="news-card">
-                            <img src="https://placehold.co/600x400/f1f5f9/2563eb?text=Gov+Policy" class="news-img" alt="Article">
-                            <div class="news-body">
-                                <span class="news-category">Policy</span>
-                                <h4 class="fw-bold mb-2">New Startup Act: What It Means for Nigerian Entrepreneurs</h4>
-                                <p class="text-muted small mb-3">The recently passed legislation provides tax incentives and regulatory support for early-stage technology companies.</p>
-                                <div class="news-tags">
-                                    <span class="news-tag">#Policy</span>
-                                    <span class="news-tag">#Startups</span>
-                                    <span class="news-tag">#Legislation</span>
-                                </div>
-                                <div class="news-meta">
-                                    <span><i class="fas fa-calendar me-1"></i> March 10, 2025</span>
-                                    <span><i class="fas fa-clock me-1"></i> 4 min read</span>
-                                </div>
-                                <a href="article.html" class="btn btn-outline-primary btn-sm mt-2">Read More</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Article 3 -->
-                    <div class="col-md-4" data-aos="fade-up" data-aos-delay="400">
-                        <div class="news-card">
-                            <img src="https://placehold.co/600x400/f1f5f9/2563eb?text=Tech+Event" class="news-img" alt="Article">
-                            <div class="news-body">
-                                <span class="news-category">Events</span>
-                                <h4 class="fw-bold mb-2">Lagos Tech Festival 2025: Highlights and Key Takeaways</h4>
-                                <p class="text-muted small mb-3">Over 5,000 attendees gathered for Africa's largest tech conference featuring groundbreaking innovations and networking opportunities.</p>
-                                <div class="news-tags">
-                                    <span class="news-tag">#Events</span>
-                                    <span class="news-tag">#Conference</span>
-                                    <span class="news-tag">#Networking</span>
-                                </div>
-                                <div class="news-meta">
-                                    <span><i class="fas fa-calendar me-1"></i> March 8, 2025</span>
-                                    <span><i class="fas fa-clock me-1"></i> 6 min read</span>
-                                </div>
-                                <a href="article.html" class="btn btn-outline-primary btn-sm mt-2">Read More</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Article 4 -->
-                    <div class="col-md-4" data-aos="fade-up" data-aos-delay="500">
-                        <div class="news-card">
-                            <img src="https://placehold.co/600x400/f1f5f9/2563eb?text=Blockchain" class="news-img" alt="Article">
-                            <div class="news-body">
-                                <span class="news-category">Innovation</span>
-                                <h4 class="fw-bold mb-2">Blockchain Adoption Grows Among Nigerian Financial Institutions</h4>
-                                <p class="text-muted small mb-3">Major banks are exploring distributed ledger technology to improve security and reduce transaction costs.</p>
-                                <div class="news-tags">
-                                    <span class="news-tag">#Blockchain</span>
-                                    <span class="news-tag">#Banking</span>
-                                    <span class="news-tag">#Innovation</span>
-                                </div>
-                                <div class="news-meta">
-                                    <span><i class="fas fa-calendar me-1"></i> March 5, 2025</span>
-                                    <span><i class="fas fa-clock me-1"></i> 5 min read</span>
-                                </div>
-                                <a href="article.html" class="btn btn-outline-primary btn-sm mt-2">Read More</a>
-                            </div>
-                        </div>
-                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted lead">No articles found.</p>
+                    <a href="news.php" class="btn btn-outline-primary">View All News</a>
                 </div>
+            <?php endif; ?>
+        </div>
 
-                <!-- Pagination -->
-                <nav aria-label="Page navigation" class="mt-5">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">Previous</a>
-                        </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Next</a>
-                        </li>
-                    </ul>
-                </nav>
+        <!-- Pagination -->
+        <?php if ($total_pages > 1): ?>
+        <nav aria-label="Page navigation" class="mt-5">
+            <ul class="pagination justify-content-center">
+                <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?page=<?= $page - 1 ?><?= $search ? '&s='.$search : '' ?><?= $cat_filter ? '&cat='.$cat_filter : '' ?>" tabindex="-1">Previous</a>
+                </li>
+                
+                <?php for($i = 1; $i <= $total_pages; $i++): ?>
+                    <li class="page-item <?= ($page == $i) ? 'active' : '' ?>">
+                        <a class="page-link" href="?page=<?= $i ?><?= $search ? '&s='.$search : '' ?><?= $cat_filter ? '&cat='.$cat_filter : '' ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+
+                <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?page=<?= $page + 1 ?><?= $search ? '&s='.$search : '' ?><?= $cat_filter ? '&cat='.$cat_filter : '' ?>">Next</a>
+                </li>
+            </ul>
+        </nav>
+        <?php endif; ?>
     </section>
 
+
+<br><br>
     <?php include_once('footer.php'); ?>
 
     <script>
-        // Category filter functionality
+        // Category filter functionality (Optional: Keeps button active state visual)
         document.querySelectorAll('.filter-btn').forEach(button => {
             button.addEventListener('click', function() {
                 document.querySelectorAll('.filter-btn').forEach(btn => {
