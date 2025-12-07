@@ -92,7 +92,7 @@ $featured_companies->execute([$category['id']]);
                             <div class="featured-body">
                                 <span class="verified-badge"><i class="fas fa-check-circle"></i> Verified Partner</span>
                                 <div class="company-logo">
-                                    <img src="<?= htmlspecialchars($company['logo_url']) ?>" alt="<?= htmlspecialchars($company['name']) ?>" style="height: 100%; width: auto;">
+                                    <img src="<?= htmlspecialchars($url_path."/".$company['logo_url']) ?>" alt="<?= htmlspecialchars($company['name']) ?>" style="height: 100%; width: auto;">
 
                                 </div>
                                 <h4 class="fw-bold mb-2"><?= htmlspecialchars($company['name']) ?></h4>
@@ -137,7 +137,7 @@ $featured_companies->execute([$category['id']]);
                                         <span><?= htmlspecialchars($company['team_size']) ?> employees</span>
                                     </div>
                                 </div>
-                                <a href="premium-listed.php?slug=<?= htmlspecialchars($company['slug']) ?>"><button class="btn-featured">View Profile</button></a>
+                                <a href="<?= $url_path ?>/premium-listed/<?= htmlspecialchars($company['slug']) ?>"><button class="btn-featured">View Profile</button></a>
                             </div>
                         </div>
                     </div>
@@ -219,7 +219,7 @@ $featured_companies->execute([$category['id']]);
                     <div class="company-card">
                         <div class="company-body">
                             <div class="company-logo-sm">
-                                <img src="<?= htmlspecialchars($listed_company['logo_url']) ?>" alt="<?= htmlspecialchars($listed_company['name']) ?>" style="height: 100%; width: auto;">
+                                <img src="<?= htmlspecialchars($url_path ."/".$listed_company['logo_url']) ?>" alt="<?= htmlspecialchars($listed_company['name']) ?>" style="height: 100%; width: auto;">
                             </div>
                             <h5 class="fw-bold mb-2"><?= htmlspecialchars($listed_company['name']); ?></h5>
                             <div class="align-items-center mb-2">

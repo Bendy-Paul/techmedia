@@ -336,7 +336,7 @@ $duration_str = $duration->days > 0 ? $duration->days . " Days" : $duration->h .
                     <div class="organizer-card">
                         <div class="organizer-avatar">
                             <?php if(!empty($event['organizer_logo'])): ?>
-                                <img src="<?= htmlspecialchars($event['organizer_logo']) ?>" alt="Organizer">
+                                <img src="<?= htmlspecialchars($url_path) ?>/<?= htmlspecialchars($event['organizer_logo']) ?>" alt="Organizer">
                             <?php else: ?>
                                 <i class="fas fa-user-tie"></i>
                             <?php endif; ?>

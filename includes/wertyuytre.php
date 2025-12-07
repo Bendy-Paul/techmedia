@@ -18,4 +18,6 @@ try {
     // In production, hide this error
     die("Database connection failed.");
 }
+
+$url_path = 'http://localhost/techmedia';
 ?>

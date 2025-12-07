@@ -41,8 +41,9 @@ $featuredEvent = $featStmt->fetch();
     <style>
         /* Events Hero */
         .events-hero {
-            background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.5) 0%, rgba(59, 130, 246, 0.45) 100%), url('../assets/images/event-hero.jpg') no-repeat center center/cover;
             padding: 120px 0 60px;
+            color: white;
             position: relative;
         }
 
@@ -276,7 +277,7 @@ $featuredEvent = $featStmt->fetch();
             <div class="row justify-content-center text-center">
                 <div class="col-lg-8" data-aos="fade-up">
                     <h1 class="display-4 fw-bold mb-4">Tech Events in Nigeria</h1>
-                    <p class="lead text-muted mb-4">Discover conferences, meetups, hackathons, and workshops across Nigeria's tech ecosystem.</p>
+                    <p class="lead mb-4">Discover conferences, meetups, hackathons, and workshops across Nigeria's tech ecosystem.</p>
                     <div class="input-group input-group-lg mx-auto" style="max-width: 500px;">
                         <input type="text" class="form-control" placeholder="Search events..." value="<?= htmlspecialchars($search) ?>" onkeypress="if(event.key === 'Enter') window.location.href='?s='+this.value">
                         <button class="btn btn-primary" type="button" onclick="window.location.href='?s='+this.previousElementSibling.value"><i class="fas fa-search"></i></button>
@@ -300,7 +301,7 @@ $featuredEvent = $featStmt->fetch();
                         <span><i class="fas fa-map-marker-alt me-2"></i> <?= htmlspecialchars($featuredEvent['location_name']) ?></span>
                     </div>
                     <div class="d-flex gap-3">
-                        <a href="featured-event.php?slug=<?= $featuredEvent['slug'] ?>" class="btn btn-light btn-lg">View Details</a>
+                        <a href="<?= htmlspecialchars($url_path) ?>/featured-event/<?= htmlspecialchars($featuredEvent['slug']) ?>" class="btn btn-light btn-lg">View Details</a>
                         <?php if($featuredEvent['ticket_url']): ?>
                         <a href="<?= htmlspecialchars($featuredEvent['ticket_url']) ?>" class="btn btn-outline-light btn-lg" target="_blank">Get Tickets</a>
                         <?php endif; ?>
@@ -342,8 +343,8 @@ $featuredEvent = $featStmt->fetch();
                                 <span><i class="fas fa-map-marker-alt me-1"></i> <?= $event['is_virtual'] ? 'Online' : htmlspecialchars($event['city_name'] ?? 'Nigeria') ?></span>
                             </div>
                             <!-- Link Logic: Redirect to featured-event.php if featured, else event.php -->
-                            <?php $link = $event['is_featured'] ? 'featured-event.php' : 'event.php'; ?>
-                            <a href="<?= $link ?>?slug=<?= $event['slug'] ?>" class="btn btn-outline-primary btn-sm mt-3">View Details</a>
+                            <?php $link = $event['is_featured'] ? 'featured-event' : 'event'; ?>
+                            <a href="<?= $url_path ."/" . $link . "/" . $event['slug'] ?>" class="btn btn-outline-primary btn-sm mt-3">View Details</a>
                         </div>
                     </div>
                 </div>

@@ -393,7 +393,7 @@ $highest_count = $result[0]['company_count'];
                                     <h5 class="fw-bold"><?= htmlspecialchars($comp['name']) ?></h5>
                                     <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt text-primary-accent"></i> <?= htmlspecialchars($comp['city_name'] ?? 'Nigeria') ?></p>
                                     <p class="small text-dark text-truncate"><?= htmlspecialchars($comp['tagline'] ?? '') ?></p>
-                                    <a href="company.php?slug=<?= $comp['slug'] ?>" class="btn btn-sm btn-outline-primary w-100 mt-2">View Profile</a>
+                                    <a href="<?= $url_path ?>/listed/<?= $comp['slug'] ?>" class="btn btn-sm btn-outline-primary w-100 mt-2">View Profile</a>
                                 </div>
                             </div>
                         </div>
@@ -425,7 +425,7 @@ $highest_count = $result[0]['company_count'];
                                 <span class="text-secondary small text-uppercase fw-bold"><i class="fas fa-chart-line me-1"></i> Analysis</span>
                                 <h3 class="mt-2 fw-bold"><?= htmlspecialchars($featured['title']) ?></h3>
                                 <p class="text-muted text-truncate"><?= strip_tags($featured['content']) ?></p>
-                                <a href="article.php?slug=<?= $featured['slug'] ?>" class="text-primary-accent fw-bold">Read Article <i class="fas fa-arrow-right ms-1"></i></a>
+                                <a href="<?= $url_path ?>/article/<?= $featured['slug'] ?>" class="text-primary-accent fw-bold">Read Article <i class="fas fa-arrow-right ms-1"></i></a>
                             </div>
                         </div>
 
@@ -439,7 +439,7 @@ $highest_count = $result[0]['company_count'];
                                     <img src=" <?= htmlspecialchars($post['featured_image_url'] ?? "https://placehold.co/800x400/f1f5f9/2563eb?text=Tech+Media") ?>" class="rounded-3 me-3" style="width:100px; height:100px; object-fit:cover;">
                                     <div>
                                         <span class="text-muted small"><?= date('M d, Y', strtotime($post['published_at'])) ?></span>
-                                        <h5 class="mb-2 fw-bold"><a href="article.php?slug=<?= $post['slug'] ?>" class="text-dark text-decoration-none"><?= htmlspecialchars($post['title']) ?></a></h5>
+                                        <h5 class="mb-2 fw-bold"><a href="<?= $url_path ?>/article/<?= $post['slug'] ?>" class="text-dark text-decoration-none"><?= htmlspecialchars($post['title']) ?></a></h5>
                                     </div>
                                 </div>
                             <?php endfor; ?>

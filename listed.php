@@ -31,7 +31,7 @@ if (!$company) {
 // 4. Redirect UPGRADE if Premium (Optional but good UX)
 // If a gold company lands here, send them to the nice page
 if ($company['subscription_tier'] !== 'free') {
-    header("Location: premium-listed.php?slug=" . urlencode($slug));
+    header("Location: $url_path/premium-listed/" . urlencode($slug));
     exit();
 }
 

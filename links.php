@@ -1,3 +1,7 @@
+    <?php
+        require_once 'includes/wertyuytre.php';
+    ?>
+    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,4 +21,4 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-    <link rel="stylesheet" href="./assets/css/styles.css?<?php echo time(); ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars($url_path) ?>/assets/css/styles.css?<?php echo time(); ?>">

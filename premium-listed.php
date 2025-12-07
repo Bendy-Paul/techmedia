@@ -256,7 +256,7 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                 <div class="col-md-2 text-center text-md-start">
                     <div class="company-logo" data-aos="zoom-in">
                         <?php if(!empty($company['logo_url'])): ?>
-                            <img src="<?= htmlspecialchars($company['logo_url']) ?>" alt="<?= htmlspecialchars($company['name']) ?>">
+                            <img src="<?= htmlspecialchars($url_path."/".$company['logo_url']) ?>" alt="<?= htmlspecialchars($company['name']) ?>">
                         <?php else: ?>
                             <i class="fas fa-building"></i>
                         <?php endif; ?>

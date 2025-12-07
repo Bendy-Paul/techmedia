@@ -10,8 +10,8 @@
                 <!-- Desktop Navigation -->
                 <div class="collapse navbar-collapse desktop-nav">
                     <ul class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-center">
-                        <li class="nav-item"><a class="nav-link" id="home" href="index.php">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" id="about-us" href="about-us.php">About</a></li>
+                        <li class="nav-item"><a class="nav-link" id="home" href="<?= htmlspecialchars($url_path) ?>">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" id="about-us" href="<?=  htmlspecialchars($url_path) ?>/about-us">About</a></li>
 
                         <!-- Categories Dropdown (Full Width) -->
                         <li class="nav-item dropdown position-static">
@@ -30,7 +30,7 @@
                                                 <div class="col-md-4 mb-4">
                                                     <h6 class="text-primary-accent mb-1 text-uppercase fw-bold"><i class="<?php echo $parent['icon_class']; ?> me-2"></i><?php echo htmlspecialchars($parent['name']); ?></h6>
                                                     <?php foreach ($child_categories as $child) { ?>
-                                                        <a class="dropdown-item" href="categories.php?slug=<?php echo $child['slug']; ?>"><?php echo htmlspecialchars($child['name']); ?></a>
+                                                        <a class="dropdown-item" href="<?=  htmlspecialchars($url_path) ?>/categories/<?php echo $child['slug']; ?>"><?php echo htmlspecialchars($child['name']); ?></a>
                                                     <?php } ?>
                                                 </div>
 
@@ -66,7 +66,7 @@
                                                 <div class="col-md-4 mb-4">
                                                     <h6 class="text-primary-accent mb-1 text-uppercase fw-bold"><i class="<?php echo $parent['icon_class']; ?> me-2"></i><?php echo htmlspecialchars($parent['name']); ?></h6>
                                                     <?php foreach ($child_categories as $child) { ?>
-                                                        <a class="dropdown-item" href="events.php?slug=<?php echo $child['slug']; ?>"><?php echo htmlspecialchars($child['name']); ?></a>
+                                                        <a class="dropdown-item" href="<?= $url_path ?>/events/<?php echo $child['slug']; ?>"><?php echo htmlspecialchars($child['name']); ?></a>
                                                     <?php } ?>
                                                 </div>
 
@@ -83,10 +83,10 @@
                             </div>
                         </li>
 
-                        <li class="nav-item"><a class="nav-link" id="news" href="news.php">News</a></li>
+                        <li class="nav-item"><a class="nav-link" id="news" href="<?= $url_path ?>/news">News</a></li>
                     </ul>
                     <div class="d-flex mt-3 mt-lg-0">
-                        <a href="get-listed.php"><button class="btn-get-listed">Get Listed</button></a>
+                        <a href="<?= $url_path ?>/get-listed.php"><button class="btn-get-listed">Get Listed</button></a>
                     </div>
                 </div>
 

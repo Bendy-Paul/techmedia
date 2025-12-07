@@ -11,7 +11,7 @@ $cat_filter = $_GET['cat'] ?? '';
 // --- 2. Fetch Featured Article ---
 // Only show on first page and when no specific search/filter is applied
 $featured = null;
-if ($page == 1 && empty($search) && empty($cat_filter)) {
+if ($page == 1) {
     $fStmt = $pdo->query("SELECT * FROM articles WHERE status='published' AND is_featured=1 ORDER BY published_at DESC LIMIT 1");
     $featured = $fStmt->fetch();
 }
@@ -83,9 +83,11 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 15")->fetchAll();
     <style>
         /* News Hero */
         .news-hero {
-            background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
             padding: 120px 0 60px;
             position: relative;
+            overflow: hidden;
         }
         .news-hero::before {
             content: '';
@@ -94,10 +96,8 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 15")->fetchAll();
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
-                radial-gradient(circle at 15% 30%, rgba(37, 99, 235, 0.1) 0%, transparent 45%),
-                radial-gradient(circle at 85% 70%, rgba(59, 130, 246, 0.05) 0%, transparent 45%);
-            z-index: 1;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.05"><polygon points="1000,100 1000,0 0,100"></polygon></svg>');
+            background-size: cover;
         }
         .news-hero-content {
             position: relative;
@@ -226,7 +226,7 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 15")->fetchAll();
             <div class="row justify-content-center text-center">
                 <div class="col-lg-8" data-aos="fade-up">
                     <h1 class="display-4 fw-bold mb-4">Tech News & Insights</h1>
-                    <p class="lead text-muted mb-4">Stay updated with the latest trends, innovations, and stories from Nigeria's booming tech ecosystem.</p>
+                    <p class="lead mb-4">Stay updated with the latest trends, innovations, and stories from Nigeria's booming tech ecosystem.</p>
                     <div class="input-group input-group-lg mx-auto" style="max-width: 500px;">
                         <input type="text" class="form-control" placeholder="Search articles..." value="<?= htmlspecialchars($search) ?>" onkeypress="if(event.key === 'Enter') window.location.href='?s='+this.value">
                         <button class="btn btn-primary" type="button" onclick="window.location.href='?s='+this.previousElementSibling.value"><i class="fas fa-search"></i></button>
@@ -244,7 +244,7 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 15")->fetchAll();
                 <div class="category-filter" data-aos="fade-up">
                     <h5 class="fw-bold mb-3">Filter by Category</h5>
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="news.php" class="filter-btn <?= empty($cat_filter) ? 'active' : '' ?>">All</a>
+                        <a href="<?= $url_path ?>/news" class="filter-btn <?= empty($cat_filter) ? 'active' : '' ?>">All</a>
                         <?php foreach($cats as $cat): ?>
                             <a href="?cat=<?= htmlspecialchars($cat['slug']) ?>" class="filter-btn <?= $cat_filter == $cat['slug'] ? 'active' : '' ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
@@ -282,7 +282,7 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 15")->fetchAll();
                             <span><i class="fas fa-calendar me-1"></i> <?= date('F j, Y', strtotime($featured['published_at'])) ?></span>
                             <span><i class="fas fa-clock me-1"></i> <?= ceil(str_word_count(strip_tags($featured['content'])) / 200) ?> min read</span>
                         </div>
-                        <a href="article.php?slug=<?= htmlspecialchars($featured['slug']) ?>" class="btn btn-primary mt-3">Read Full Article</a>
+                        <a href="<?= $url_path ?>/article/<?= htmlspecialchars($featured['slug']) ?>" class="btn btn-primary mt-3">Read Full Article</a>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -359,7 +359,7 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 15")->fetchAll();
                                     <span><i class="fas fa-calendar me-1"></i> <?= date('M d, Y', strtotime($article['published_at'])) ?></span>
                                     <span><i class="fas fa-clock me-1"></i> <?= ceil(str_word_count(strip_tags($article['content'])) / 200) ?> min</span>
                                 </div>
-                                <a href="article.php?slug=<?= htmlspecialchars($article['slug']) ?>" class="btn btn-outline-primary btn-sm mt-2">Read More</a>
+                                <a href="<?= $url_path ?>/article/<?= htmlspecialchars($article['slug']) ?>" class="btn btn-outline-primary btn-sm mt-2">Read More</a>
                             </div>
                         </div>
                     </div>
@@ -367,7 +367,7 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 15")->fetchAll();
             <?php else: ?>
                 <div class="col-12 text-center py-5">
                     <p class="text-muted lead">No articles found.</p>
-                    <a href="news.php" class="btn btn-outline-primary">View All News</a>
+                    <a href="<?= $url_path ?>/news" class="btn btn-outline-primary">View All News</a>
                 </div>
             <?php endif; ?>
         </div>
