@@ -34,8 +34,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $upload_dir = '../../uploads/companies/';
     $logo_sql = "";
     $cover_sql = "";
+
+    if(!empty($_POST['city_id'])) {
+        // Verify city_id exists
+        $stmt = $pdo->prepare("SELECT * FROM cities WHERE id = ? LIMIT 1");
+        $stmt->execute([$_POST['city_id']]);
+        $city_data = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $state_id = $city_data['state_id'];
+
+        $stmt2 = $pdo->prepare("SELECT * FROM states WHERE id = ? LIMIT 1");
+        $stmt2->execute([$state_id]);
+        $state_data = $stmt2->fetch(PDO::FETCH_ASSOC);
+        $country_id = $state_data['country_id'];
+    }else{
+        $city_id = null;
+        $state_id = null;
+        $country_id = null;
+    }
+
+
     $params = [
-        $name, $tagline, $description, $email, $phone, $website, $city_id, $address,
+        $name, $tagline, $description, $email, $phone, $website, $city_id, $state_id, $country_id, $address,
         $year_founded, $team_size, $starting_cost, $social_links, $profile_stats,
         $tier, $is_verified, $is_featured
     ];
@@ -54,6 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $params[] = 'uploads/companies/' . $cover_name;
         }
     }
+
+
     $params[] = $id;
 
     try {
@@ -62,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // 1. Update Core Data
         $sql = "UPDATE companies SET 
                 name=?, tagline=?, description=?, email=?, phone=?, website_url=?, 
-                city_id=?, address=?, year_founded=?, team_size=?, starting_cost=?, 
+                city_id=?, state_id=?, country_id=?, address=?, year_founded=?, team_size=?, starting_cost=?, 
                 social_links=?, profile_stats=?, subscription_tier=?, is_verified=?, is_featured=?
                 $logo_sql $cover_sql WHERE id=?";
         $stmt = $pdo->prepare($sql);

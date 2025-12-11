@@ -37,9 +37,9 @@ $highest_count = $result[0]['company_count'];
 
                 if($state['company_count'] == $highest_count) {
                     echo 'fill:  var(--primary-accent);'; // Darkest color for the highest count
-                } elseif ($state['company_count'] >= $highest_count * 0.75) {
-                    echo 'fill:  var(--primary-accent-75);'; // Medium color for mid count
                 } elseif ($state['company_count'] >= $highest_count * 0.5) {
+                    echo 'fill:  var(--primary-accent-75);'; // Medium color for mid count
+                } elseif ($state['company_count'] >= $highest_count * 0.35) {
                     echo 'fill: var(--primary-accent-50);'; // Lighter color for low count
                 } elseif ($state['company_count'] <= $highest_count * 0.25)  {
                     echo 'fill: var(--primary-accent-25);'; // Lightest color for the lowest count

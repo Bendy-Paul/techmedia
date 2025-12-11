@@ -27,13 +27,13 @@ $company = $stmt->fetch();
 // 3. Handling Redirects
 if (!$company) {
     // Company not found
-    header("Location: 404.html");
+    header("Location: $url_path/404.html");
     exit();
 }
 
 if ($company['subscription_tier'] === 'free') {
     // Not a premium company, redirect to standard listing
-    header("Location: listed.php?slug=" . urlencode($slug));
+    header("Location: $url_path/listed.php/" . urlencode($slug));
     exit();
 }
 
@@ -132,7 +132,7 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
         .verified-badge {
             position: absolute;
             bottom: -10px;
-            right: -10px;
+            right: 0px;
             background: var(--premium-gold);
             color: white;
             width: 40px;

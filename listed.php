@@ -24,7 +24,7 @@ $company = $stmt->fetch();
 
 // 3. Validate Existence
 if (!$company) {
-    header("Location: 404.html");
+    header("Location: $url_path/404.html");
     exit();
 }
 
@@ -151,7 +151,7 @@ $socials = json_decode($company['social_links'] ?? '{}', true);
                 <div class="col-md-2 text-center text-md-start">
                     <div class="company-logo" data-aos="zoom-in">
                         <?php if(!empty($company['logo_url'])): ?>
-                            <img src="<?= htmlspecialchars($company['logo_url']) ?>" alt="<?= htmlspecialchars($company['name']) ?>">
+                            <img src="<?= htmlspecialchars($url_path .'/'. $company['logo_url']) ?>" alt="<?= htmlspecialchars($company['name']) ?>">
                         <?php else: ?>
                             <i class="fas fa-code"></i>
                         <?php endif; ?>

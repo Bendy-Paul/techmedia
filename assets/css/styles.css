@@ -1,3 +1,35 @@
+        /* Skeleton Loader Styles */
+        .skeleton-loader {
+            background: #f3f3f3;
+            border-radius: 8px;
+            padding: 1.5rem;
+            min-height: 180px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            animation: skeleton-pulse 1.2s infinite ease-in-out;
+        }
+        .skeleton-logo {
+            width: 50px;
+            height: 50px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        .skeleton-line {
+            height: 16px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        .skeleton-title { width: 60%; }
+        .skeleton-text { width: 80%; }
+        .skeleton-badge { width: 40%; height: 24px; }
+        @keyframes skeleton-pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
         :root {
             /* Light Blue Theme */
             --bg-light: #f8fafc;
@@ -22,7 +54,7 @@
 
             --primary-accent-75: #467dca;
             --primary-accent-50: #7899c7;
-            --primary-accent-25: #a9b7ca;
+            --primary-accent-25: #9ab0cf;
         }
 
         body {

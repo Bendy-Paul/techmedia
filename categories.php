@@ -150,112 +150,76 @@ $featured_companies->execute([$category['id']]);
     </section>
 
     <!-- Filter Section -->
-    <section class="section-padding" style="background-color: #f8fafc;" data-aos="fade-up" data-aos-delay="100">
+    <section class="section-padding" style="background-color: #f8fafc;" data-aos="fade-up" data-aos-delay="100" id="companies-list-filter">
         <div class="container">
             <div class="filter-section" data-aos="zoom-in" data-aos-delay="200">
                 <h3 class="filter-title">Filter Companies</h3>
-                <div class="row">
-                    <div class="col-lg-3 col-md-6">
-                        <div class="filter-group">
-                            <div class="filter-label">Location</div>
-                            <select class="form-select">
-                                <option selected>All Locations</option>
-                                <option>Lagos</option>
-                                <option>Abuja</option>
-                                <option>Port Harcourt</option>
-                                <option>Ibadan</option>
-                                <option>Kano</option>
-                            </select>
+                <form id="filter-form">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="filter-group">
+                                <div class="filter-label">Location</div>
+                                <select class="form-select" name="location">
+                                    <option value="">All Locations</option>
+                                    <?php 
+                                    
+                                    $locations = $pdo->query("SELECT * FROM states ORDER BY name ASC")->fetchAll();
+                                    foreach ($locations as $loc) { ?>
+                                        <option value="<?= htmlspecialchars($loc['id']) ?>"><?= htmlspecialchars($loc['name']) ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="filter-group">
-                            <div class="filter-label">Price Range</div>
-                            <select class="form-select">
-                                <option selected>Any Budget</option>
-                                <option>Under ₦500,000</option>
-                                <option>₦500,000 - ₦2M</option>
-                                <option>₦2M - ₦5M</option>
-                                <option>Over ₦5M</option>
-                            </select>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="filter-group">
+                                <div class="filter-label">Price Range</div>
+                                <select class="form-select" name="price_range">
+                                    <option value="all">Any Budget</option>
+                                    <option value="500000">Under ₦500,000</option>
+                                    <option value="2000000">₦500,000 - ₦2M</option>
+                                    <option value="5000000">₦2M - ₦5M</option>
+                                    <option value="10000000">Over ₦5M</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="filter-group">
-                            <div class="filter-label">Verification Status</div>
-                            <div class="d-flex gap-2 flex-wrap">
-                                <button class="btn-filter active">All</button>
-                                <button class="btn-filter">Verified Only</button>
-                                <button class="btn-filter">Unverified</button>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="filter-group">
+                                <div class="filter-label">Verification Status</div>
+                                <select class="form-select" name="verified">
+                                    <option value="">All</option>
+                                    <option value="1">Verified Only</option>
+                                    <option value="0">Unverified</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="filter-group">
+                                <div class="filter-label">Team Size</div>
+                                <select class="form-select" name="team_size">
+                                    <option value="">Any Size</option>
+                                    <option value="1-10">Freelancer (1)</option>
+                                    <option value="11-50">Small (2-10)</option>
+                                    <option value="51-200">Medium (11-50)</option>
+                                    <option value="200+">Large (51+)</option>
+                                </select>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="filter-group">
-                            <div class="filter-label">Team Size</div>
-                            <select class="form-select">
-                                <option selected>Any Size</option>
-                                <option>Freelancer (1)</option>
-                                <option>Small (2-10)</option>
-                                <option>Medium (11-50)</option>
-                                <option>Large (51+)</option>
-                            </select>
-                        </div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="reset" class="btn btn-outline-primary">Reset Filters</button>
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
                     </div>
-                </div>
-                <div class="d-flex justify-content-between mt-4">
-                    <button class="btn btn-outline-primary">Reset Filters</button>
-                    <button class="btn btn-primary">Apply Filters</button>
-                </div>
+                </form>
             </div>
 
             <!-- Company Listings -->
-            <div class="row g-4">
-                <?php
-                foreach ($listed_companies as $listed_company) {
-                ?>
-                <!-- Company 1 -->
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                    <div class="company-card">
-                        <div class="company-body">
-                            <div class="company-logo-sm">
-                                <img src="<?= htmlspecialchars($url_path ."/".$listed_company['logo_url']) ?>" alt="<?= htmlspecialchars($listed_company['name']) ?>" style="height: 100%; width: auto;">
-                            </div>
-                            <h5 class="fw-bold mb-2"><?= htmlspecialchars($listed_company['name']); ?></h5>
-                            <div class="align-items-center mb-2">
-                                <?= $listed_company['is_verified'] ? '<span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span>' : '<span class="verified-badge bg-light text-black"><i class="fas fa-times-circle"></i> Unverified</span>' ?><br>
-                                <span class="badge bg-light text-dark border ms-2"><?= htmlspecialchars($listed_company['location'] ?? 'Lagos') ?></span>
-                            </div>
-                            <p class="text-muted small mb-3"><?= htmlspecialchars($listed_company['tagline']) ?></p>
-                            <div class="d-flex justify-content-between text-muted small">
-                                <span><i class="fas fa-users me-1"></i> <?= htmlspecialchars($listed_company['team_size']) ?> employees</span>
-                                <span><i class="fas fa-star me-1 text-warning"></i> 4.5</span>
-                            </div>
-                            <a href="listed.php?slug=<?= htmlentities($listed_company['slug']) ?>"><button class="btn-view-profile">View Profile</button></a>
-                        </div>
-                    </div>
-                </div>
-
-                <?php
-                }
-                ?>
-
-
+            <div class="row g-4" id="companies-list">
+                <!-- Companies will be loaded here by JS -->
             </div>
 
             <!-- Pagination -->
             <nav aria-label="Page navigation" class="mt-5" data-aos="fade-up" data-aos-delay="100">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-                    </li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">Next</a>
-                    </li>
-                </ul>
+                <div id="pagination" class="d-flex justify-content-center"></div>
             </nav>
         </div>
     </section>
@@ -275,6 +239,7 @@ $featured_companies->execute([$category['id']]);
 
     <?php include_once('footer.php'); ?>
 
+    <script src="<?= $url_path ?>/assets/js/companies-filter.js"></script>
 </body>
 
 </html>

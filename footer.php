@@ -45,30 +45,9 @@
     </footer>
 
 
-    
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
 
         <script>
         $(document).ready(function() {
-            // 1. Initialize AOS
-            // AOS.init({
-            //     once: true,
-            //     offset: 80,
-            //     duration: 1000,
-            // });
-
-            // Comment if Needed
-            AOS.init({
-                duration: 800,
-                easing: 'ease-in-out',
-                once: false,
-                mirror: true,
-                offset: 80
-            });
 
             // 2. Ticker Logic (Fade transition every 12s)
             const tickerItems = $('.ticker-item');
@@ -92,32 +71,32 @@
                 let display = element.find('.countdown-timer');
             }
 
-            // 3. Number Counter Animation (for Stats)
-            let counted = false;
-            $(window).scroll(function() {
-                var oTop = $('#about').offset().top - window.innerHeight;
-                if (counted == false && $(window).scrollTop() > oTop) {
-                    $('.stats-number').each(function() {
-                        var $this = $(this),
-                        countTo = $this.attr('data-target');
-                        $({ countNum: $this.text() }).animate({
-                                countNum: countTo
-                            },
-                            {
-                                duration: 2500,
-                                easing: 'swing',
-                                step: function() {
-                                    $this.text(Math.floor(this.countNum));
-                                },
-                                complete: function() {
-                                    $this.text(this.countNum);
-                                    if(countTo > 1000) $this.text(Math.floor(this.countNum/1000) + 'K+');
-                                }
-                            });
-                    });
-                    counted = true;
-                }
-            });
+            // // 3. Number Counter Animation (for Stats)
+            // let counted = false;
+            // $(window).scroll(function() {
+            //     var oTop = $('#about').offset().top - window.innerHeight;
+            //     if (counted == false && $(window).scrollTop() > oTop) {
+            //         $('.stats-number').each(function() {
+            //             var $this = $(this),
+            //             countTo = $this.attr('data-target');
+            //             $({ countNum: $this.text() }).animate({
+            //                     countNum: countTo
+            //                 },
+            //                 {
+            //                     duration: 2500,
+            //                     easing: 'swing',
+            //                     step: function() {
+            //                         $this.text(Math.floor(this.countNum));
+            //                     },
+            //                     complete: function() {
+            //                         $this.text(this.countNum);
+            //                         if(countTo > 1000) $this.text(Math.floor(this.countNum/1000) + 'K+');
+            //                     }
+            //                 });
+            //         });
+            //         counted = true;
+            //     }
+            // });
 
             // 4. Map Tooltip Logic
             $('.state-path').hover(function(e) {

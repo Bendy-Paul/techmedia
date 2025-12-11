@@ -22,3 +22,21 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <link rel="stylesheet" href="<?= htmlspecialchars($url_path) ?>/assets/css/styles.css?<?php echo time(); ?>">
+    
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+
+        <script>
+        $(document).ready(function() {
+            // 1. Initialize AOS
+            AOS.init({
+                once: true,
+                offset: 10,
+                duration: 800,
+                easing: 'ease-in-out-back'
+            });
+        });
+        </script>
