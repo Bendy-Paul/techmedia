@@ -34,7 +34,7 @@
             // 1. Initialize AOS
             AOS.init({
                 once: true,
-                offset: 10,
+                // offset: 10,
                 duration: 800,
                 easing: 'ease-in-out-back'
             });

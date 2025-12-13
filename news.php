@@ -240,52 +240,33 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 15")->fetchAll();
         <div class="row">
             <!-- Main Content -->
             <div class="col-lg-8">
-                <!-- Category Filter -->
-                <div class="category-filter" data-aos="fade-up">
+                <!-- Filter News (AJAX) -->
+                <form id="news-filter-form" class="category-filter" data-aos="fade-up">
                     <h5 class="fw-bold mb-3">Filter by Category</h5>
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="<?= $url_path ?>/news" class="filter-btn <?= empty($cat_filter) ? 'active' : '' ?>">All</a>
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <button type="button" class="filter-btn" data-category="">All</button>
                         <?php foreach($cats as $cat): ?>
-                            <a href="?cat=<?= htmlspecialchars($cat['slug']) ?>" class="filter-btn <?= $cat_filter == $cat['slug'] ? 'active' : '' ?>">
+                            <button type="button" class="filter-btn" data-category="<?= htmlspecialchars($cat['slug']) ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
-                            </a>
+                            </button>
                         <?php endforeach; ?>
                     </div>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" name="search" placeholder="Search articles...">
+                        <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                    </div>
+                    <input type="hidden" name="category" id="news-category-input" value="">
+                </form>
+
+                <!-- News Grid (AJAX) -->
+                <div class="row g-4" id="news-list">
+                    <!-- News will be loaded here by JS -->
                 </div>
 
-                <!-- Featured Article -->
-                <?php if ($featured): ?>
-                <div class="news-card mb-5" data-aos="fade-up" data-aos-delay="100">
-                    <?php 
-                        $featImg = !empty($featured['featured_image_url']) ? $featured['featured_image_url'] : 'https://placehold.co/800x400/f1f5f9/2563eb?text=Featured+Tech+News';
-                    ?>
-                    <img src="<?= htmlspecialchars($featImg) ?>" class="news-img" alt="<?= htmlspecialchars($featured['title']) ?>">
-                    <div class="news-body">
-                        <span class="news-category">Featured</span>
-                        <h2 class="fw-bold mb-3"><?= htmlspecialchars($featured['title']) ?></h2>
-                        <p class="text-muted mb-3"><?= htmlspecialchars(substr(strip_tags($featured['content']), 0, 160)) ?>...</p>
-                        
-                        <!-- Featured Article Tags -->
-                        <?php
-                            $ftStmt = $pdo->prepare("SELECT t.name FROM tags t JOIN article_tags at ON t.id = at.tag_id WHERE at.article_id = ? LIMIT 4");
-                            $ftStmt->execute([$featured['id']]);
-                            $fTags = $ftStmt->fetchAll(PDO::FETCH_COLUMN);
-                        ?>
-                        <div class="news-tags">
-                            <?php foreach($fTags as $tag): ?>
-                                <span class="news-tag">#<?= htmlspecialchars($tag) ?></span>
-                            <?php endforeach; ?>
-                        </div>
-                        
-                        <div class="news-meta">
-                            <span><i class="fas fa-user me-1"></i> By <?= htmlspecialchars($featured['author_name'] ?? 'Editorial') ?></span>
-                            <span><i class="fas fa-calendar me-1"></i> <?= date('F j, Y', strtotime($featured['published_at'])) ?></span>
-                            <span><i class="fas fa-clock me-1"></i> <?= ceil(str_word_count(strip_tags($featured['content'])) / 200) ?> min read</span>
-                        </div>
-                        <a href="<?= $url_path ?>/article/<?= htmlspecialchars($featured['slug']) ?>" class="btn btn-primary mt-3">Read Full Article</a>
-                    </div>
-                </div>
-                <?php endif; ?>
+                <!-- Pagination (AJAX) -->
+                <nav aria-label="Page navigation" class="mt-5">
+                    <div id="news-pagination" class="d-flex justify-content-center"></div>
+                </nav>
             </div>
 
             <!-- Sidebar -->
@@ -328,86 +309,28 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 15")->fetchAll();
         </div>
     </div>
 
-    <section class="news-section container">
-        <!-- News Grid -->
-        <div class="row g-4">
-            <?php if (count($articles) > 0): ?>
-                <?php foreach($articles as $article): ?>
-                    <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                        <div class="news-card h-100">
-                            <?php 
-                                $artImg = !empty($article['featured_image_url']) ? $article['featured_image_url'] : 'https://placehold.co/600x400/f1f5f9/2563eb?text=News';
-                            ?>
-                            <img src="<?= htmlspecialchars($artImg) ?>" class="news-img" alt="<?= htmlspecialchars($article['title']) ?>">
-                            <div class="news-body">
-                                <span class="news-category">News</span>
-                                <h4 class="fw-bold mb-2"><?= htmlspecialchars($article['title']) ?></h4>
-                                <p class="text-muted small mb-3"><?= htmlspecialchars(substr(strip_tags($article['content']), 0, 120)) ?>...</p>
-                                
-                                <?php
-                                    $tStmt = $pdo->prepare("SELECT t.name FROM tags t JOIN article_tags at ON t.id = at.tag_id WHERE at.article_id = ? LIMIT 3");
-                                    $tStmt->execute([$article['id']]);
-                                    $artTags = $tStmt->fetchAll(PDO::FETCH_COLUMN);
-                                ?>
-                                <div class="news-tags">
-                                    <?php foreach($artTags as $tag): ?>
-                                        <span class="news-tag">#<?= htmlspecialchars($tag) ?></span>
-                                    <?php endforeach; ?>
-                                </div>
-                                
-                                <div class="news-meta">
-                                    <span><i class="fas fa-calendar me-1"></i> <?= date('M d, Y', strtotime($article['published_at'])) ?></span>
-                                    <span><i class="fas fa-clock me-1"></i> <?= ceil(str_word_count(strip_tags($article['content'])) / 200) ?> min</span>
-                                </div>
-                                <a href="<?= $url_path ?>/article/<?= htmlspecialchars($article['slug']) ?>" class="btn btn-outline-primary btn-sm mt-2">Read More</a>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="col-12 text-center py-5">
-                    <p class="text-muted lead">No articles found.</p>
-                    <a href="<?= $url_path ?>/news" class="btn btn-outline-primary">View All News</a>
-                </div>
-            <?php endif; ?>
-        </div>
 
-        <!-- Pagination -->
-        <?php if ($total_pages > 1): ?>
-        <nav aria-label="Page navigation" class="mt-5">
-            <ul class="pagination justify-content-center">
-                <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                    <a class="page-link" href="?page=<?= $page - 1 ?><?= $search ? '&s='.$search : '' ?><?= $cat_filter ? '&cat='.$cat_filter : '' ?>" tabindex="-1">Previous</a>
-                </li>
-                
-                <?php for($i = 1; $i <= $total_pages; $i++): ?>
-                    <li class="page-item <?= ($page == $i) ? 'active' : '' ?>">
-                        <a class="page-link" href="?page=<?= $i ?><?= $search ? '&s='.$search : '' ?><?= $cat_filter ? '&cat='.$cat_filter : '' ?>"><?= $i ?></a>
-                    </li>
-                <?php endfor; ?>
-
-                <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
-                    <a class="page-link" href="?page=<?= $page + 1 ?><?= $search ? '&s='.$search : '' ?><?= $cat_filter ? '&cat='.$cat_filter : '' ?>">Next</a>
-                </li>
-            </ul>
-        </nav>
-        <?php endif; ?>
-    </section>
 
 
 <br><br>
     <?php include_once('footer.php'); ?>
 
-    <script>
-        // Category filter functionality (Optional: Keeps button active state visual)
-        document.querySelectorAll('.filter-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
+</body>
+<script src="assets/js/news-filter.js"></script>
+<script>
+    // AJAX category button logic
+    document.addEventListener('DOMContentLoaded', function () {
+        const catBtns = document.querySelectorAll('.filter-btn');
+        const catInput = document.getElementById('news-category-input');
+        catBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                catBtns.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
+                catInput.value = this.getAttribute('data-category');
+                document.getElementById('news-filter-form').dispatchEvent(new Event('submit'));
             });
         });
-    </script>
+    });
+</script>
 </body>
 </html>

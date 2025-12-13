@@ -84,6 +84,7 @@
                         </li>
 
                         <li class="nav-item"><a class="nav-link" id="news" href="<?= $url_path ?>/news">News</a></li>
+                        <li class="nav-item"><a class="nav-link" id="news" href="<?= $url_path ?>/jobs">Jobs</a></li>
                     </ul>
                     <div class="d-flex mt-3 mt-lg-0">
                         <a href="<?= $url_path ?>/get-listed.php"><button class="btn-get-listed">Get Listed</button></a>
@@ -144,6 +145,7 @@
             </div>
         </div>
 
+        <a href="news.php" id="news-mobile" class="mobile-nav-link">News</a>
         <a href="news.php" id="news-mobile" class="mobile-nav-link">News</a>
 
         <div class="mt-4 pt-4 border-top border-secondary">

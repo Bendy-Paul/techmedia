@@ -8,7 +8,7 @@ $search = $_GET['s'] ?? '';
 $sql = "SELECT e.*, c.name as city_name 
         FROM events e 
         LEFT JOIN cities c ON e.city_id = c.id 
-        WHERE e.start_datetime >= NOW()";
+        WHERE e.end_datetime >= NOW()";
 
 if ($type != 'all') {
     $sql .= " AND e.event_type = :type";
@@ -26,7 +26,7 @@ $stmt->execute();
 $events = $stmt->fetchAll();
 
 // Fetch one featured event for the banner
-$featStmt = $pdo->query("SELECT * FROM events WHERE is_featured = 1 AND start_datetime >= NOW() ORDER BY start_datetime ASC LIMIT 1");
+$featStmt = $pdo->query("SELECT * FROM events WHERE is_featured = 1 AND end_datetime >= NOW() ORDER BY start_datetime ASC LIMIT 1");
 $featuredEvent = $featStmt->fetch();
 
 ?>
@@ -278,10 +278,6 @@ $featuredEvent = $featStmt->fetch();
                 <div class="col-lg-8" data-aos="fade-up">
                     <h1 class="display-4 fw-bold mb-4">Tech Events in Nigeria</h1>
                     <p class="lead mb-4">Discover conferences, meetups, hackathons, and workshops across Nigeria's tech ecosystem.</p>
-                    <div class="input-group input-group-lg mx-auto" style="max-width: 500px;">
-                        <input type="text" class="form-control" placeholder="Search events..." value="<?= htmlspecialchars($search) ?>" onkeypress="if(event.key === 'Enter') window.location.href='?s='+this.value">
-                        <button class="btn btn-primary" type="button" onclick="window.location.href='?s='+this.previousElementSibling.value"><i class="fas fa-search"></i></button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -308,54 +304,56 @@ $featuredEvent = $featStmt->fetch();
                     </div>
                 </div>
                 <div class="col-lg-6 p-0">
-                    <img src="<?= htmlspecialchars($featuredEvent['banner_image_url'] ?? 'https://placehold.co/600x400/f1f5f9/2563eb?text=Featured+Event') ?>" class="img-fluid w-100" alt="Featured Event" style="height: 400px; object-fit: cover;">
+                    <img src="<?= htmlspecialchars($url_path . '/' . $featuredEvent['banner_image_url'] ?? 'https://placehold.co/600x400/f1f5f9/2563eb?text=Featured+Event') ?>" class="img-fluid w-100" alt="Featured Event" style="height: 400px; object-fit: cover;">
                 </div>
             </div>
         </div>
         <?php endif; ?>
 
-        <!-- Filter Section -->
+        <!-- Filter Section (AJAX) -->
         <div class="filter-section" data-aos="fade-up" data-aos-delay="100">
             <h5 class="fw-bold mb-3">Filter Events</h5>
-            <div class="d-flex flex-wrap">
-                <a href="events.php" class="filter-btn <?= $type == 'all' ? 'active' : '' ?>">All Events</a>
-                <a href="events.php?type=conference" class="filter-btn <?= $type == 'conference' ? 'active' : '' ?>">Conferences</a>
-                <a href="events.php?type=hackathon" class="filter-btn <?= $type == 'hackathon' ? 'active' : '' ?>">Hackathons</a>
-                <a href="events.php?type=workshop" class="filter-btn <?= $type == 'workshop' ? 'active' : '' ?>">Workshops</a>
-                <a href="events.php?type=meetup" class="filter-btn <?= $type == 'meetup' ? 'active' : '' ?>">Meetups</a>
-                <a href="events.php?type=webinar" class="filter-btn <?= $type == 'webinar' ? 'active' : '' ?>">Webinars</a>
-            </div>
-        </div>
-
-        <!-- Events Grid -->
-        <div class="row g-4">
-            <?php if (count($events) > 0): ?>
-                <?php foreach ($events as $event): ?>
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="event-card">
-                        <img src="<?= htmlspecialchars($event['banner_image_url'] ?? 'https://placehold.co/600x400/f1f5f9/2563eb?text=Tech+Event') ?>" class="event-img" alt="Event">
-                        <div class="event-body">
-                            <span class="event-category"><?= ucfirst($event['event_type']) ?></span>
-                            <h4 class="fw-bold mb-2"><?= htmlspecialchars($event['title']) ?></h4>
-                            <p class="text-muted small mb-3"><?= htmlspecialchars(substr(strip_tags($event['description']), 0, 80)) ?>...</p>
-                            <div class="event-meta">
-                                <span><i class="fas fa-calendar me-1"></i> <?= date('M d, Y', strtotime($event['start_datetime'])) ?></span>
-                                <span><i class="fas fa-map-marker-alt me-1"></i> <?= $event['is_virtual'] ? 'Online' : htmlspecialchars($event['city_name'] ?? 'Nigeria') ?></span>
-                            </div>
-                            <!-- Link Logic: Redirect to featured-event.php if featured, else event.php -->
-                            <?php $link = $event['is_featured'] ? 'featured-event' : 'event'; ?>
-                            <a href="<?= $url_path ."/" . $link . "/" . $event['slug'] ?>" class="btn btn-outline-primary btn-sm mt-3">View Details</a>
-                        </div>
+            <form id="event-filter-form">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Location</label>
+                        <select class="form-select" name="location">
+                            <option value="">All Locations</option>
+                            <?php $locations = $pdo->query("SELECT DISTINCT location_name FROM events WHERE location_name IS NOT NULL AND location_name != '' ORDER BY location_name ASC")->fetchAll();
+                            foreach ($locations as $loc) { ?>
+                                <option value="<?= htmlspecialchars($loc['location_name']) ?>"><?= htmlspecialchars($loc['location_name']) ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Ticket Price</label>
+                        <select class="form-select" name="ticket">
+                            <option value="">All</option>
+                            <option value="free">Free</option>
+                            <option value="paid">Paid</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Search</label>
+                        <input type="text" class="form-control" name="search" placeholder="Search events...">
                     </div>
                 </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="col-12 text-center py-5">
-                    <h4 class="text-muted">No events found matching your criteria.</h4>
-                    <a href="events.php" class="btn btn-primary mt-3">View All Events</a>
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="reset" class="btn btn-outline-primary me-2">Reset</button>
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
                 </div>
-            <?php endif; ?>
+            </form>
         </div>
+
+        <!-- Events Grid (AJAX) -->
+        <div class="row g-4" id="events-list">
+            <!-- Events will be loaded here by JS -->
+        </div>
+
+        <!-- Pagination (AJAX) -->
+        <nav aria-label="Page navigation" class="mt-5">
+            <div id="events-pagination" class="d-flex justify-content-center"></div>
+        </nav>
 
         <!-- Nigeria Events Heat Map (Static for now as per request to keep layout) -->
         <div class="nigeria-map-container" data-aos="fade-up" data-aos-delay="800">
@@ -396,33 +394,20 @@ $featuredEvent = $featStmt->fetch();
 
     <?php include_once('footer.php'); ?>
 
+    <script src="<?= htmlspecialchars($url_path) ?>/assets/js/events-filter.js"></script>
     <script>
-        // Category filter functionality
-        document.querySelectorAll('.filter-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                this.classList.add('active');
-            });
-        });
-
-        // Map Tooltip Logic
+        // Map Tooltip Logic (unchanged)
         document.querySelectorAll('.state-path').forEach(path => {
             path.addEventListener('mouseover', function(e) {
-                const name = this.getAttribute('title'); // Changed to title as per SVG
-                // You would typically fetch count dynamically here
-                const count = Math.floor(Math.random() * 20) + " Events"; 
+                const name = this.getAttribute('title');
+                const count = Math.floor(Math.random() * 20) + " Events";
                 const tooltip = document.getElementById('map-tooltip');
-
                 tooltip.innerHTML = `<strong>${name}</strong><br><span class="text-primary-accent">${count}</span>`;
                 tooltip.style.opacity = '1';
             });
-
             path.addEventListener('mouseout', function() {
                 document.getElementById('map-tooltip').style.opacity = '0';
             });
-
             path.addEventListener('mousemove', function(e) {
                 document.getElementById('map-tooltip').style.left = (e.pageX + 15) + 'px';
                 document.getElementById('map-tooltip').style.top = (e.pageY + 15) + 'px';
@@ -430,5 +415,4 @@ $featuredEvent = $featStmt->fetch();
         });
     </script>
 </body>
-
 </html>

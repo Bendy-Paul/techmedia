@@ -225,7 +225,7 @@ $duration_str = $duration->days > 0 ? $duration->days . " Days" : $duration->h .
                 <div class="col-lg-8" data-aos="fade-right">
                     <span class="featured-event-badge"><i class="fas fa-crown"></i> FEATURED EVENT</span>
                     <h1 class="display-4 fw-bold mb-3"><?= htmlspecialchars($event['title']) ?></h1>
-                    <p class="lead mb-4"><?= htmlspecialchars($event['description']) ?></p> <!-- Assuming short description in DB or use substr -->
+                    <!-- <p class="lead mb-4"><?= htmlspecialchars($event['description']) ?></p> Assuming short description in DB or use substr -->
                     <div class="d-flex flex-wrap gap-4 mb-4">
                         <span><i class="fas fa-calendar me-2"></i> <?= date('M d-y', strtotime($event['start_datetime'])) ?></span>
                         <span><i class="fas fa-map-marker-alt me-2"></i> <?= $event['is_virtual'] ? 'Online' : htmlspecialchars($event['location_name']) ?></span>
@@ -233,7 +233,7 @@ $duration_str = $duration->days > 0 ? $duration->days . " Days" : $duration->h .
                     </div>
                     <div class="d-flex gap-3">
                         <?php if($event['ticket_url']): ?>
-                        <a href="<?= htmlspecialchars($event['ticket_url']) ?>" target="_blank" class="btn btn-light btn-lg">Get Tickets</a>
+                        <a href="<?= htmlspecialchars($event['ticket_url']) ?>" target="_blank" class="btn btn-light btn-lg">Register</a>
                         <?php endif; ?>
                         <!-- <a href="#" class="btn btn-outline-light btn-lg">Save to Calendar</a> -->
                     </div>
@@ -244,7 +244,7 @@ $duration_str = $duration->days > 0 ? $duration->days . " Days" : $duration->h .
                         <h2 class="display-4 fw-bold mb-3"><?= $event['price'] > 0 ? '₦'.number_format($event['price']) : 'Free' ?></h2>
                         <p class="mb-4">Full access to all sessions and networking events.</p>
                         <?php if($event['ticket_url']): ?>
-                        <a href="<?= htmlspecialchars($event['ticket_url']) ?>" target="_blank" class="btn btn-light btn-lg w-100">Buy Now</a>
+                        <a href="<?= htmlspecialchars($event['ticket_url']) ?>" target="_blank" class="btn btn-light btn-lg w-100">Register Now</a>
                         <?php endif; ?>
                     </div>
                 </div>

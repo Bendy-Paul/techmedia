@@ -47,9 +47,9 @@ $featured_companies->execute([$category['id']]);
                 <div class="col-lg-8 category-hero-content">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="index.html" class="text-primary-accent">Home</a></li>
-                            <li class="breadcrumb-item"><a href="#" class="text-primary-accent">Categories</a></li>
-                            <li class="breadcrumb-item active" aria-current="page"><?php echo htmlspecialchars($category['name']); ?></li>
+                            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Categories</a></li>
+                            <li class="breadcrumb-item" aria-current="page"><?php echo htmlspecialchars($category['name']); ?></li>
                         </ol>
                     </nav>
                     <h1 class="display-4 fw-bold mb-4" data-aos="fade-up" data-aos-delay="200"><?php echo htmlspecialchars($category['name']); ?> Companies</h1>

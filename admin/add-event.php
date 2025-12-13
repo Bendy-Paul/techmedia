@@ -6,6 +6,7 @@ require 'includes/sidebar.php';
 $cities = $pdo->query("SELECT * FROM cities ORDER BY name ASC")->fetchAll();
 $companies = $pdo->query("SELECT id, name FROM companies ORDER BY name ASC")->fetchAll();
 $tags = $pdo->query("SELECT * FROM tags ORDER BY name ASC")->fetchAll();
+$categories = $pdo->query("SELECT * FROM categories WHERE type = 'event' ORDER BY name ASC")->fetchAll();
 ?>
 
 <main class="main-content">
@@ -33,11 +34,10 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY name ASC")->fetchAll();
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold small text-muted">Event Type</label>
                                 <select name="event_type" class="form-select" required>
-                                    <option value="conference">Conference</option>
-                                    <option value="meetup">Meetup</option>
-                                    <option value="hackathon">Hackathon</option>
-                                    <option value="workshop">Workshop</option>
-                                    <option value="webinar">Webinar</option>
+                                    <option value="">Select Event Type...</option>
+                                    <?php foreach($categories as $category): ?>
+                                        <option value="<?= $category['id'] ?>"><?= htmlspecialchars($category['name']) ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
