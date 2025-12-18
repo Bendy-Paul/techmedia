@@ -22,14 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $comp_name = $c->fetchColumn();
     }
 
-    $type = $_POST['job_type'];
-    $location = trim($_POST['location']);
+    $type = isset($_POST['job_type']) ? $_POST['job_type'] : 'Full-time';
+    $location = isset($_POST['location']) ? trim($_POST['location']) : 'Not Specified';
     $is_remote = isset($_POST['is_remote']) ? 1 : 0;
-    $salary = trim($_POST['salary_range']);
-    $level = $_POST['experience_level'];
+    $salary = isset($_POST['salary_range']) ? trim($_POST['salary_range']) : 'Not Specified';
+    $level = isset($_POST['experience_level']) ? $_POST['experience_level'] : 'Not Specified';
     $link = trim($_POST['apply_link']);
-    $skills = trim($_POST['skills']);
-    $expiry = $_POST['expires_at'];
+    $skills = trim($_POST['skills']) ;
+    $expiry = !empty($_POST['expires_at']) ? $_POST['expires_at'] : date('Y-m-d', strtotime('+30 days'));
     
     $is_featured = isset($_POST['is_featured']) ? 1 : 0;
     $is_urgent = isset($_POST['is_urgent']) ? 1 : 0;

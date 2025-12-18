@@ -14,7 +14,7 @@ $where = [];
 $params = [];
 
 if ($category) {
-    $where[] = 'n.category_id = ?';
+    $where[] = 'c.id = ?';
     $params[] = $category;
 }
 if ($search) {
@@ -25,13 +25,13 @@ if ($search) {
 $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
 // Get total count
-$countSql = "SELECT COUNT(*) FROM news n $whereSql";
+$countSql = "SELECT COUNT(*) FROM articles n LEFT JOIN article_categories cat ON n.id = cat.article_id LEFT JOIN categories c ON c.id = cat.category_id $whereSql";
 $stmt = $pdo->prepare($countSql);
 $stmt->execute($params);
 $total = $stmt->fetchColumn();
 
 // Get paginated news
-$sql = "SELECT n.*, cat.name as category_name FROM news n LEFT JOIN categories cat ON n.category_id = cat.id $whereSql ORDER BY n.published_at DESC LIMIT $perPage OFFSET $offset";
+$sql = "SELECT n.*, c.name as category_name FROM articles n LEFT JOIN article_categories cat ON n.id = cat.article_id LEFT JOIN categories c ON c.id = cat.category_id $whereSql ORDER BY n.published_at DESC LIMIT $perPage OFFSET $offset";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $news = $stmt->fetchAll(PDO::FETCH_ASSOC);

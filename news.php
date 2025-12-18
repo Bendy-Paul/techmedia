@@ -238,6 +238,34 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 15")->fetchAll();
 
     <div class="container my-5">
         <div class="row">
+            
+                <!-- Featured Article -->
+                <?php if ($featured): ?>
+                <div class="news-card mb-5" data-aos="fade-up" data-aos-delay="100">
+                    <?php 
+                        $featImg = !empty($featured['featured_image_url']) ? $featured['featured_image_url'] : 'https://placehold.co/800x400/f1f5f9/2563eb?text=Featured+Tech+News';
+                    ?>
+                    <img src="<?= htmlspecialchars($featImg) ?>" class="news-img" alt="<?= htmlspecialchars($featured['title']) ?>">
+                    <div class="news-body">
+                        <span class="news-category">Featured</span>
+                        <h2 class="fw-bold mb-3"><?= htmlspecialchars($featured['title']) ?></h2>
+                        <p class="text-muted mb-3"><?= htmlspecialchars(substr(strip_tags($featured['content']), 0, 160)) ?>...</p>
+                        
+                        <!-- Featured Article Tags -->
+                        <?php
+                            $ftStmt = $pdo->prepare("SELECT t.name FROM tags t JOIN article_tags at ON t.id = at.tag_id WHERE at.article_id = ? LIMIT 4");
+                            $ftStmt->execute([$featured['id']]);
+                            $fTags = $ftStmt->fetchAll(PDO::FETCH_COLUMN);
+                        ?>
+                        <div class="news-tags">
+                            <?php foreach($fTags as $tag): ?>
+                                <span class="news-tag">#<?= htmlspecialchars($tag) ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+                        
             <!-- Main Content -->
             <div class="col-lg-8">
                 <!-- Filter News (AJAX) -->

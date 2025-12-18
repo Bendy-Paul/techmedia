@@ -317,7 +317,7 @@ $new_jobs_count = $pdo->query("SELECT COUNT(*) FROM jobs WHERE created_at >= DAT
                                     
                                     <div class="job-card-footer">
                                         <span class="small text-muted"><?= date('M d', strtotime($job['created_at'])) ?></span>
-                                        <a href="job-details.php?slug=<?= $job['slug'] ?>" class="btn btn-sm <?= $job['is_featured'] ? 'btn-primary' : 'btn-outline-primary' ?>">View Details</a>
+                                        <a href="<?= $url_path ?>/job-details/<?= htmlspecialchars($job['slug']) ?>" class="btn btn-sm btn-primary">Apply Now</a>
                                     </div>
                                 </div>
                             </div>

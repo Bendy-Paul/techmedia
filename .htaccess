@@ -18,6 +18,8 @@
     RewriteRule ^article/([^/]+)/?$ article.php?slug=$1 [L,QSA]
     RewriteRule ^premium-listed/([^/]+)/?$ premium-listed.php?slug=$1 [L,QSA]
     RewriteRule ^listed/([^/]+)/?$ listed.php?slug=$1 [L,QSA]
+    RewriteRule ^job-details/([^/]+)/?$ job-details.php?slug=$1 [L,QSA]
+
     # Remove www from URLs
     RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
     RewriteRule ^(.*)$ http://%1/$1 [R=301,L]

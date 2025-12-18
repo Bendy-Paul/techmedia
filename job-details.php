@@ -95,7 +95,7 @@ $similar_jobs = $simStmt->fetchAll();
             <div class="d-flex flex-column flex-md-row align-items-center gap-4">
                 <div class="company-logo-large">
                     <?php if($company_logo): ?>
-                        <img src="<?= htmlspecialchars($company_logo) ?>" alt="Logo">
+                        <img src="<?= htmlspecialchars($url_path. '/' .$company_logo) ?>" alt="Logo">
                     <?php else: ?>
                         <i class="fas fa-building"></i>
                     <?php endif; ?>
