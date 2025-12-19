@@ -28,6 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $params[] = 'uploads/articles/' . $file_name;
         }
     }
+        elseif (!empty($_POST['selected_image'])) {
+        $featured_image_url = $_POST['selected_image'];
+            $img_sql = ", featured_image_url = ?";
+            $params[] = $featured_image_url;
+    }
 
     $params[] = $id;
 
@@ -35,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $pdo->beginTransaction();
 
         // 1. Update Main Article
-        $stmt = $pdo->prepare("UPDATE articles SET title = ?, content = ?, status = ? $img_sql, is_featured = ? WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE articles SET title = ?, content = ?, status = ?, is_featured = ? $img_sql WHERE id = ?");
         $stmt->execute($params);
 
         // 2. Update Companies (Reset & Re-insert)

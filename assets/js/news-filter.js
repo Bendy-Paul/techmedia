@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
         newsContainer.innerHTML = '';
         for (let i = 0; i < count; i++) {
             const skeleton = document.createElement('div');
-            skeleton.className = 'col-md-4';
+            skeleton.className = 'col-md-6';
             skeleton.innerHTML = `
                 <div class="news-card skeleton-loader h-100">
                     <div class="news-img skeleton-logo"></div>
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         news.forEach(article => {
             const div = document.createElement('div');
-            div.className = 'col-md-4';
+            div.className = 'col-md-6';
             div.innerHTML = `
                 <div class="news-card h-100">
                     <img src="${article.featured_image_url ? article.featured_image_url : 'https://placehold.co/600x400/f1f5f9/2563eb?text=News'}" class="news-img" alt="${article.title}">

@@ -12,6 +12,7 @@ $categories = $pdo->query("SELECT * FROM categories WHERE type='article' ORDER B
 // Fetch Tags
 $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
 ?>
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
 
 <main class="main-content">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -32,24 +33,36 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
                             <label class="form-label fw-bold small text-muted">Article Title</label>
                             <input type="text" name="title" class="form-control form-control-lg" placeholder="Enter title here..." required>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted">Content</label>
-                            <textarea name="content" class="form-control" rows="15" placeholder="Write your article..." required></textarea>
-                            <div class="form-text">You can use HTML tags for formatting.</div>
+                            <textarea name="content" class="form-control" id="ckeditor-editor" rows="15"></textarea>
+                            <div class="form-text">You can use rich text formatting.</div>
+                            <!-- CKEditor 5 WYSIWYG Editor -->
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    ClassicEditor
+                                        .create(document.querySelector('#ckeditor-editor'))
+                                        .catch(error => {
+                                            console.error(error);
+                                        });
+                                });
+                            </script>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row">
                     <div class="col-md-6">
                         <!-- Company Tagging -->
                         <div class="card border-0 shadow-sm mb-4">
-                            <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Tag Companies</h6></div>
+                            <div class="card-header bg-white py-3">
+                                <h6 class="fw-bold mb-0">Tag Companies</h6>
+                            </div>
                             <div class="card-body">
                                 <div class="form-text mb-2">Select companies mentioned in this article. It will appear on their profiles.</div>
                                 <div class="border rounded p-2 bg-light" style="max-height: 200px; overflow-y: auto;">
-                                    <?php foreach($companies as $company): ?>
+                                    <?php foreach ($companies as $company): ?>
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="companies[]" value="<?= $company['id'] ?>" id="comp_<?= $company['id'] ?>">
                                             <label class="form-check-label small" for="comp_<?= $company['id'] ?>">
@@ -64,11 +77,13 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
                     <div class="col-md-6">
                         <!-- Event Tagging -->
                         <div class="card border-0 shadow-sm mb-4">
-                            <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Tag Events</h6></div>
+                            <div class="card-header bg-white py-3">
+                                <h6 class="fw-bold mb-0">Tag Events</h6>
+                            </div>
                             <div class="card-body">
                                 <div class="form-text mb-2">Select events mentioned in this article. It will appear on their profiles.</div>
                                 <div class="border rounded p-2 bg-light" style="max-height: 200px; overflow-y: auto;">
-                                    <?php foreach($events as $event): ?>
+                                    <?php foreach ($events as $event): ?>
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="events[]" value="<?= $event['id'] ?>" id="event_<?= $event['id'] ?>">
                                             <label class="form-check-label small" for="event_<?= $event['id'] ?>">
@@ -86,7 +101,9 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
             <!-- Right Column: Settings -->
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Publishing</h6></div>
+                    <div class="card-header bg-white py-3">
+                        <h6 class="fw-bold mb-0">Publishing</h6>
+                    </div>
                     <div class="card-body">
                         <div class="mb-3">
                             <div class="form-check form-switch mb-3">
@@ -98,14 +115,14 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted">Categories</label>
                             <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
-                                    <?php foreach($categories as $cat): ?>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="categories[]" value="<?= $cat['id'] ?>" id="cat_<?= $cat['id'] ?>">
-                                            <label class="form-check-label" for="cat_<?= $cat['id'] ?>">
-                                                <?= htmlspecialchars($cat['name']) ?>
-                                            </label>
-                                        </div>
-                                    <?php endforeach; ?>
+                                <?php foreach ($categories as $cat): ?>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="categories[]" value="<?= $cat['id'] ?>" id="cat_<?= $cat['id'] ?>">
+                                        <label class="form-check-label" for="cat_<?= $cat['id'] ?>">
+                                            <?= htmlspecialchars($cat['name']) ?>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
 
@@ -116,14 +133,14 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
                                 <option value="published">Published</option>
                             </select>
                         </div>
-                        
+
                         <!-- Featured Image with Gallery Selection -->
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted">Featured Image</label>
-                            
+
                             <!-- Hidden input to store selected image URL -->
                             <input type="hidden" name="selected_image" id="selected_image_input">
-                            
+
                             <!-- Image Preview Area -->
                             <div id="image_preview_container" class="mb-2 d-none">
                                 <img src="" id="image_preview" class="img-fluid rounded border" style="max-height: 150px;">
@@ -149,11 +166,13 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
 
                 <!-- Topic Tags -->
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Article Tags (#)</h6></div>
+                    <div class="card-header bg-white py-3">
+                        <h6 class="fw-bold mb-0">Article Tags (#)</h6>
+                    </div>
                     <div class="card-body">
                         <input type="text" name="new_tags" class="form-control mb-2" placeholder="Add tags separated by comma (e.g. AI, Funding)">
                         <div class="d-flex flex-wrap gap-1">
-                            <?php foreach($tags as $tag): ?>
+                            <?php foreach ($tags as $tag): ?>
                                 <div class="form-check form-check-inline m-0">
                                     <input class="form-check-input" type="checkbox" name="tags[]" value="<?= $tag['id'] ?>" id="tag_<?= $tag['id'] ?>">
                                     <label class="form-check-label small" for="tag_<?= $tag['id'] ?>">#<?= htmlspecialchars($tag['name']) ?></label>
@@ -181,12 +200,12 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
                     // Simple logic to scan uploads folder for images to show in gallery
                     $upload_path = '../uploads/articles/';
                     $web_path = 'uploads/articles/';
-                    if(is_dir($upload_path)){
+                    if (is_dir($upload_path)) {
                         $files = scandir($upload_path);
-                        foreach($files as $file){
-                            if($file !== '.' && $file !== '..'){
+                        foreach ($files as $file) {
+                            if ($file !== '.' && $file !== '..') {
                                 echo '<div class="col-3">';
-                                echo '<img src="../'.$web_path.$file.'" class="img-thumbnail gallery-img" style="cursor:pointer; height:100px; object-fit:cover; width:100%;" onclick="selectImage(\''.$web_path.$file.'\')" loading="lazy">';
+                                echo '<img src="../' . $web_path . $file . '" class="img-thumbnail gallery-img" style="cursor:pointer; height:100px; object-fit:cover; width:100%;" onclick="selectImage(\'' . $web_path . $file . '\')" loading="lazy">';
                                 echo '</div>';
                             }
                         }
@@ -197,7 +216,6 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
         </div>
     </div>
 </div>
-
 </div>
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -206,7 +224,6 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
         document.getElementById('selected_image_input').value = url;
         document.getElementById('image_preview').src = '../' + url;
         document.getElementById('image_preview_container').classList.remove('d-none');
-        
         // Close modal
         var myModalEl = document.getElementById('mediaGalleryModal');
         var modal = bootstrap.Modal.getInstance(myModalEl);
@@ -220,4 +237,5 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
     }
 </script>
 </body>
+
 </html>

@@ -329,7 +329,7 @@
                 <article class="article-content" data-aos="fade-up">
                     <?php if($article['featured_image_url']): ?>
                     <div class="article-image-featured">
-                        <img src="<?= htmlspecialchars($article['featured_image_url']) ?>" class="img-fluid w-100" alt="<?= htmlspecialchars($article['title']) ?>">
+                        <img src="<?= htmlspecialchars($url_path. '/' .$article['featured_image_url']) ?>" class="img-fluid w-100" alt="<?= htmlspecialchars($article['title']) ?>">
                     </div>
                     <?php endif; ?>
 

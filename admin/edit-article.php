@@ -43,6 +43,7 @@ $companies = $pdo->query("SELECT id, name FROM companies ORDER BY name ASC")->fe
 $events = $pdo->query("SELECT id, title FROM events ORDER BY title ASC")->fetchAll();
 $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
 ?>
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
 
 <main class="main-content">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -66,7 +67,17 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted">Content</label>
-                            <textarea name="content" class="form-control" rows="15" required><?= htmlspecialchars($article['content']) ?></textarea>
+                            <textarea name="content" class="form-control" id="ckeditor-editor" rows="15" required><?= htmlspecialchars($article['content']) ?></textarea>
+                            <!-- CKEditor 5 WYSIWYG Editor -->
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    ClassicEditor
+                                        .create(document.querySelector('#ckeditor-editor'))
+                                        .catch(error => {
+                                            console.error(error);
+                                        });
+                                });
+                            </script>
                         </div>
                     </div>
                 </div>

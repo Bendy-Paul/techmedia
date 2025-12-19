@@ -1,5 +1,6 @@
     <?php
         require_once 'includes/wertyuytre.php';
+        // include_once __DIR__ . '/meta.php';
     ?>
     
     <!-- Fonts -->
