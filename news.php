@@ -68,7 +68,7 @@ $cats = $pdo->query("SELECT * FROM categories WHERE type='article' ORDER BY name
 if (empty($cats)) {
     $cats = $pdo->query("SELECT * FROM categories ORDER BY name ASC LIMIT 10")->fetchAll();
 }
-$tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 15")->fetchAll();
+$tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
 
 ?>
 <!DOCTYPE html>

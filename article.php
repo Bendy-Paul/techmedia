@@ -1,78 +1,123 @@
-<?php 
-    include_once('./includes/wertyuytre.php'); 
-    session_start();
-            // Get the article slug from the URL
-        if (!isset($_GET['slug'])) {
-            header("Location: news.php");
-            exit();
-        }
+<?php
+include_once('./includes/wertyuytre.php');
+session_start();
+// Get the article slug from the URL
+if (!isset($_GET['slug'])) {
+    header("Location: news.php");
+    exit();
+}
 
-        $slug = $_GET['slug'];
+$slug = $_GET['slug'];
 
-        // 1. Fetch the Main Article
-        $stmt = $pdo->prepare("
+// 1. Fetch the Main Article
+$stmt = $pdo->prepare("
             SELECT a.*, u.full_name as author_name, u.avatar_url as author_avatar
             FROM articles a
             LEFT JOIN users u ON a.author_id = u.id
             WHERE a.slug = ? AND a.status = 'published'
         ");
-        $stmt->execute([$slug]);
-        $article = $stmt->fetch();
+$stmt->execute([$slug]);
+$article = $stmt->fetch();
 
-        if (!$article) {
-            // In a real app, redirect to a 404 page
-            header("Location: news.php");
-            exit();
-        }
+if (!$article) {
+    // In a real app, redirect to a 404 page
+    header("Location: news.php");
+    exit();
+}
 
-        // Increment View Count (Simple logic)
-        $pdo->prepare("UPDATE articles SET views = views + 1 WHERE id = ?")->execute([$article['id']]);
+// Increment View Count (Simple logic)
+$pdo->prepare("UPDATE articles SET views = views + 1 WHERE id = ?")->execute([$article['id']]);
 
-        // 2. Fetch Article Tags
-        $tagsStmt = $pdo->prepare("
+// 2. Fetch Article Tags
+$tagsStmt = $pdo->prepare("
             SELECT t.name, t.id 
             FROM tags t
             JOIN article_tags at ON t.id = at.tag_id
             WHERE at.article_id = ?
         ");
-        $tagsStmt->execute([$article['id']]);
-        $tags = $tagsStmt->fetchAll();
+$tagsStmt->execute([$article['id']]);
+$tags = $tagsStmt->fetchAll();
 
-        // 3. Fetch Related Articles (Based on similar tags or random)
-        $relatedStmt = $pdo->prepare("
+// 3. Fetch Related Articles (Based on similar tags or random)
+$relatedStmt = $pdo->prepare("
             SELECT id, title, slug, featured_image_url, published_at 
             FROM articles 
             WHERE id != ? AND status = 'published' 
             ORDER BY published_at DESC 
             LIMIT 3
         ");
-        $relatedStmt->execute([$article['id']]);
-        $related_articles = $relatedStmt->fetchAll();
+$relatedStmt->execute([$article['id']]);
+$related_articles = $relatedStmt->fetchAll();
 
-        // 4. Fetch Categories for Sidebar (Standard Widget)
-        $categories = $pdo->query("
-            SELECT c.name, c.slug, COUNT(cc.company_id) as count 
+// 4. Fetch Categories for Sidebar (Standard Widget)
+$categories = $pdo->query("
+            SELECT c.name, c.slug, COUNT(cc.article_id) as count 
             FROM categories c 
-            LEFT JOIN company_categories cc ON c.id = cc.category_id 
+            LEFT JOIN article_categories cc ON c.id = cc.category_id 
             GROUP BY c.id 
             ORDER BY count DESC 
             LIMIT 6
         ")->fetchAll();
 
-    ?>
+?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($article['title']) ?> | Tech Media Directory</title>
-    
+
     <?php include_once('links.php'); ?>
     <style>
         /* Article Hero */
         .article-hero {
-            background: linear-gradient(135deg, #b3d0f6ff 0%, #f8fafc 100%);
-            padding: 100px 0 40px;
+        position: relative;
+            width: 100%;
+            height: 26rem;
+            display: flex;
+            align-items: center; /* Vertically center text */
+            justify-content: center; /* Horizontally center text */
+            overflow: hidden; /* Crucial: hides the messy edges caused by the blur */
+        }
+
+        /* The Blurred Image Layer */
+        .article-hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            
+            /* Replace with your image URL */
+            background-image: url('<?= htmlspecialchars($url_path . '/' . $article['featured_image_url']) ?>');
+            background-size: cover;
+            background-position: center;
+            
+            /* 1. The Blur Effect */
+            filter: blur(15px); 
+            
+            /* 2. Scale Fix: When you blur, edges get white/faded. 
+               Scaling up slightly pushes those bad edges off-screen. */
+            transform: scale(1.1); 
+            
+            z-index: -2; /* Places it at the very back */
+        }
+
+        /* The Dark Overlay Layer */
+        .article-hero::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            
+            /* Black overlay with 40% opacity */
+            background-color: rgba(0, 0, 0, 0.4); 
+            
+            z-index: -1; /* Places it above the image but behind the text */
         }
 
         .article-meta {
@@ -80,13 +125,13 @@
             align-items: center;
             gap: 20px;
             margin-bottom: 20px;
-            color: var(--text-muted);
+            color: white;
             flex-wrap: wrap;
         }
 
         .article-category {
             background: rgba(37, 99, 235, 0.1);
-            color: var(--primary-accent);
+            color: white;
             padding: 6px 15px;
             border-radius: 20px;
             font-size: 0.8rem;
@@ -121,13 +166,13 @@
             font-size: 1.1rem;
             line-height: 1.8;
         }
-        
+
         /* Ensure images inside content are responsive */
         .article-content img {
             max-width: 100%;
             height: auto;
             border-radius: 12px;
-            margin: 20px 0;
+            /* margin: 20px 0; */
         }
 
         .article-content h2 {
@@ -140,12 +185,13 @@
         .article-content p {
             margin-bottom: 20px;
         }
-        
-        .article-content ul, .article-content ol {
+
+        .article-content ul,
+        .article-content ol {
             margin-bottom: 20px;
             padding-left: 20px;
         }
-        
+
         .article-content li {
             margin-bottom: 10px;
         }
@@ -153,7 +199,7 @@
         .article-image-featured {
             border-radius: 16px;
             overflow: hidden;
-            margin: 30px 0;
+            /* margin: 30px 0; */
             box-shadow: var(--shadow-light);
         }
 
@@ -179,7 +225,7 @@
             margin-right: 20px;
             overflow: hidden;
         }
-        
+
         .author-avatar img {
             width: 100%;
             height: 100%;
@@ -201,12 +247,12 @@
             align-items: center;
             margin-bottom: 15px;
             padding-bottom: 15px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             text-decoration: none;
             color: inherit;
             transition: 0.3s;
         }
-        
+
         .related-article:hover h6 {
             color: var(--primary-accent);
         }
@@ -248,33 +294,58 @@
             color: white;
         }
 
-        /* Footer */
-        footer {
-            background: #f1f5f9;
-            border-top: 1px solid rgba(37, 99, 235, 0.1);
-            padding: 80px 0 30px;
+        /* 1. Base Table Styling */
+        table {
+            border-collapse: collapse;
+            /* Removes space between borders */
+            margin: 25px 0;
+            /* Adds spacing around the table */
+            font-size: 0.9em;
+            /* Standard table font size */
+            font-family: sans-serif;
+            /* Clean font */
+            min-width: 400px;
+            /* Ensures the table doesn't look too squashed */
+            width: 100%;
         }
 
-        .footer-link {
-            display: block;
-            color: var(--text-muted);
-            text-decoration: none;
-            margin-bottom: 12px;
-            transition: 0.3s;
+        /* 2. Header Styling */
+        table thead tr {
+            background-color: #009879;
+            /* Change this to your brand color */
+            color: #ffffff;
+            text-align: left;
         }
 
-        .footer-link:hover { color: var(--primary-accent); }
-
-        .social-btn {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: rgba(37, 99, 235, 0.1);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--text-main); text-decoration: none;
-            transition: 0.3s;
+        /* 3. Cell Styling (Header & Body) */
+        table th,
+        table td {
+            padding: 12px 15px;
+            /* Adds breathing room inside cells */
         }
 
-        .social-btn:hover { background: var(--primary-accent); color: #fff; }
+        /* 4. Row Styling & Borders */
+        table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+
+        /* 5. Zebra Striping (Alternating Row Colors) */
+        table tbody tr:nth-of-type(even) {
+            background-color: #e8edf8c7;
+        }
+
+        /* 6. Active Row / Last Row Styling */
+        table tbody tr:last-of-type {
+            border-bottom: 2px solid #009879;
+            /* Matches header color */
+        }
+
+        table tbody tr:hover {
+            background-color: #f1f1f1;
+            /* Highlight row on mouse over */
+            cursor: pointer;
+            /* Optional: indicates interactivity */
+        }
 
         @media (max-width: 768px) {
             .article-hero {
@@ -283,10 +354,11 @@
         }
     </style>
 </head>
+
 <body>
-    
-    <?php include_once('event-ticker.php')?>
-    <?php include_once('header.php')?>
+
+    <?php include_once('event-ticker.php') ?>
+    <?php include_once('header.php') ?>
     <script>
         document.getElementById('news').classList.add('active')
         document.getElementById('news-mobile').classList.add('active')
@@ -298,22 +370,22 @@
             <div class="row justify-content-center">
                 <div class="col-lg-8" data-aos="fade-up">
                     <span class="article-category">Tech News</span>
-                    <h1 class="display-5 fw-bold mb-4"><?= htmlspecialchars($article['title']) ?></h1>
-                    
+                    <h1 class="display-5 fw-bold mb-4 text-light"><?= htmlspecialchars($article['title']) ?></h1>
+
                     <div class="article-meta">
                         <span><i class="fas fa-user me-1"></i> By <?= htmlspecialchars($article['author_name'] ?? 'Editorial Team') ?></span>
                         <span><i class="fas fa-calendar me-1"></i> <?= date('F j, Y', strtotime($article['published_at'])) ?></span>
                         <!-- Calculating approximate read time -->
-                        <?php 
-                            $word_count = str_word_count(strip_tags($article['content']));
-                            $read_time = ceil($word_count / 200); 
+                        <?php
+                        $word_count = str_word_count(strip_tags($article['content']));
+                        $read_time = ceil($word_count / 200);
                         ?>
                         <span><i class="fas fa-clock me-1"></i> <?= $read_time ?> min read</span>
                         <span><i class="fas fa-eye me-1"></i> <?= number_format($article['views']) ?> views</span>
                     </div>
 
                     <div class="article-tags">
-                        <?php foreach($tags as $tag): ?>
+                        <?php foreach ($tags as $tag): ?>
                             <a href="news.php?tag=<?= urlencode($tag['name']) ?>" class="article-tag">#<?= htmlspecialchars($tag['name']) ?></a>
                         <?php endforeach; ?>
                     </div>
@@ -327,22 +399,24 @@
             <!-- Article Content -->
             <div class="col-lg-8">
                 <article class="article-content" data-aos="fade-up">
-                    <?php if($article['featured_image_url']): ?>
-                    <div class="article-image-featured">
-                        <img src="<?= htmlspecialchars($url_path. '/' .$article['featured_image_url']) ?>" class="img-fluid w-100" alt="<?= htmlspecialchars($article['title']) ?>">
-                    </div>
+                    <?php if ($article['featured_image_url']): ?>
+                        <div class="article-image-featured mb-4">
+                            <img src="<?= htmlspecialchars($url_path . '/' . $article['featured_image_url']) ?>" class="img-fluid w-100" alt="<?= htmlspecialchars($article['title']) ?>">
+                        </div>
                     <?php endif; ?>
 
                     <!-- Output the HTML content directly from the DB (Ensure input was sanitized on save if allowing HTML) -->
-                    <?= $article['content'] ?>
-                    
+                    <div class="p-2">
+                        <?= $article['content'] ?>
+                    </div>
+
                 </article>
 
                 <!-- Author Bio -->
                 <div class="author-card" data-aos="fade-up" data-aos-delay="100">
                     <div class="d-flex">
                         <div class="author-avatar">
-                            <?php if(!empty($article['author_avatar'])): ?>
+                            <?php if (!empty($article['author_avatar'])): ?>
                                 <img src="<?= htmlspecialchars($article['author_avatar']) ?>" alt="<?= htmlspecialchars($article['author_name']) ?>">
                             <?php else: ?>
                                 <i class="fas fa-user"></i>
@@ -376,13 +450,13 @@
                 <div class="sidebar-widget" data-aos="fade-left" data-aos-delay="300">
                     <h5 class="fw-bold mb-4">Directory Categories</h5>
                     <ul class="list-unstyled">
-                        <?php foreach($categories as $cat): ?>
-                        <li class="mb-2">
-                            <a href="categories.php?slug=<?= htmlspecialchars($cat['slug']) ?>" class="text-decoration-none d-flex justify-content-between">
-                                <span><?= htmlspecialchars($cat['name']) ?></span> 
-                                <span class="text-muted"><?= $cat['count'] ?></span>
-                            </a>
-                        </li>
+                        <?php foreach ($categories as $cat): ?>
+                            <li class="mb-2">
+                                <a href="categories.php?slug=<?= htmlspecialchars($cat['slug']) ?>" class="text-decoration-none d-flex justify-content-between">
+                                    <span><?= htmlspecialchars($cat['name']) ?></span>
+                                    <span class="text-muted"><?= $cat['count'] ?></span>
+                                </a>
+                            </li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
@@ -390,16 +464,16 @@
                 <!-- Related Articles -->
                 <div class="sidebar-widget" data-aos="fade-left" data-aos-delay="200">
                     <h5 class="fw-bold mb-4">Related Articles</h5>
-                    
-                    <?php if(count($related_articles) > 0): ?>
-                        <?php foreach($related_articles as $related): ?>
-                        <a href="article.php?slug=<?= $related['slug'] ?>" class="related-article">
-                            <img src="<?= htmlspecialchars($related['featured_image_url'] ?? 'https://placehold.co/80x60') ?>" class="related-img" alt="Thumb">
-                            <div>
-                                <h6 class="fw-bold mb-1 small"><?= htmlspecialchars($related['title']) ?></h6>
-                                <p class="text-muted small mb-0"><?= date('M d, Y', strtotime($related['published_at'])) ?></p>
-                            </div>
-                        </a>
+
+                    <?php if (count($related_articles) > 0): ?>
+                        <?php foreach ($related_articles as $related): ?>
+                            <a href="<?= $url_path . '/article/' . $related['slug'] ?>" class="related-article">
+                                <img src="<?= htmlspecialchars($url_path . '/' . $related['featured_image_url'] ?? 'https://placehold.co/80x60') ?>" class="related-img" alt="Thumb">
+                                <div>
+                                    <h6 class="fw-bold mb-1 small"><?= htmlspecialchars($related['title']) ?></h6>
+                                    <p class="text-muted small mb-0"><?= date('M d, Y', strtotime($related['published_at'])) ?></p>
+                                </div>
+                            </a>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <p class="text-muted small">No related articles found.</p>
@@ -418,6 +492,7 @@
         </div>
     </div>
 
-<?php include_once('footer.php')?>
+    <?php include_once('footer.php') ?>
 </body>
+
 </html>

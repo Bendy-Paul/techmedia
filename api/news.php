@@ -14,7 +14,7 @@ $where = [];
 $params = [];
 
 if ($category) {
-    $where[] = 'c.id = ?';
+    $where[] = 'c.name = ?';
     $params[] = $category;
 }
 if ($search) {

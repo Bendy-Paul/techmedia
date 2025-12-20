@@ -410,7 +410,7 @@ $highest_count = $result[0]['company_count'];
                 <div class="row">
 
                     <?php
-                    $news = $pdo->query("SELECT * FROM articles WHERE status='published' ORDER BY published_at DESC LIMIT 3")->fetchAll();
+                    $news = $pdo->query("SELECT * FROM articles WHERE status='published' ORDER BY is_featured DESC, published_at DESC LIMIT 4")->fetchAll();
                     $featured_news = $pdo->query("SELECT * FROM articles WHERE status='published' AND is_featured='1' ORDER BY published_at DESC LIMIT 1")->fetchAll();
                     empty($featured_news) ? null : $featured = $featured_news[0];
                     if ($news):
