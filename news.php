@@ -73,11 +73,12 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tech News & Insights | Tech Media Directory</title>
-    
+
     <?php include_once('links.php'); ?>
 
     <style>
@@ -89,6 +90,7 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
             position: relative;
             overflow: hidden;
         }
+
         .news-hero::before {
             content: '';
             position: absolute;
@@ -99,6 +101,7 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
             background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.05"><polygon points="1000,100 1000,0 0,100"></polygon></svg>');
             background-size: cover;
         }
+
         .news-hero-content {
             position: relative;
             z-index: 2;
@@ -113,19 +116,22 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
             border: 1px solid rgba(37, 99, 235, 0.1);
             transition: 0.3s;
         }
-        
+
         .news-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-medium);
         }
+
         .news-img {
             height: 200px;
             width: 100%;
             object-fit: cover;
         }
+
         .news-body {
             padding: 25px;
         }
+
         .news-category {
             background: rgba(37, 99, 235, 0.1);
             color: var(--primary-accent);
@@ -136,12 +142,14 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
             display: inline-block;
             margin-bottom: 12px;
         }
+
         .news-tags {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             margin-top: 15px;
         }
+
         .news-tag {
             background: rgba(37, 99, 235, 0.05);
             color: var(--text-muted);
@@ -149,6 +157,7 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
             border-radius: 12px;
             font-size: 0.7rem;
         }
+
         .news-meta {
             display: flex;
             align-items: center;
@@ -167,6 +176,7 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
             border: 1px solid rgba(37, 99, 235, 0.1);
             margin-bottom: 30px;
         }
+
         .filter-btn {
             background: rgba(37, 99, 235, 0.1);
             color: var(--primary-accent);
@@ -178,7 +188,9 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
             text-decoration: none;
             display: inline-block;
         }
-        .filter-btn:hover, .filter-btn.active {
+
+        .filter-btn:hover,
+        .filter-btn.active {
             background: var(--primary-accent);
             color: white;
         }
@@ -194,11 +206,13 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
             position: sticky;
             top: 80px;
         }
+
         .tag-cloud {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
         }
+
         .tag-item {
             background: rgba(37, 99, 235, 0.1);
             color: var(--primary-accent);
@@ -208,15 +222,17 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
             text-decoration: none;
             transition: 0.3s;
         }
+
         .tag-item:hover {
             background: var(--primary-accent);
             color: white;
         }
     </style>
 </head>
+
 <body>
     <?php include_once('event-ticker.php'); ?>
-    <?php include_once('header.php'); ?>    
+    <?php include_once('header.php'); ?>
     <script>
         document.getElementById('news').classList.add('active');
         document.getElementById('news-mobile').classList.add('active');
@@ -241,40 +257,40 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
     <div class="container my-5">
         <!-- Featured Article -->
         <?php if ($featured): ?>
-        <div class="news-card mb-5" data-aos="fade-up" data-aos-delay="100">
-            <?php 
-                $featImg = !empty($featured['featured_image_url']) ? $featured['featured_image_url'] : 'https://placehold.co/800x400/f1f5f9/2563eb?text=Featured+Tech+News';
-            ?>
-            <img src="<?= htmlspecialchars($featImg) ?>" class="news-img" alt="<?= htmlspecialchars($featured['title']) ?>">
-            <div class="news-body">
-                <span class="news-category">Featured</span>
-                <h2 class="fw-bold mb-3"><?= htmlspecialchars($featured['title']) ?></h2>
-                <p class="text-muted mb-3"><?= htmlspecialchars(substr(strip_tags($featured['content']), 0, 160)) ?>...</p>
-                
-                <!-- Featured Article Tags -->
+            <div class="news-card mb-5" data-aos="fade-up" data-aos-delay="100">
                 <?php
+                $featImg = !empty($featured['featured_image_url']) ? $featured['featured_image_url'] : 'https://placehold.co/800x400/f1f5f9/2563eb?text=Featured+Tech+News';
+                ?>
+                <img src="<?= htmlspecialchars($featImg) ?>" class="news-img" alt="<?= htmlspecialchars($featured['title']) ?>">
+                <div class="news-body">
+                    <span class="news-category">Featured</span>
+                    <h2 class="fw-bold mb-3"><?= htmlspecialchars($featured['title']) ?></h2>
+                    <p class="text-muted mb-3"><?= htmlspecialchars(substr(strip_tags($featured['content']), 0, 160)) ?>...</p>
+
+                    <!-- Featured Article Tags -->
+                    <?php
                     $ftStmt = $pdo->prepare("SELECT t.name FROM tags t JOIN article_tags at ON t.id = at.tag_id WHERE at.article_id = ? LIMIT 4");
                     $ftStmt->execute([$featured['id']]);
                     $fTags = $ftStmt->fetchAll(PDO::FETCH_COLUMN);
-                ?>
-                <div class="news-tags">
-                    <?php foreach($fTags as $tag): ?>
-                        <span class="news-tag">#<?= htmlspecialchars($tag) ?></span>
-                    <?php endforeach; ?>
+                    ?>
+                    <div class="news-tags">
+                        <?php foreach ($fTags as $tag): ?>
+                            <span class="news-tag">#<?= htmlspecialchars($tag) ?></span>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
             </div>
-        </div>
         <?php endif; ?>
 
-        <div class="row">                    
+        <div class="row">
             <!-- Main Content -->
-            <div class="col-lg-8">
+            <div class="col-lg-10">
                 <!-- Filter News (AJAX) -->
                 <form id="news-filter-form" class="category-filter" data-aos="fade-up">
                     <h5 class="fw-bold mb-3">Filter by Category</h5>
                     <div class="d-flex flex-wrap gap-2 mb-3">
                         <button type="button" class="filter-btn" data-category="">All</button>
-                        <?php foreach($cats as $cat): ?>
+                        <?php foreach ($cats as $cat): ?>
                             <button type="button" class="filter-btn" data-category="<?= htmlspecialchars($cat['slug']) ?>">
                                 <?= htmlspecialchars($cat['name']) ?>
                             </button>
@@ -285,6 +301,15 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
                         <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
                     </div>
                     <input type="hidden" name="category" id="news-category-input" value="">
+
+                    <div data-aos="fade-left" data-aos-delay="300">
+                        <h5 class="fw-bold mb-4">Popular Tags</h5>
+                        <div class="tag-cloud">
+                            <?php foreach ($tags as $tag): ?>
+                                <a href="?s=<?= urlencode($tag['name']) ?>" class="tag-item"><?= htmlspecialchars($tag['name']) ?></a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
                 </form>
 
                 <!-- News Grid (AJAX) -->
@@ -299,60 +324,53 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
             </div>
 
             <!-- Sidebar -->
-            <div class="col-lg-4">
-                <!-- Categories Widget -->
-                <div class="sidebar-widget" data-aos="fade-left" data-aos-delay="200">
-                    <h5 class="fw-bold mb-4">Categories</h5>
-                    <ul class="list-unstyled">
-                        <?php foreach($cats as $cat): ?>
-                        <li class="mb-2">
-                            <a href="?cat=<?= htmlspecialchars($cat['slug']) ?>" class="text-decoration-none d-flex justify-content-between">
-                                <span><?= htmlspecialchars($cat['name']) ?></span> 
-                                <!-- Optional: Add count logic if desired -->
-                            </a>
-                        </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-
-                <!-- Tags Widget -->
-                <div class="sidebar-widget" data-aos="fade-left" data-aos-delay="300">
-                    <h5 class="fw-bold mb-4">Popular Tags</h5>
-                    <div class="tag-cloud">
-                        <?php foreach($tags as $tag): ?>
-                            <a href="?s=<?= urlencode($tag['name']) ?>" class="tag-item"><?= htmlspecialchars($tag['name']) ?></a>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-
+            <div class="col-lg-2">
                 <!-- Newsletter Widget -->
                 <div class="sidebar-widget" data-aos="fade-left" data-aos-delay="400">
                     <h5 class="fw-bold mb-3">Stay Updated</h5>
                     <p class="text-muted small mb-3">Get the latest tech news and insights delivered to your inbox.</p>
-                    <div class="input-group">
-                        <input type="email" class="form-control" placeholder="Your email">
-                        <button class="btn btn-primary">Subscribe</button>
+                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#newsletterModal">Subscribe</button>
+                </div>
+
+                <!-- Newsletter Modal -->
+                <div class="modal fade" id="newsletterModal" tabindex="-1" aria-labelledby="newsletterModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="newsletterModalLabel">Subscribe to Newsletter</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="newsletter-form">
+                                    <div class="input-group">
+                                        <input type="email" class="form-control" placeholder="Your email">
+                                        <button class="btn btn-primary">Subscribe</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    </div>
 
 
 
 
-<br><br>
+    <br><br>
     <?php include_once('footer.php'); ?>
 
 </body>
 <script src="assets/js/news-filter.js?<?= time() ?>"></script>
 <script>
     // AJAX category button logic
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const catBtns = document.querySelectorAll('.filter-btn');
         const catInput = document.getElementById('news-category-input');
         catBtns.forEach(btn => {
-            btn.addEventListener('click', function () {
+            btn.addEventListener('click', function() {
                 catBtns.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 catInput.value = this.getAttribute('data-category');
@@ -362,4 +380,5 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
     });
 </script>
 </body>
+
 </html>

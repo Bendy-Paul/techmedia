@@ -67,7 +67,7 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted">Content</label>
-                            <textarea name="content" class="form-control" id="ckeditor-editor" rows="15" required><?= htmlspecialchars($article['content']) ?></textarea>
+                            <textarea name="content" class="form-control" id="ckeditor-editor" rows="15" ><?= htmlspecialchars($article['content']) ?></textarea>
                             <!-- CKEditor 5 WYSIWYG Editor -->
                             <script>
                                 document.addEventListener('DOMContentLoaded', function() {

@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 require_once '../includes/wertyuytre.php';
 
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$perPage = isset($_GET['per_page']) ? max(1, intval($_GET['per_page'])) : 10;
+$perPage = isset($_GET['per_page']) ? max(1, intval($_GET['per_page'])) : 9;
 $offset = ($page - 1) * $perPage;
 
 $category = isset($_GET['category']) ? trim($_GET['category']) : null;
@@ -31,7 +31,16 @@ $stmt->execute($params);
 $total = $stmt->fetchColumn();
 
 // Get paginated news
-$sql = "SELECT n.*, c.name as category_name FROM articles n LEFT JOIN article_categories cat ON n.id = cat.article_id LEFT JOIN categories c ON c.id = cat.category_id $whereSql ORDER BY n.published_at DESC LIMIT $perPage OFFSET $offset";
+$sql = "SELECT 
+            n.*, 
+            GROUP_CONCAT(c.name SEPARATOR ', ') as category_names 
+        FROM articles n 
+        LEFT JOIN article_categories cat ON n.id = cat.article_id 
+        LEFT JOIN categories c ON c.id = cat.category_id 
+        $whereSql 
+        GROUP BY n.id
+        ORDER BY n.published_at DESC 
+        LIMIT $perPage OFFSET $offset";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $news = $stmt->fetchAll(PDO::FETCH_ASSOC);

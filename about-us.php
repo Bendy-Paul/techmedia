@@ -137,7 +137,7 @@
                     <a href="#our-story" class="btn btn-primary btn-lg rounded-pill px-4 py-2">Our Story</a>
                 </div>
                 <div class="col-lg-6 text-center" data-aos="zoom-in" data-aos-delay="200">
-                    <img src="https://placehold.co/600x400/f1f5f9/2563eb?text=Tech+Community" alt="Tech Community" class="img-fluid rounded-4 shadow">
+                    <img src="<?= htmlspecialchars($url_path . '/assets/images/ab00.png') ?>?4" alt="Tech Community" class="img-fluid rounded-4 shadow">
                 </div>
             </div>
         </div>
@@ -173,24 +173,6 @@
                                 </div>
                                 <h4 class="mb-3">Our Vision</h4>
                                 <p class="text-muted">To become Africa's most trusted tech ecosystem directory, driving innovation, investment, and collaboration across the continent.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mission-card" data-aos="fade-up" data-aos-delay="350">
-                                <div class="mission-icon">
-                                    <i class="fas fa-handshake"></i>
-                                </div>
-                                <h4 class="mb-3">Our Values</h4>
-                                <p class="text-muted">Transparency, inclusivity, and innovation guide everything we do. We believe in the power of connection to drive meaningful change.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mission-card" data-aos="fade-up" data-aos-delay="450">
-                                <div class="mission-icon">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <h4 class="mb-3">Our Impact</h4>
-                                <p class="text-muted">We've facilitated over 5,000 connections between startups and investors, and helped thousands of professionals find opportunities.</p>
                             </div>
                         </div>
                     </div>
