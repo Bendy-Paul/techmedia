@@ -87,24 +87,56 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             align-items: center;
             gap: 5px;
         }
-        
+
+
+                /* Article Hero */
         .profile-header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+        position: relative;
+            width: 100%;
+            height: 28rem;
+            display: flex;
+            align-items: center; /* Vertically center text */
+            justify-content: center; /* Horizontally center text */
+             overflow: hidden; /*Crucial: hides the messy edges caused by the blur */
             color: white;
-            padding: 80px 0 40px;
-            position: relative;
-            overflow: hidden;
         }
-        
+
+        /* The Blurred Image Layer */
         .profile-header::before {
-            content: '';
+            content: "";
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.05"><polygon points="1000,100 1000,0 0,100"></polygon></svg>');
+            /* Replace with your image URL */
+            background-image: url('<?= htmlspecialchars($url_path."/".$company['logo_url']) ?>');
             background-size: cover;
+            background-position: center;
+            
+            /* 1. The Blur Effect */
+            filter: blur(10px); 
+            
+            /* 2. Scale Fix: When you blur, edges get white/faded. 
+               Scaling up slightly pushes those bad edges off-screen. */
+            transform: scale(1.1); 
+            
+            z-index: -2; /* Places it at the very back */
+        }
+
+        /* The Dark Overlay Layer */
+        .profile-header::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            
+            /* Black overlay with 40% opacity */
+            background-color: rgba(0, 0, 0, 0.4); 
+            
+            z-index: -1; /* Places it above the image but behind the text */
         }
         
         .company-logo {
@@ -161,7 +193,7 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
         
         .category-badge {
             background: rgba(37, 99, 235, 0.1);
-            color: var(--primary-accent);
+            color: white;
             padding: 6px 15px;
             border-radius: 20px;
             font-size: 0.85rem;
@@ -187,7 +219,7 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--primary-accent);
+            color: white;
             text-decoration: none;
             transition: all 0.3s ease;
         }
@@ -322,17 +354,48 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                 <!-- Competitive Analytics (Charts) -->
                 <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="100">
                     <h3 class="fw-bold mb-4">Performance Analytics</h3>
+                    <?php
+                        // Use metrics from profile_stats JSON
+                        $response_rate = isset($stats['response_rate']) ? (float)$stats['response_rate'] : null;
+                        $completeness = isset($stats['completeness']) ? (float)$stats['completeness'] : null;
+                        $views = isset($company['views']) ? (int)$company['views'] : null;
+                        $projects_count = isset($projects) ? count($projects) : 0;
+                    ?>
                     <div class="row">
-                        <div class="col-md-12 mb-4">
-                            <h5 class="text-center mb-3">Client Satisfaction</h5>
-                            <div class="chart-container">
-                                <canvas id="satisfactionChart"></canvas>
+                        <div class="col-md-6 mb-4">
+                            <div class="info-card text-center">
+                                <h5 class="mb-2">Response Rate</h5>
+                                <div style="font-size:2.2rem;font-weight:700; color:#2563eb;">
+                                    <?= $response_rate !== null ? $response_rate . '%' : 'N/A' ?>
+                                </div>
+                                <div class="small text-muted">How quickly this company responds to inquiries.</div>
                             </div>
                         </div>
-                        <div class="col-md-12 mb-4">
-                            <h5 class="text-center mb-3">Project Delivery Time</h5>
-                            <div class="chart-container">
-                                <canvas id="deliveryChart" class="col-12"></canvas>
+                        <div class="col-md-6 mb-4">
+                            <div class="info-card text-center">
+                                <h5 class="mb-2">Profile Completeness</h5>
+                                <div style="font-size:2.2rem;font-weight:700; color:#10b981;">
+                                    <?= $completeness !== null ? $completeness . '%' : 'N/A' ?>
+                                </div>
+                                <div class="small text-muted">How complete the company profile is.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="info-card text-center">
+                                <h5 class="mb-2">Profile Views</h5>
+                                <div style="font-size:2.2rem;font-weight:700; color:#f59e0b;">
+                                    <?= $views !== null ? number_format($views) : 'N/A' ?>
+                                </div>
+                                <div class="small text-muted">Total times this profile has been viewed.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="info-card text-center">
+                                <h5 class="mb-2">Projects Listed</h5>
+                                <div style="font-size:2.2rem;font-weight:700; color:#3b82f6;">
+                                    <?= $projects_count ?>
+                                </div>
+                                <div class="small text-muted">Number of projects in portfolio.</div>
                             </div>
                         </div>
                     </div>
@@ -396,7 +459,34 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                     </div>
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Year Started</h6>
-                        <p class="mb-0"><?= htmlspecialchars($company['year_founded'] ?? 'N/A') ?></p>
+                        <?php
+                            $thisYear = (int)date('Y');
+                            $companyYear = (int)($company['year_founded'] ?? 0);
+                            $companyAge = $companyYear ? ($thisYear - $companyYear) : null;
+                            $peerAges = [];
+                            if (isset($catIdsArr) && count($catIdsArr) > 0) {
+                                $in = str_repeat('?,', count($catIdsArr)-1) . '?';
+                                $sql = "SELECT DISTINCT c.year_founded FROM companies c JOIN company_categories cc ON c.id = cc.company_id WHERE cc.category_id IN ($in) AND c.id != ? AND c.year_founded IS NOT NULL AND c.year_founded > 1900";
+                                $params = array_merge($catIdsArr, [$company['id']]);
+                                $stmt = $pdo->prepare($sql);
+                                $stmt->execute($params);
+                                foreach($stmt as $row) {
+                                    $peerYear = (int)$row['year_founded'];
+                                    if($peerYear) $peerAges[] = $thisYear - $peerYear;
+                                }
+                            }
+                            $avgPeerAge = count($peerAges) ? round(array_sum($peerAges)/count($peerAges),1) : null;
+                        ?>
+                        <p class="mb-0">
+                            <?php if($companyYear): ?>
+                                <?= htmlspecialchars($companyYear) ?> (<?= $companyAge ?> yrs old)
+                                <?php if($avgPeerAge !== null): ?>
+                                    <br><span class="small text-muted">Category avg: <?= $avgPeerAge ?> yrs</span>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                N/A
+                            <?php endif; ?>
+                        </p>
                     </div>
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Starting Cost Per Project</h6>
@@ -409,8 +499,46 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                 <!-- Profile Strength -->
                 <div class="info-card mb-4" data-aos="fade-left" data-aos-delay="100">
                     <h4 class="fw-bold mb-4">Profile Strength</h4>
-                    <div class="chart-container">
-                        <canvas id="profileStrengthChart"></canvas>
+                    <?php
+                        // Calculate profile strength (example: based on completeness of key fields)
+                        $fields = ['name','tagline','description','email','phone','website_url','year_founded','team_size','logo_url', 'address'];
+                        $filled = 0;
+                        foreach($fields as $f) if(!empty($company[$f])) $filled++;
+                        $profile_strength = round(($filled/count($fields))*100);
+
+                        // Get average profile strength for companies in the same categories
+                        $catIds = $pdo->prepare("SELECT category_id FROM company_categories WHERE company_id = ?");
+                        $catIds->execute([$company['id']]);
+                        $catIdsArr = $catIds->fetchAll(PDO::FETCH_COLUMN);
+                        $avgStrength = null;
+                        if (count($catIdsArr) > 0) {
+                            $in = str_repeat('?,', count($catIdsArr)-1) . '?';
+                            $sql = "SELECT c.id, c.name, c.logo_url, c.tagline, c.description, c.email, c.phone, c.website_url, c.year_founded, c.team_size, c.starting_cost, c.address FROM companies c JOIN company_categories cc ON c.id = cc.company_id WHERE cc.category_id IN ($in) AND c.id != ?";
+                            $params = array_merge($catIdsArr, [$company['id']]);
+                            $peers = $pdo->prepare($sql);
+                            $peers->execute($params);
+                            $peerStrengths = [];
+                            foreach($peers as $peer) {
+                                $peerFilled = 0;
+                                foreach($fields as $f) if(!empty($peer[$f])) $peerFilled++;
+                                $peerStrengths[] = round(($peerFilled/count($fields))*100);
+                            }
+                            $avgStrength = count($peerStrengths) ? round(array_sum($peerStrengths)/count($peerStrengths)) : null;
+                        }
+                    ?>
+                    <div class="mb-2">
+                        <div class="progress" style="height: 28px; background: #e5e7eb;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: <?= $profile_strength ?>%; font-weight:600; font-size:1.1rem;" aria-valuenow="<?= $profile_strength ?>" aria-valuemin="0" aria-valuemax="100">
+                                <?= $profile_strength ?>%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="small text-muted">
+                        <?php if($avgStrength !== null): ?>
+                            <span>Your profile is <b><?= $profile_strength ?>%</b> complete. Category average: <b><?= $avgStrength ?>%</b>.</span>
+                        <?php else: ?>
+                            <span>Your profile is <b><?= $profile_strength ?>%</b> complete.</span>
+                        <?php endif; ?>
                     </div>
                 </div>
                 
@@ -451,94 +579,7 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script>
-
-        // Prepare Data for Charts (Using Profile Stats from DB)
-        const statsData = {
-            completeness: <?= $stats['completeness'] ?? 0 ?>,
-            response_rate: <?= $stats['response_rate'] ?? 0 ?>
-        };
-
-        // Profile Strength Chart
-        const profileCtx = document.getElementById('profileStrengthChart').getContext('2d');
-        const profileChart = new Chart(profileCtx, {
-            type: 'radar',
-            data: {
-                labels: ['Profile Completeness', 'Response Rate', 'Client Reviews', 'Project Portfolio', 'Industry Experience', 'Social Proof'],
-                datasets: [{
-                    label: 'Profile Strength',
-                    // Mapping DB stats + some calculated/random values for demo visualization
-                    data: [statsData.completeness, statsData.response_rate, 80, 85, 75, 90], 
-                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
-                    borderColor: '#2563eb',
-                    pointBackgroundColor: '#2563eb',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: '#2563eb'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        angleLines: { display: true },
-                        suggestedMin: 0,
-                        suggestedMax: 100
-                    }
-                },
-                plugins: {
-                    legend: { display: false }
-                }
-            }
-        });
-
-        // Client Satisfaction Chart (Dummy data for visual - needs review table data to be dynamic)
-        const satisfactionCtx = document.getElementById('satisfactionChart').getContext('2d');
-        const satisfactionChart = new Chart(satisfactionCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Very Satisfied', 'Satisfied', 'Neutral', 'Unsatisfied'],
-                datasets: [{
-                    data: [75, 20, 4, 1],
-                    backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
-            }
-        });
-
-        // Project Delivery Time Chart (Dummy visual)
-        const deliveryCtx = document.getElementById('deliveryChart').getContext('2d');
-        const deliveryChart = new Chart(deliveryCtx, {
-            type: 'bar',
-            data: {
-                labels: ['This Company', 'Industry Average'],
-                datasets: [{
-                    label: 'Days to Delivery',
-                    data: [45, 68],
-                    backgroundColor: ['#2563eb', '#94a3b8']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Days' }
-                    }
-                }
-            }
-        });
+        // No charts needed for metrics cards
     </script>
 </body>
 </html>

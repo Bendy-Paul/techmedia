@@ -49,6 +49,8 @@
             --primary-accent: #2563eb;
             /* Vibrant Blue */
             --secondary-accent: #3b82f6;
+            /* Gradient Color */
+             --primary-gradient: linear-gradient(to right, #2563eb, #8fc3fbff);
             /* Lighter Blue */
             --highlight: #1d4ed8;
             /* Darker blue for hovers */
@@ -62,9 +64,11 @@
             --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --featured-glow: 0 10px 30px rgba(37, 99, 235, 0.15);
 
-            --primary-accent-75: #467dca;
-            --primary-accent-50: #7899c7;
-            --primary-accent-25: #9ab0cf;
+            --primary-accent-75: #3672d2;
+            --primary-accent-50: #5a8ad8;
+            --primary-accent-25: #748fc5;
+            --primary-accent-0: #8a93a1;
+            --primary-accent-gradient: linear-gradient(90deg, #2563eb 0%, #3672d2 25%, #4b7fd6 50%, #7fa7e0 75%, #b3c7e6 100%);
         }
 
         body {
@@ -93,6 +97,10 @@
 
         .text-primary-accent {
             color: var(--primary-accent) !important;
+        }
+
+        .text-primary-accent-25{
+            color: var(--primary-accent-25) !important;
         }
 
         .bg-glass {

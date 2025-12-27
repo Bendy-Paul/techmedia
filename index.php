@@ -15,7 +15,8 @@ $sql = "
 ";
 
 $result = $pdo->query($sql)->fetchAll();
-$highest_count = $result[0]['company_count'];
+// $highest_count = $result[0]['company_count'];
+$highest_count = 3;
 
 
 ?>
@@ -35,14 +36,16 @@ $highest_count = $result[0]['company_count'];
             echo '<style>
                 #' . 'NG-' . strtoupper(substr($state['state_code'], 0, 2)) . ' {';
 
-                if($state['company_count'] == $highest_count) {
+                if($state['company_count'] >= $highest_count) {
                     echo 'fill:  var(--primary-accent);'; // Darkest color for the highest count
                 } elseif ($state['company_count'] >= $highest_count * 0.5) {
                     echo 'fill:  var(--primary-accent-75);'; // Medium color for mid count
                 } elseif ($state['company_count'] >= $highest_count * 0.35) {
                     echo 'fill: var(--primary-accent-50);'; // Lighter color for low count
-                } elseif ($state['company_count'] <= $highest_count * 0.25)  {
+                } elseif ($state['company_count'] >= $highest_count * 0.25)  {
                     echo 'fill: var(--primary-accent-25);'; // Lightest color for the lowest count
+                }else {
+                    echo 'fill: var(--primary-accent-0);';  // Default color for zero or very low count
                 }
 
             echo ' }  

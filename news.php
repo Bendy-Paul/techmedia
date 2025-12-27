@@ -86,7 +86,7 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
         .news-hero {
             background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
             color: white;
-            padding: 120px 0 60px;
+            padding: 50px 0 30px;
             position: relative;
             overflow: hidden;
         }
@@ -124,6 +124,12 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
 
         .news-img {
             height: 200px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .news-featured-img {
+            height: 400px;
             width: 100%;
             object-fit: cover;
         }
@@ -261,7 +267,11 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
                 <?php
                 $featImg = !empty($featured['featured_image_url']) ? $featured['featured_image_url'] : 'https://placehold.co/800x400/f1f5f9/2563eb?text=Featured+Tech+News';
                 ?>
-                <img src="<?= htmlspecialchars($featImg) ?>" class="news-img" alt="<?= htmlspecialchars($featured['title']) ?>">
+                <!-- <img src="<?= htmlspecialchars($featImg) ?>" class="news-featured-img" alt="<?= htmlspecialchars($featured['title']) ?>"> -->
+                                <div class="position-relative">
+                <img src="<?= htmlspecialchars($featImg) ?>" class="news-featured-img" alt="<?= htmlspecialchars($featured['title']) ?>">
+                                    <span class="position-absolute top-0 start-0 m-3 badge bg-primary">FEATURED</span>
+                                </div>
                 <div class="news-body">
                     <span class="news-category">Featured</span>
                     <h2 class="fw-bold mb-3"><?= htmlspecialchars($featured['title']) ?></h2>
@@ -311,16 +321,6 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
                         </div>
                     </div>
                 </form>
-
-                <!-- News Grid (AJAX) -->
-                <div class="row g-4" id="news-list">
-                    <!-- News will be loaded here by JS -->
-                </div>
-
-                <!-- Pagination (AJAX) -->
-                <nav aria-label="Page navigation" class="mt-5">
-                    <div id="news-pagination" class="d-flex justify-content-center"></div>
-                </nav>
             </div>
 
             <!-- Sidebar -->
@@ -351,6 +351,18 @@ $tags = $pdo->query("SELECT * FROM tags ORDER BY RAND() LIMIT 7")->fetchAll();
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="col-lg-12">
+                                <!-- News Grid (AJAX) -->
+                <div class="row g-4" id="news-list">
+                    <!-- News will be loaded here by JS -->
+                </div>
+
+                <!-- Pagination (AJAX) -->
+                <nav aria-label="Page navigation" class="mt-5">
+                    <div id="news-pagination" class="d-flex justify-content-center"></div>
+                </nav>
             </div>
         </div>
     </div>

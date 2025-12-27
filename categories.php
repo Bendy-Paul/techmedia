@@ -25,10 +25,226 @@ $featured_companies->execute([$category['id']]);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Development Companies | Tech Media Directory</title>
+    <title><?= $category['name'] ?> | Tech Media Directory</title>
 
     <?php include_once('links.php'); ?>
 
+    <style>
+                /* --- Hero Section Styling --- */
+        .hero-section {
+            padding: 80px 0 100px;
+            position: relative;
+            background: var(--bg-light);
+            /* Creating a curved background effect */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23f9faff' fill-opacity='1' d='M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,208C1248,224,1344,192,1392,176L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: top;
+            background-size: cover;
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Optional: Decorative Bubbles/Shapes */
+        .shape-blob {
+            position: absolute;
+            z-index: 0;
+            /* left: 50%; */
+            opacity: 0.1;
+        }
+
+        .shape-1 { top: 10%; left: 5%; width: 300px; }
+        .shape-2 { bottom: 10%; right: 5%; width: 250px; }
+
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(78, 121, 200, 0.1);
+            color: var(--primary-color);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+
+        .hero-text {
+            color: var(--text-gray);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 35px;
+            max-width: 90%;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero-primary {
+            padding: 15px 35px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(78, 84, 200, 0.2);
+        }
+
+        .btn-hero-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(78, 84, 200, 0.3);
+            color: white;
+        }
+
+        .btn-hero-secondary {
+            padding: 15px 35px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            background: white;
+            color: var(--text-dark);
+            border: 2px solid #eee;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-hero-secondary:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: white;
+        }
+
+        /* Hero Image Container */
+        .hero-image-container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-img-main {
+            width: 100%;
+            animation: float 6s ease-in-out infinite;
+            border-radius: 20px;
+            /* Placeholder styling if image fails */
+            background: #e0e5ec; 
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Creating a mock illustration using CSS/Icon since I can't generate a real PNG */
+        .mock-illustration {
+            width: 100%;
+            height: auto;
+            position: relative;
+        }
+
+        /* Statistics Card Floating */
+        .floating-card {
+            position: absolute;
+            /* background: white; */
+            padding: 20px;
+            border-radius: 15px;
+            /* box-shadow: 0 20px 40px rgba(0,0,0,0.08); */
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: float-delayed 5s ease-in-out infinite;
+            z-index: 3;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .card-icon.orange { background: #fff0e6; color: #ff9f43; }
+        .card-icon.blue { background: #e6f7ff; color: #0abde3; }
+
+        .card-1 {
+            bottom: 40px;
+            left: -30px;
+        }
+
+        .card-2 {
+            top: 60px;
+            right: -20px;
+            animation-duration: 7s;
+        }
+
+        .stat-text h4 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+        .stat-text p { margin: 0; font-size: 0.8rem; color: var(--text-gray); }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes float-delayed {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .hero-section {
+                padding-top: 40px;
+                text-align: center;
+            }
+
+            .hero-text {
+                margin: 0 auto 35px;
+            }
+
+            .hero-btns {
+                justify-content: center;
+            }
+
+            .hero-image-container {
+                margin-top: 60px;
+            }
+            
+            .card-1 { left: 0; }
+            .card-2 { right: 0; }
+            
+            .hero-title { font-size: 2.5rem; }
+        }
+
+        path, .hero-icon{
+            fill: var(--secondary-accent);
+            color: var(--secondary-accent);
+        }
+    </style>
 </head>
 
 <body>
@@ -40,32 +256,57 @@ $featured_companies->execute([$category['id']]);
         document.getElementById('categories-mobile').classList.add('active');
     </script>
 
-    <!-- Category Hero -->
-    <section class="category-hero" data-aos="fade-in" data-aos-duration="1000">
+
+    <!-- Hero Section -->
+    <section class="hero-section" data-aos="fade-in" data-aos-duration="1000">
+        <!-- Decorative Shape -->
+        <svg class="shape-blob shape-1" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <path fill="var(--secondary-accent)" d="M44.7,-76.4C58.9,-69.2,71.8,-59.1,81.6,-46.6C91.4,-34.1,98.1,-19.2,95.8,-4.9C93.5,9.3,82.2,22.9,71.3,34.6C60.4,46.3,49.9,56.1,38.2,63.5C26.5,70.8,13.6,75.7,0.3,75.2C-13,74.7,-26,68.8,-37.1,60.8C-48.2,52.8,-57.4,42.7,-64.7,31.2C-72,19.7,-77.4,6.8,-76.4,-5.8C-75.4,-18.4,-68,-30.7,-58.5,-40.6C-49,-50.5,-37.4,-58,-25.5,-66.4C-13.6,-74.8,-1.4,-84.1,12.2,-84.8C25.8,-85.4,40.5,-83.6,44.7,-76.4Z" transform="translate(100 100)" />
+        </svg>
+
+        <i class="hero-icon <?php echo htmlspecialchars($category['icon_class']); ?> shape-blob shape-2 text-grey floating-card d-none d-md-flex d-lg-flex d-xl-flex d-xxl-flex" style="font-size: 10rem; opacity: 0.7;"></i>
+
+
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-lg-8 category-hero-content">
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                            <li class="breadcrumb-item"><a href="#">Categories</a></li>
-                            <li class="breadcrumb-item" aria-current="page"><?php echo htmlspecialchars($category['name']); ?></li>
-                        </ol>
-                    </nav>
-                    <h1 class="display-4 fw-bold mb-4" data-aos="fade-up" data-aos-delay="200"><?php echo htmlspecialchars($category['name']); ?> Companies</h1>
-                    <p class="lead text-white mb-4" data-aos="fade-up" data-aos-delay="300">Discover Nigeria's top <?php echo htmlspecialchars($category['name']); ?> agencies, freelancers, and tech teams building the digital future of Africa.</p>
-                    <div class="d-flex flex-wrap gap-2" data-aos="fade-up" data-aos-delay="400">
-                        <?php foreach ($child_cat as $child) { ?>
-                            <span class="badge bg-light text-dark border"><?php echo htmlspecialchars($child['name']); ?></span>
+                <!-- Text Content -->
+                <div class="col-lg-12 text-center">
+                    <span class="hero-badge">Top <?php echo htmlspecialchars($category['name']); ?> Platform</span>
+                    <h1 class="hero-title" data-aos="fade-up" data-aos-delay="200">
+                        Discover Leading <br>
+                        <span><?php echo htmlspecialchars($category['name']); ?> Companies</span>
+                    </h1>
+                    <p class="hero-text">
+                        <?php if (!empty($category['description'])) {
+                            echo htmlspecialchars($category['description']);
+                        } else { ?>
+                            Explore the best <?php echo htmlspecialchars($category['name']); ?> agencies, teams, and freelancers in Nigeria. Find the right partner to build your digital future.
                         <?php } ?>
+                    </p>
+                    <div class="hero-btns">
+                        <a href="#companies-list-filter" class="btn btn-hero-primary">
+                            View <?php echo htmlspecialchars($category['name']); ?> Companies <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                        <a href="get-listed.php" class="btn btn-hero-secondary">
+                            <i class="fas fa-plus-circle text-primary"></i> List Your Company
+                        </a>
                     </div>
-                </div>
-                <div class="col-lg-4 text-center d-none d-lg-block" data-aos="zoom-in" data-aos-delay="500">
-                    <i class="<?php echo htmlspecialchars($category['icon_class']); ?> text-white" style="font-size: 10rem; opacity: 0.7;"></i>
+                    <div class="mt-4 pt-3 d-flex align-items-center gap-3">
+                        <div class="d-flex">
+                            <img src="https://ui-avatars.com/api/?name=<?php echo urlencode(substr($category['name'],0,1)); ?>+<?php echo urlencode(substr($category['name'],1,1)); ?>&background=random" class="rounded-circle border border-white" width="40" alt="User">
+                            <img src="https://ui-avatars.com/api/?name=<?php echo urlencode(substr($category['name'],2,1)); ?>+<?php echo urlencode(substr($category['name'],3,1)); ?>&background=random" class="rounded-circle border border-white" width="40" style="margin-left: -15px;" alt="User">
+                            <img src="https://ui-avatars.com/api/?name=<?php echo urlencode(substr($category['name'],4,1)); ?>+<?php echo urlencode(substr($category['name'],5,1)); ?>&background=random" class="rounded-circle border border-white" width="40" style="margin-left: -15px;" alt="User">
+                            <div class="rounded-circle bg-light border border-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; margin-left: -15px; font-size: 0.8rem; font-weight: 700;">
+                                +<?php echo number_format($listed_companies->rowCount()); ?>
+                            </div>
+                        </div>
+                        <span class="text-muted small">Active companies in <?php echo htmlspecialchars($category['name']); ?></span>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
+
 
     <!-- Featured Companies -->
     <section class="section-padding featured-section">
@@ -159,6 +400,7 @@ $featured_companies->execute([$category['id']]);
                         <div class="col-lg-3 col-md-6">
                             <div class="filter-group">
                                 <div class="filter-label">Location</div>
+                                <input type="hidden" name="category_id" value="<?= htmlspecialchars($category['id']) ?>">
                                 <select class="form-select" name="location">
                                     <option value="">All Locations</option>
                                     <?php 
@@ -225,7 +467,7 @@ $featured_companies->execute([$category['id']]);
     </section>
 
     <!-- CTA Section -->
-    <section class="section-padding" data-aos="fade-up" data-aos-delay="100">
+    <section class="section-padding" data-aos="fade-up" class="bg-light">
         <div class="container">
             <div class="row justify-content-center text-center">
                 <div class="col-lg-8">

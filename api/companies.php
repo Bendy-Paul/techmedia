@@ -4,10 +4,10 @@ header('Content-Type: application/json');
 require_once '../includes/wertyuytre.php';
 
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$perPage = isset($_GET['per_page']) ? max(1, intval($_GET['per_page'])) : 12;
+$perPage = isset($_GET['per_page']) ? max(1, intval($_GET['per_page'])) : 9;
 $offset = ($page - 1) * $perPage;
 
-$category = isset($_GET['category']) ? trim($_GET['category']) : null;
+$category = isset($_GET['category_id']) ? trim($_GET['category_id']) : null;
 $search = isset($_GET['search']) ? trim($_GET['search']) : null;
 $state= isset($_GET['location']) ? trim($_GET['location']) : null;
 $verified = isset($_GET['verified']) ? trim($_GET['verified']) : null;
@@ -18,7 +18,7 @@ $where = [];
 $params = [];
 
 if ($category) {
-    $where[] = 'c.id = ?';
+    $where[] = 'cat.category_id  = ?';
     $params[] = $category;
 }
 if ($state) {
@@ -64,13 +64,13 @@ if ($search) {
 $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
 // Get total count
-$countSql = "SELECT COUNT(*) FROM companies c $whereSql";
+$countSql = "SELECT COUNT(*) FROM companies c LEFT JOIN company_categories cat ON c.id = cat.company_id $whereSql";
 $stmt = $pdo->prepare($countSql);
 $stmt->execute($params);
 $total = $stmt->fetchColumn();
 
 // Get paginated companies
-$sql = "SELECT c.*, cat.name as category_name FROM companies c LEFT JOIN categories cat ON c.id = cat.id $whereSql ORDER BY c.name ASC LIMIT $perPage OFFSET $offset";
+$sql = "SELECT c.* FROM companies c LEFT JOIN company_categories cat ON c.id = cat.company_id $whereSql ORDER BY c.name ASC LIMIT $perPage OFFSET $offset";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $companies = $stmt->fetchAll(PDO::FETCH_ASSOC);

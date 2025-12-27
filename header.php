@@ -19,7 +19,7 @@
                             <div class="dropdown-menu">
                                 <div class="container">
                                     <div class="row p-3">
-                                        <div class="row col-md-10">
+                                        <div class="row col-md-12">
                                             <?php
                                             $parent_categories = $pdo->query("SELECT * FROM categories WHERE parent_id=0 AND type='company' ORDER BY name ASC LIMIT 6")->fetchAll();
                                             foreach ($parent_categories as $parent) {
@@ -27,7 +27,7 @@
                                                 $child_categories->execute([$parent['id']]);
                                                 $child_categories = $child_categories->fetchAll();
                                             ?>
-                                                <div class="col-md-4 mb-4">
+                                                <div class="col-md-3 mb-4">
                                                     <h6 class="text-primary-accent mb-1 text-uppercase fw-bold"><i class="<?php echo $parent['icon_class']; ?> me-2"></i><?php echo htmlspecialchars($parent['name']); ?></h6>
                                                     <?php foreach ($child_categories as $child) { ?>
                                                         <a class="dropdown-item" href="<?=  htmlspecialchars($url_path) ?>/categories/<?php echo $child['slug']; ?>"><?php echo htmlspecialchars($child['name']); ?></a>
@@ -36,13 +36,13 @@
 
                                             <?php } ?>
                                         </div>
-                                        <div class="col-md-2 border-start border-secondary d-none d-md-block">
+                                        <!-- <div class="col-md-2 border-start border-secondary d-none d-md-block">
                                             <div class="text-center">
                                                 <i class="fas fa-rocket fa-3x mb-3 text-secondary"></i>
                                                 <p class="small text-muted">Explore over 50+ categories in the Nigerian Tech Space.</p>
                                                 <a href="all-categories.php" class="btn btn-outline-primary btn-sm">View All</a>
                                             </div>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </div>
                             </div>
