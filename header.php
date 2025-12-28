@@ -1,17 +1,20 @@
     <!-- Modern Header -->
-    <div class="navbar-container">
+    <div class="navbar-container" >
         <div class="container">
-            <nav class="navbar navbar-expand-lg">
-                <a class="navbar-brand" href="#">
-                    <i class="bi bi-hexagon-fill text-primary-accent"></i>
-                    TECH<span>MEDIA</span>
-                </a>
+            <nav class="navbar navbar-expand-lg"style="height: 6em;">
+                <!-- <i class="bi bi-hexagon-fill text-primary-accent"></i>
+                TECH<span>MEDIA</span> -->
+                <div class="col-2 d-flex align-items-center">
+                    <a class="" href="#">
+                        <img src="<?= $url_path ?>/assets/images/techstream-logo.png" class="img-fluid" alt="TechMedia Logo">
+                    </a>
+                </div>
 
                 <!-- Desktop Navigation -->
                 <div class="collapse navbar-collapse desktop-nav">
                     <ul class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-center">
                         <li class="nav-item"><a class="nav-link" id="home" href="<?= htmlspecialchars($url_path) ?>">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" id="about-us" href="<?=  htmlspecialchars($url_path) ?>/about-us">About</a></li>
+                        <li class="nav-item"><a class="nav-link" id="about-us" href="<?= htmlspecialchars($url_path) ?>/about-us">About</a></li>
 
                         <!-- Categories Dropdown (Full Width) -->
                         <li class="nav-item dropdown position-static">
@@ -30,7 +33,7 @@
                                                 <div class="col-md-3 mb-4">
                                                     <h6 class="text-primary-accent mb-1 text-uppercase fw-bold"><i class="<?php echo $parent['icon_class']; ?> me-2"></i><?php echo htmlspecialchars($parent['name']); ?></h6>
                                                     <?php foreach ($child_categories as $child) { ?>
-                                                        <a class="dropdown-item" href="<?=  htmlspecialchars($url_path) ?>/categories/<?php echo $child['slug']; ?>"><?php echo htmlspecialchars($child['name']); ?></a>
+                                                        <a class="dropdown-item" href="<?= htmlspecialchars($url_path) ?>/categories/<?php echo $child['slug']; ?>"><?php echo htmlspecialchars($child['name']); ?></a>
                                                     <?php } ?>
                                                 </div>
 

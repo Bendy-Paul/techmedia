@@ -115,7 +115,7 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             background-position: center;
             
             /* 1. The Blur Effect */
-            filter: blur(10px); 
+            filter: blur(5px); 
             
             /* 2. Scale Fix: When you blur, edges get white/faded. 
                Scaling up slightly pushes those bad edges off-screen. */
@@ -134,7 +134,7 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             height: 100%;
             
             /* Black overlay with 40% opacity */
-            background-color: rgba(0, 0, 0, 0.4); 
+            background-color: rgba(52, 74, 98, 0.4); 
             
             z-index: -1; /* Places it above the image but behind the text */
         }
