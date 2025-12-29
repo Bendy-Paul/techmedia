@@ -185,25 +185,63 @@ $companies = $pdo->query("SELECT id, name FROM companies ORDER BY name ASC")->fe
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Links</h6></div>
                     <div class="card-body">
+                        <h6 class="small fw-bold text-muted mt-2">Social Media</h6>
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text"><i class="fab fa-linkedin"></i></span>
+                            <input type="text" name="social[linkedin]" class="form-control" value="<?= htmlspecialchars($social['linkedin']??'') ?>" placeholder="LinkedIn URL">
+                        </div>
                         <div class="input-group input-group-sm mb-2">
                             <span class="input-group-text"><i class="fab fa-twitter"></i></span>
-                            <input type="text" name="social[twitter]" class="form-control" value="<?= htmlspecialchars($social['twitter']??'') ?>">
+                            <input type="text" name="social[twitter]" class="form-control" value="<?= htmlspecialchars($social['twitter']??'') ?>" placeholder="X/Twitter URL">
                         </div>
                         <div class="input-group input-group-sm mb-2">
-                            <span class="input-group-text"><i class="fab fa-whatsapp"></i></span>
-                            <input type="text" name="community[whatsapp]" class="form-control" value="<?= htmlspecialchars($community['whatsapp']??'') ?>">
+                            <span class="input-group-text"><i class="fab fa-facebook"></i></span>
+                            <input type="text" name="social[facebook]" class="form-control" value="<?= htmlspecialchars($social['facebook']??'') ?>" placeholder="Facebook URL">
                         </div>
-                        <!-- Add other social inputs here as needed -->
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text"><i class="fab fa-instagram"></i></span>
+                            <input type="text" name="social[instagram]" class="form-control" value="<?= htmlspecialchars($social['instagram']??'') ?>" placeholder="Instagram URL">
+                        </div>
+
+                        <h6 class="small fw-bold text-muted mt-3">Community Links</h6>
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text"><i class="fab fa-whatsapp"></i></span>
+                            <input type="text" name="community[whatsapp]" class="form-control" value="<?= htmlspecialchars($community['whatsapp']??'') ?>" placeholder="WhatsApp Group">
+                        </div>
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text"><i class="fab fa-telegram"></i></span>
+                            <input type="text" name="community[telegram]" class="form-control" value="<?= htmlspecialchars($community['telegram']??'') ?>" placeholder="Telegram Channel">
+                        </div>
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input type="text" name="community[newsletter]" class="form-control" value="<?= htmlspecialchars($community['newsletter']??'') ?>" placeholder="Newsletter URL">
+                        </div>
                     </div>
                 </div>
 
                 <!-- Banner & Save -->
                 <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Tickets & Banner</h6></div>
                     <div class="card-body">
-                        <?php if($event['banner_image_url']): ?>
-                            <img src="../<?= htmlspecialchars($event['banner_image_url']) ?>" class="img-fluid rounded mb-2">
-                        <?php endif; ?>
-                        <input type="file" name="banner_image_upload" class="form-control form-control-sm mb-3">
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Price (NGN)</label>
+                            <input type="number" name="price" class="form-control" value="<?= htmlspecialchars($event['price']) ?>">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Ticket Link</label>
+                            <input type="url" name="ticket_url" class="form-control" value="<?= htmlspecialchars($event['ticket_url']) ?>" placeholder="https://">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Banner Image</label>
+                            <?php if($event['banner_image_url']): ?>
+                                <img src="../<?= htmlspecialchars($event['banner_image_url']) ?>" class="img-fluid rounded mb-2">
+                            <?php endif; ?>
+                            <input type="file" name="banner_image_upload" class="form-control form-control-sm">
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" name="is_featured" value="1" <?= $event['is_featured'] ? 'checked' : '' ?>>
+                            <label class="form-check-label">Feature Event</label>
+                        </div>
                         <button type="submit" class="btn btn-primary w-100 fw-bold">Save Changes</button>
                     </div>
                 </div>

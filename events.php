@@ -394,7 +394,7 @@ $featuredEvent = $featStmt->fetch();
 
     <?php include_once('footer.php'); ?>
 
-    <script src="<?= htmlspecialchars($url_path) ?>/assets/js/events-filter.js"></script>
+    <script src="<?= htmlspecialchars($url_path) ?>/assets/js/events-filter.js?3"></script>
     <script>
         // Map Tooltip Logic (unchanged)
         document.querySelectorAll('.state-path').forEach(path => {

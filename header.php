@@ -16,9 +16,35 @@
                         <li class="nav-item"><a class="nav-link" id="home" href="<?= htmlspecialchars($url_path) ?>">Home</a></li>
                         <li class="nav-item"><a class="nav-link" id="about-us" href="<?= htmlspecialchars($url_path) ?>/about-us">About</a></li>
 
+                        <!-- States Dropdown (Full Width) -->
+                        <li class="nav-item dropdown position-static">
+                            <a class="nav-link dropdown-toggle" id="states" href="#" data-bs-toggle="dropdown">States</a>
+                            <div class="dropdown-menu" style="width:100%;min-width:600px;">
+                                <div class="container">
+                                    <div class="row p-3">
+                                        <?php
+                                        $states = $pdo->query("SELECT s.*, COUNT(c.id) as company_count FROM states s LEFT JOIN companies c ON s.id = c.state_id GROUP BY s.id ORDER BY company_count DESC, s.name ASC LIMIT 20")->fetchAll();
+                                        ?>
+                                        <div class="row col-md-12">
+                                            <?php foreach ($states as $state): ?>
+                                                <div class="col-md-3 mb-3">
+                                                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="<?= $url_path ?>/states?state_id=<?= $state['id'] ?>">
+                                                        <span><?= htmlspecialchars($state['name']) ?></span>
+                                                        <span class="badge bg-light text-dark ms-2"><?= $state['company_count'] ?></span>
+                                                    </a>
+                                                </div>
+                                            <?php endforeach; ?>
+                                            <div class="col-md-3 mb-3">
+                                                <a class="dropdown-item btn btn-outline-primary w-100 fw-bold" href="<?= $url_path ?>/all-states">View All States</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
                         <!-- Categories Dropdown (Full Width) -->
                         <li class="nav-item dropdown position-static">
-                            <a class="nav-link dropdown-toggle" id="categories" href="#" data-bs-toggle="dropdown">Browse Companies</a>
+                            <a class="nav-link dropdown-toggle" id="categories" href="#" data-bs-toggle="dropdown">Services</a>
                             <div class="dropdown-menu">
                                 <div class="container">
                                     <div class="row p-3">
@@ -43,7 +69,7 @@
                                             <div class="text-center">
                                                 <i class="fas fa-rocket fa-3x mb-3 text-secondary"></i>
                                                 <p class="small text-muted">Explore over 50+ categories in the Nigerian Tech Space.</p>
-                                                <a href="all-categories.php" class="btn btn-outline-primary btn-sm">View All</a>
+                                                <a href="all-categories" class="btn btn-outline-primary btn-sm">View All</a>
                                             </div>
                                         </div> -->
                                     </div>
@@ -90,7 +116,7 @@
                         <li class="nav-item"><a class="nav-link" id="news" href="<?= $url_path ?>/jobs">Jobs</a></li>
                     </ul>
                     <div class="d-flex mt-3 mt-lg-0">
-                        <a href="<?= $url_path ?>/get-listed.php"><button class="btn-get-listed">Get Listed</button></a>
+                        <a href="<?= $url_path ?>/get-listed"><button class="btn-get-listed">Get Listed</button></a>
                     </div>
                 </div>
 
@@ -114,8 +140,8 @@
             </button>
         </div>
 
-        <a href="index.php" id="home-responsive" class="mobile-nav-link">Home</a>
-        <a href="about-us.php" id="about-us-responsive" class="mobile-nav-link">About</a>
+        <a href="index" id="home-responsive" class="mobile-nav-link">Home</a>
+        <a href="about-us" id="about-us-responsive" class="mobile-nav-link">About</a>
 
         <div class="mobile-dropdown">
             <a href="#" id="categories-mobile" class="mobile-nav-link d-flex justify-content-between align-items-center">
@@ -123,7 +149,7 @@
                 <i class="fas fa-chevron-down"></i>
             </a>
             <div class="mobile-dropdown-content">
-                <a href="categories.php" class="mobile-nav-link">Web Development</a>
+                <a href="categories" class="mobile-nav-link">Web Development</a>
                 <a href="#" class="mobile-nav-link">Mobile Apps</a>
                 <a href="#" class="mobile-nav-link">SaaS Platforms</a>
                 <a href="#" class="mobile-nav-link">Robotics</a>
@@ -148,10 +174,10 @@
             </div>
         </div>
 
-        <a href="news.php" id="news-mobile" class="mobile-nav-link">News</a>
-        <a href="news.php" id="news-mobile" class="mobile-nav-link">News</a>
+        <a href="news" id="news-mobile" class="mobile-nav-link">News</a>
+        <a href="news" id="news-mobile" class="mobile-nav-link">News</a>
 
         <div class="mt-4 pt-4 border-top border-secondary">
             <button class="btn-get-listed w-100">Get Listed</button>
         </div>
-    </div>
+    </div> 

@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <span><i class="fas fa-calendar me-1"></i> ${event.start_datetime ? new Date(event.start_datetime).toLocaleDateString() : ''}</span>
                             <span><i class="fas fa-map-marker-alt me-1"></i> ${event.is_virtual == 1 ? 'Online' : (event.city_name || 'Nigeria')}</span>
                         </div>
-                        <a href="${event.is_featured == 1 ? 'featured-event' : 'event'}/${event.slug}" class="btn btn-outline-primary btn-sm mt-3">View Details</a>
+                        <a href="../${event.is_featured == 1 ? 'featured-event' : 'event'}/${event.slug}" class="btn btn-outline-primary btn-sm mt-3">View Details</a>
                     </div>
                 </div>
             `;

@@ -314,7 +314,7 @@ $featured_companies->execute([$category['id']]);
             <div class="d-flex justify-content-between align-items-end mb-5" data-aos="fade-up" data-aos-delay="100">
                 <div>
                     <span class="section-badge">Featured</span>
-                    <h2 class="fw-bold">Premium Web Development Partners</h2>
+                    <h2 class="fw-bold">Premium Partners</h2>
                     <p class="text-muted">Top-rated and verified companies with proven track records</p>
                 </div>
                 <a href="#" class="text-primary-accent text-decoration-none fw-bold">View All Featured <i class="fas fa-arrow-right"></i></a>
@@ -327,7 +327,7 @@ $featured_companies->execute([$category['id']]);
                     $projects_count = $pdo->prepare("SELECT COUNT(*) as project_count FROM company_projects WHERE company_id = ?");
                     $projects_count->execute([$company['id']]);
                 ?>
-                    <div class="col-lg-6 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
                         <div class="featured-card">
                             <span class="featured-badge">Featured</span>
                             <div class="featured-body">
