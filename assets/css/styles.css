@@ -193,18 +193,6 @@
             color: var(--primary-accent) !important;
         }
 
-        /* Indicator dot for active link */
-        .nav-link.active::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 4px;
-            background: var(--primary-accent);
-            border-radius: 50%;
-        }
 
         /* Full-Width Dropdown Styling */
         .dropdown-menu {

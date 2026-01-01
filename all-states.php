@@ -23,7 +23,7 @@ $states = $pdo->query("SELECT s.*, COUNT(c.id) as company_count FROM states s LE
             border-radius: 8px;
             padding: 1em 1.5em;
             font-weight: 600;
-            color: #007bff;
+            /* color: #007bff; */
             text-decoration: none;
             box-shadow: 0 1px 4px rgba(0,0,0,0.04);
             transition: background 0.2s;
@@ -39,7 +39,7 @@ $states = $pdo->query("SELECT s.*, COUNT(c.id) as company_count FROM states s LE
     <h2 class="fw-bold mb-4 text-primary-accent">All States</h2>
     <div class="state-list">
         <?php foreach ($states as $state): ?>
-            <a href="states.php?state_id=<?= $state['id'] ?>" class="state-item">
+            <a href="states.php?slug=<?= htmlspecialchars($state['slug']) ?>" class="state-item">
                 <?= htmlspecialchars($state['name']) ?> <span class="badge bg-light text-dark ms-2"><?= $state['company_count'] ?></span>
             </a>
         <?php endforeach; ?>

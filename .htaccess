@@ -12,6 +12,7 @@
     RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /techmedia/index\.php\ HTTP
     RewriteRule ^index\.php$ / [R=301,L]
     RewriteRule ^categories/([^/]+)/?$ categories.php?slug=$1 [L,QSA]
+    RewriteRule ^states/([^/]+)/?$ states.php?slug=$1 [L,QSA]
     RewriteRule ^events/([^/]+)/?$ events.php?slug=$1 [L,QSA]
     RewriteRule ^featured-event/([^/]+)/?$ featured-event.php?slug=$1 [L,QSA]    
     RewriteRule ^event/([^/]+)/?$ event.php?slug=$1 [L,QSA]

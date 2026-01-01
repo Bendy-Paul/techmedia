@@ -3,27 +3,27 @@ require 'includes/db.php';
 require 'includes/header.php';
 require 'includes/sidebar.php';
 
-if (!isset($_GET['id'])) {
-    header("Location: companies.php");
-    exit();
-}
+if (!isset($_GET['id'])) { header("Location: companies.php"); exit(); }
 $id = (int)$_GET['id'];
 
-// Fetch Company Data
 $stmt = $pdo->prepare("SELECT * FROM companies WHERE id = ?");
 $stmt->execute([$id]);
 $company = $stmt->fetch();
-if (!$company) die("Company not found.");
+if (!$company) die("Not Found");
 
-// Fetch Related Data
+// Related Data
 $projects = $pdo->query("SELECT * FROM company_projects WHERE company_id = $id")->fetchAll();
+$branches = $pdo->query("SELECT l.*, c.name as city_name FROM company_locations l LEFT JOIN cities c ON l.city_id = c.id WHERE l.company_id = $id")->fetchAll();
 $gallery_images = $pdo->query("SELECT * FROM company_galleries WHERE company_id = $id")->fetchAll();
+$selected_stacks = json_decode($company['stack_ids'] ?? '[]', true);
+if (!is_array($selected_stacks)) $selected_stacks = [];
+
 $social = json_decode($company['social_links'] ?? '{}', true);
 $stats = json_decode($company['profile_stats'] ?? '{}', true);
 
-// Dropdowns
-$all_categories = $pdo->query("SELECT * FROM categories WHERE type='company' ORDER BY name ASC")->fetchAll();
+$categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
 $cities = $pdo->query("SELECT * FROM cities ORDER BY name ASC")->fetchAll();
+$stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetchAll();
 
 // Selected Categories
 $stmt_cat = $pdo->prepare("SELECT category_id FROM company_categories WHERE company_id = ?");
@@ -31,47 +31,74 @@ $stmt_cat->execute([$id]);
 $selected_cats = $stmt_cat->fetchAll(PDO::FETCH_COLUMN);
 ?>
 
-
 <main class="main-content">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-1">Edit Company</h2>
-            <p class="text-muted mb-0">Updating: <?= htmlspecialchars($company['name']) ?></p>
-        </div>
-        <a href="companies.php" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i> Back</a>
+        <h2 class="fw-bold mb-1">Edit Company</h2>
+        <a href="companies.php" class="btn btn-outline-secondary">Back</a>
     </div>
-
-    <?php if (isset($_GET['status']) && $_GET['status'] == 'error'): ?>
-        <div class="alert alert-danger">
-            Error: <?= htmlspecialchars($_GET['msg'] ?? 'Unknown error') ?>
-        </div>
-    <?php endif; ?>
 
     <form action="actions/update-company.php" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id" value="<?= $company['id'] ?>">
         
         <div class="row">
-            <!-- Left Column -->
+            <!-- Left -->
             <div class="col-md-8">
-                <!-- Basic Details -->
+                <!-- Details -->
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Company Details</h6></div>
+                    <div class="card-header bg-white fw-bold">Company Details</div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Company Name *</label>
+                            <label class="small text-muted">Name</label>
                             <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($company['name']) ?>" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Tagline</label>
+                            <label class="small text-muted">Tagline</label>
                             <input type="text" name="tagline" class="form-control" value="<?= htmlspecialchars($company['tagline'] ?? '') ?>">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Description</label>
-                            <textarea name="description" class="form-control" rows="6"><?= htmlspecialchars($company['description'] ?? '') ?></textarea>
+                            <label class="small text-muted">Description</label>
+                            <textarea name="description" class="form-control" rows="4"><?= htmlspecialchars($company['description'] ?? '') ?></textarea>
                         </div>
                     </div>
                 </div>
 
+                <!-- Tech Stack -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white fw-bold">Tech Stack & Tools</div>
+                    <div class="card-body">
+                        <div class="row g-2" style="max-height: 200px; overflow-y: auto;">
+                            <?php foreach($stacks as $stack): ?>
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="stack_ids[]" value="<?= $stack['id'] ?>" id="stack_<?= $stack['id'] ?>" <?= in_array($stack['id'], $selected_stacks) ? 'checked' : '' ?>>
+                                        <label class="form-check-label small" for="stack_<?= $stack['id'] ?>">
+                                            <i class="<?= $stack['icon_class'] ?> me-1 text-muted"></i> <?= htmlspecialchars($stack['name']) ?>
+                                        </label>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Branches -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white d-flex justify-content-between">
+                        <span class="fw-bold">Branch Locations</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addBranch()">+ Add</button>
+                    </div>
+                    <div class="card-body" id="branches_container">
+                        <?php foreach($branches as $branch): ?>
+                            <div class="border rounded p-2 mb-2 position-relative bg-light" id="ex_branch_<?= $branch['id'] ?>">
+                                <input type="hidden" name="existing_branches[<?= $branch['id'] ?>][id]" value="<?= $branch['id'] ?>">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-1" onclick="deleteBranch(<?= $branch['id'] ?>)"></button>
+                                <div class="fw-bold small mb-1"><?= htmlspecialchars($branch['city_name']) ?></div>
+                                <input type="text" name="existing_branches[<?= $branch['id'] ?>][address]" class="form-control form-control-sm" value="<?= htmlspecialchars($branch['address']) ?>">
+                            </div>
+                        <?php endforeach; ?>
+                        <input type="hidden" name="delete_branch_ids" id="delete_branch_ids">
+                    </div>
+                </div>
                 
                 <!-- Projects Section (Dynamic) -->
                 <div class="card border-0 shadow-sm mb-4">
@@ -128,21 +155,47 @@ $selected_cats = $stmt_cat->fetchAll(PDO::FETCH_COLUMN);
                         <input type="file" name="gallery[]" class="form-control" multiple accept="image/*">
                     </div>
                 </div>
+            </div>
 
+            <!-- Right -->
+            <div class="col-md-4">
+                <!-- HQ & Contact (Simplified for brevity, assuming standard inputs) -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <label class="small text-muted">HQ City</label>
+                        <select name="city_id" class="form-select mb-2">
+                            <option value="">Select...</option>
+                            <?php foreach($cities as $city): ?>
+                                <option value="<?= $city['id'] ?>" <?= $company['city_id']==$city['id']?'selected':'' ?>><?= htmlspecialchars($city['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <label class="small text-muted">Address</label>
+                        <textarea name="address" class="form-control mb-2" rows="2"><?= htmlspecialchars($company['address'] ?? '') ?></textarea>
+                        
+                        <input type="email" name="email" class="form-control mb-2" value="<?= htmlspecialchars($company['email'] ?? '') ?>" placeholder="Email">
+                        <input type="text" name="phone" class="form-control mb-2" value="<?= htmlspecialchars($company['phone'] ?? '') ?>" placeholder="Phone">
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted">Categories</label>
+                            <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
+                                <?php foreach($categories as $cat): ?>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="categories[]" value="<?= $cat['id'] ?>" id="cat_<?= $cat['id'] ?>"
+                                        <?= in_array($cat['id'], $selected_cats) ? 'checked' : '' ?>>
+                                        <label class="form-check-label" for="cat_<?= $cat['id'] ?>">
+                                            <?= htmlspecialchars($cat['name']) ?>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Contact & Metrics (Updated) -->
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Contact & Metrics</h6></div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold small text-muted">Email</label>
-                                <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($company['email'] ?? '') ?>">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold small text-muted">Phone</label>
-                                <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($company['phone'] ?? '') ?>">
-                            </div>
-                        </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted">Website URL</label>
                             <input type="url" name="website_url" class="form-control" value="<?= htmlspecialchars($company['website_url'] ?? '') ?>">
@@ -173,48 +226,8 @@ $selected_cats = $stmt_cat->fetchAll(PDO::FETCH_COLUMN);
                         </div>
                     </div>
                 </div>
-
-                <!-- Location & Categories -->
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Location & Categories</h6></div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold small text-muted">City</label>
-                                <select name="city_id" class="form-select">
-                                    <option value="">Select City...</option>
-                                    <?php foreach($cities as $city): ?>
-                                        <option value="<?= $city['id'] ?>" <?= $city['id'] == $company['city_id'] ? 'selected' : '' ?>>
-                                            <?= htmlspecialchars($city['name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold small text-muted">Categories</label>
-                                <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
-                                    <?php foreach($all_categories as $cat): ?>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="categories[]" value="<?= $cat['id'] ?>" id="cat_<?= $cat['id'] ?>"
-                                            <?= in_array($cat['id'], $selected_cats) ? 'checked' : '' ?>>
-                                            <label class="form-check-label" for="cat_<?= $cat['id'] ?>">
-                                                <?= htmlspecialchars($cat['name']) ?>
-                                            </label>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Full Address</label>
-                            <textarea name="address" class="form-control" rows="2"><?= htmlspecialchars($company['address'] ?? '') ?></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column -->
-            <div class="col-md-4">
+                
+                <!-- Branding -->
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Branding</h6></div>
                     <div class="card-body text-center">
@@ -237,7 +250,7 @@ $selected_cats = $stmt_cat->fetchAll(PDO::FETCH_COLUMN);
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- Social Media Links (New) -->
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Social Links</h6></div>
@@ -277,7 +290,7 @@ $selected_cats = $stmt_cat->fetchAll(PDO::FETCH_COLUMN);
                         </div>
                     </div>
                 </div>
-
+                
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Settings</h6></div>
                     <div class="card-body">
@@ -301,14 +314,40 @@ $selected_cats = $stmt_cat->fetchAll(PDO::FETCH_COLUMN);
                         <button type="submit" class="btn btn-primary w-100 fw-bold">Update Listing</button>
                     </div>
                 </div>
+                
             </div>
         </div>
     </form>
 </main>
-</div>
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
+    const citiesData = <?php echo json_encode($cities); ?>;
+    let newBranchCount = 0;
+
+    function addBranch() {
+        let options = '<option value="">Select City...</option>';
+        citiesData.forEach(c => { options += `<option value="${c.id}">${c.name}</option>`; });
+
+        const html = `
+            <div class="border rounded p-2 mb-2 position-relative bg-light" id="new_branch_${newBranchCount}">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-1" onclick="document.getElementById('new_branch_${newBranchCount}').remove()"></button>
+                <select name="new_branches[${newBranchCount}][city_id]" class="form-select form-select-sm mb-1">${options}</select>
+                <input type="text" name="new_branches[${newBranchCount}][address]" class="form-control form-control-sm" placeholder="Address">
+            </div>`;
+        document.getElementById('branches_container').insertAdjacentHTML('beforeend', html);
+        newBranchCount++;
+    }
+
+    function deleteBranch(id) {
+        if(confirm('Delete Branch?')) {
+            document.getElementById('ex_branch_' + id).style.display = 'none';
+            let input = document.getElementById('delete_branch_ids');
+            let ids = input.value ? input.value.split(',') : [];
+            ids.push(id);
+            input.value = ids.join(',');
+        }
+    }
+    
     let newProjectCount = 0;
     
     function addProject() {
@@ -357,5 +396,3 @@ $selected_cats = $stmt_cat->fetchAll(PDO::FETCH_COLUMN);
         }
     }
 </script>
-</body>
-</html>

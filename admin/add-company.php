@@ -3,25 +3,22 @@ require 'includes/db.php';
 require 'includes/header.php';
 require 'includes/sidebar.php';
 
-// Fetch Categories & Locations for Dropdowns
-$categories = $pdo->query("SELECT * FROM categories WHERE type='company' ORDER BY name ASC")->fetchAll();
+$categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
 $cities = $pdo->query("SELECT * FROM cities ORDER BY name ASC")->fetchAll();
+$stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetchAll();
 ?>
 
 <main class="main-content">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-1">Add New Company</h2>
-            <p class="text-muted mb-0">Create a new business listing manually.</p>
-        </div>
-        <a href="companies.php" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i> Back</a>
+        <h2 class="fw-bold mb-1">Add New Company</h2>
+        <a href="companies.php" class="btn btn-outline-secondary">Back</a>
     </div>
 
     <form action="actions/save-company.php" method="POST" enctype="multipart/form-data">
         <div class="row">
-            <!-- Left Column: Basic Info -->
+            <!-- Left Column -->
             <div class="col-md-8">
-                <!-- Basic Details -->
+                <!-- Basic Info -->
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Company Details</h6></div>
                     <div class="card-body">
@@ -30,74 +27,55 @@ $cities = $pdo->query("SELECT * FROM cities ORDER BY name ASC")->fetchAll();
                             <input type="text" name="name" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Tagline (Short Bio)</label>
-                            <input type="text" name="tagline" class="form-control" placeholder="e.g. Building the future of payments">
+                            <label class="form-label fw-bold small text-muted">Tagline</label>
+                            <input type="text" name="tagline" class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Full Description</label>
-                            <textarea name="description" class="form-control" rows="6"></textarea>
+                            <label class="form-label fw-bold small text-muted">Description</label>
+                            <textarea name="description" class="form-control" rows="4"></textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- Contact & Metrics -->
+                <!-- Tech Stack (New) -->
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Contact & Metrics</h6></div>
+                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Tech Stack & Tools</h6></div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold small text-muted">Email</label>
-                                <input type="email" name="email" class="form-control">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold small text-muted">Phone</label>
-                                <input type="text" name="phone" class="form-control">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Website URL</label>
-                            <input type="url" name="website_url" class="form-control" placeholder="https://">
-                        </div>
-                        
-                        <hr class="text-muted">
-                        
-                        <!-- New Fields Added Here -->
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold small text-muted">Year Founded</label>
-                                <input type="number" name="year_founded" class="form-control" placeholder="2015">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold small text-muted">Team Size</label>
-                                <select name="team_size" class="form-select">
-                                    <option value="">Select...</option>
-                                    <option value="1-10">1-10 Employees</option>
-                                    <option value="11-50">11-50 Employees</option>
-                                    <option value="51-200">51-200 Employees</option>
-                                    <option value="200+">200+ Employees</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold small text-muted">Starting Price (NGN)</label>
-                                <input type="number" name="starting_cost" class="form-control" placeholder="500000">
-                            </div>
+                        <div class="row g-2" style="max-height: 200px; overflow-y: auto;">
+                            <?php foreach($stacks as $stack): ?>
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="stack_ids[]" value="<?= $stack['id'] ?>" id="stack_<?= $stack['id'] ?>">
+                                        <label class="form-check-label small" for="stack_<?= $stack['id'] ?>">
+                                            <i class="<?= $stack['icon_class'] ?> me-1 text-muted"></i> <?= htmlspecialchars($stack['name']) ?>
+                                        </label>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
 
-                
-                <!-- Projects Section (New) -->
+                <!-- Branch Locations (New) -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0">Branch Locations</h6>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addBranch()">+ Add Branch</button>
+                    </div>
+                    <div class="card-body" id="branches_container">
+                        <!-- Dynamic rows here -->
+                    </div>
+                </div>
+
+                <!-- Projects Section (Existing) -->
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                         <h6 class="fw-bold mb-0">Portfolio Projects</h6>
                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="addProject()">+ Add Project</button>
                     </div>
-                    <div class="card-body" id="projects_container">
-                        <!-- Project Template (Hidden) -->
-                        <!-- JS will insert rows here -->
-                    </div>
+                    <div class="card-body" id="projects_container"></div>
                 </div>
-
+                
                 <!-- Gallery Section (New) -->
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Company Gallery</h6></div>
@@ -106,59 +84,72 @@ $cities = $pdo->query("SELECT * FROM cities ORDER BY name ASC")->fetchAll();
                         <div class="form-text">Upload office photos or team pictures (Multiple allowed).</div>
                     </div>
                 </div>
-
-                <!-- Location & Categories -->
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Location & Categories</h6></div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold small text-muted">City</label>
-                                <select name="city_id" class="form-select">
-                                    <option value="">Select City...</option>
-                                    <?php foreach($cities as $city): ?>
-                                        <option value="<?= $city['id'] ?>"><?= htmlspecialchars($city['name']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold small text-muted">Categories</label>
-                                <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
-                                    <?php foreach($categories as $cat): ?>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="categories[]" value="<?= $cat['id'] ?>" id="cat_<?= $cat['id'] ?>">
-                                            <label class="form-check-label" for="cat_<?= $cat['id'] ?>">
-                                                <?= htmlspecialchars($cat['name']) ?>
-                                            </label>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Full Address</label>
-                            <textarea name="address" class="form-control" rows="2"></textarea>
-                        </div>
-                    </div>
-                </div>
             </div>
 
-            <!-- Right Column: Media & Settings -->
+            <!-- Right Column -->
             <div class="col-md-4">
+                <!-- HQ Location -->
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Branding</h6></div>
+                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Headquarters</h6></div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Logo (Square)</label>
-                            <input type="file" name="logo" class="form-control" accept="image/*">
+                            <label class="small text-muted">City</label>
+                            <select name="city_id" class="form-select">
+                                <option value="">Select...</option>
+                                <?php foreach($cities as $city): ?>
+                                    <option value="<?= $city['id'] ?>"><?= htmlspecialchars($city['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Cover Image</label>
-                            <input type="file" name="cover" class="form-control" accept="image/*">
+                            <label class="small text-muted">Address</label>
+                            <textarea name="address" class="form-control" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted">Categories</label>
+                            <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
+                                <?php foreach($categories as $cat): ?>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="categories[]" value="<?= $cat['id'] ?>" id="cat_<?= $cat['id'] ?>">
+                                        <label class="form-check-label" for="cat_<?= $cat['id'] ?>">
+                                            <?= htmlspecialchars($cat['name']) ?>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Contact & Branding -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Contact & Info</h6></div>
+                    <div class="card-body">
+                        <input type="email" name="email" class="form-control mb-2" placeholder="Email">
+                        <input type="text" name="phone" class="form-control mb-2" placeholder="Phone">
+                        <input type="url" name="website_url" class="form-control mb-2" placeholder="Website">
+                        <div class="row g-2 mb-2">
+                            <div class="col-6"><input type="number" name="year_founded" class="form-control" placeholder="Year Founded"></div>
+                            <div class="col-6">
+                                <select name="team_size" class="form-select">
+                                    <option value="">Size...</option>
+                                    <option value="1-10">1-10</option>
+                                    <option value="11-50">11-50</option>
+                                    <option value="51-200">51-200</option>
+                                    <option value="200+">200+</option>
+                                </select>
+                            </div>
+                        </div>
+                        <input type="number" name="starting_cost" class="form-control mb-3" placeholder="Starting Price">
+                        
+                        <label class="small text-muted">Logo</label>
+                        <input type="file" name="logo" class="form-control mb-2">
+                        <label class="small text-muted">Cover</label>
+                        <input type="file" name="cover" class="form-control">
+                    </div>
+                </div>
+                
                 <!-- Social Media Links (New) -->
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Social Links</h6></div>
@@ -199,26 +190,22 @@ $cities = $pdo->query("SELECT * FROM cities ORDER BY name ASC")->fetchAll();
                     </div>
                 </div>
 
+                <!-- Settings -->
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Settings</h6></div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Subscription Tier</label>
-                            <select name="subscription_tier" class="form-select">
-                                <option value="free">Free</option>
-                                <option value="silver">Silver</option>
-                                <option value="gold">Gold</option>
-                            </select>
+                        <select name="subscription_tier" class="form-select mb-3">
+                            <option value="free">Free</option>
+                            <option value="silver">Silver</option>
+                            <option value="gold">Gold</option>
+                        </select>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" name="is_verified" value="1">
+                            <label class="form-check-label">Verified</label>
                         </div>
                         <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" name="is_verified" value="1" id="verifyCheck">
-                            <label class="form-check-label" for="verifyCheck">Verify Listing</label>
+                            <input class="form-check-input" type="checkbox" name="is_featured" value="1">
+                            <label class="form-check-label">Featured</label>
                         </div>
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="featureCheck">
-                            <label class="form-check-label" for="featureCheck">Feature on Homepage</label>
-                        </div>
-                        <hr>
                         <button type="submit" class="btn btn-primary w-100 fw-bold">Create Listing</button>
                     </div>
                 </div>
@@ -226,36 +213,41 @@ $cities = $pdo->query("SELECT * FROM cities ORDER BY name ASC")->fetchAll();
         </div>
     </form>
 </main>
-</div> <!-- Close Wrapper -->
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    let projectCount = 0;
+    // Include Cities Data for JS
+    const citiesData = <?php echo json_encode($cities); ?>;
     
+    // Project Logic (Keep existing)
+    let projectCount = 0;
     function addProject() {
-        const container = document.getElementById('projects_container');
         const html = `
-            <div class="border rounded p-3 mb-3 position-relative project-row" id="project_${projectCount}">
-                <button type="button" class="btn-close position-absolute top-0 end-0 m-2" onclick="removeProject(${projectCount})"></button>
-                <div class="mb-2">
-                    <input type="text" name="projects[${projectCount}][title]" class="form-control form-control-sm fw-bold" placeholder="Project Title">
-                </div>
-                <div class="mb-0">
-                    <textarea name="projects[${projectCount}][description]" class="form-control form-control-sm" rows="2" placeholder="Short description..."></textarea>
-                </div>
-            </div>
-        `;
-        container.insertAdjacentHTML('beforeend', html);
+            <div class="border rounded p-2 mb-2 position-relative" id="proj_${projectCount}">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-1" onclick="document.getElementById('proj_${projectCount}').remove()"></button>
+                <input type="text" name="projects[${projectCount}][title]" class="form-control form-control-sm mb-1" placeholder="Title">
+                <textarea name="projects[${projectCount}][description]" class="form-control form-control-sm" rows="1" placeholder="Desc"></textarea>
+            </div>`;
+        document.getElementById('projects_container').insertAdjacentHTML('beforeend', html);
         projectCount++;
     }
 
-    function removeProject(id) {
-        document.getElementById('project_' + id).remove();
+    // Branch Logic
+    let branchCount = 0;
+    function addBranch() {
+        let options = '<option value="">Select City...</option>';
+        citiesData.forEach(c => { options += `<option value="${c.id}">${c.name}</option>`; });
+
+        const html = `
+            <div class="border rounded p-2 mb-2 position-relative bg-light" id="branch_${branchCount}">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-1" onclick="document.getElementById('branch_${branchCount}').remove()"></button>
+                <select name="branches[${branchCount}][city_id]" class="form-select form-select-sm mb-1">${options}</select>
+                <input type="text" name="branches[${branchCount}][address]" class="form-control form-control-sm" placeholder="Branch Address">
+            </div>`;
+        document.getElementById('branches_container').insertAdjacentHTML('beforeend', html);
+        branchCount++;
     }
     
-    // Add one empty project row on load
+    // Init
     addProject();
+    addBranch();
 </script>
-</body>
-</html>

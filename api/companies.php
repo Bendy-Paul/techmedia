@@ -8,6 +8,7 @@ $perPage = isset($_GET['per_page']) ? max(1, intval($_GET['per_page'])) : 9;
 $offset = ($page - 1) * $perPage;
 
 $category = isset($_GET['category_id']) ? trim($_GET['category_id']) : null;
+$selected_categories = isset($_GET['categories']) ? (array)$_GET['categories'] : [];
 $search = isset($_GET['search']) ? trim($_GET['search']) : null;
 $state= isset($_GET['location']) ? trim($_GET['location']) : null;
 $verified = isset($_GET['verified']) ? trim($_GET['verified']) : null;
@@ -17,10 +18,21 @@ $team_size = isset($_GET['team_size']) ? trim($_GET['team_size']) : null;
 $where = [];
 $params = [];
 
+$state_where = [];
+$state_params = [];
+
 if ($category) {
     $where[] = 'cat.category_id  = ?';
     $params[] = $category;
 }
+
+if (!empty($selected_categories)) {
+    foreach ($selected_categories as $cat_id) {
+        $state_where[] = 'cat.category_id  = ?';
+        $state_params[] = $cat_id;
+    }
+}
+
 if ($state) {
     $where[] = 'c.state_id = ?';
     $params[] = $state;
@@ -62,15 +74,17 @@ if ($search) {
     $params[] = "%$search%";
 }
 $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+$whereSql .= $state_where ? ($where ? ' AND ' : ' WHERE ') . '(' . implode(' OR ', $state_where) . ')' : '';
+$params = array_merge($params, $state_params);
 
 // Get total count
-$countSql = "SELECT COUNT(*) FROM companies c LEFT JOIN company_categories cat ON c.id = cat.company_id $whereSql";
+$countSql = "SELECT COUNT(DISTINCT c.id) FROM companies c LEFT JOIN company_categories cat ON c.id = cat.company_id $whereSql";
 $stmt = $pdo->prepare($countSql);
 $stmt->execute($params);
 $total = $stmt->fetchColumn();
 
 // Get paginated companies
-$sql = "SELECT c.* FROM companies c LEFT JOIN company_categories cat ON c.id = cat.company_id $whereSql ORDER BY c.name ASC LIMIT $perPage OFFSET $offset";
+$sql = "SELECT DISTINCT c.* FROM companies c LEFT JOIN company_categories cat ON c.id = cat.company_id $whereSql ORDER BY c.name ASC LIMIT $perPage OFFSET $offset";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $companies = $stmt->fetchAll(PDO::FETCH_ASSOC);

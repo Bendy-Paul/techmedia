@@ -350,7 +350,23 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                         <p><?= nl2br(htmlspecialchars($company['description'])) ?></p>
                     </div>
                 </div>
-                
+
+                <!-- Tech Stack & Tools -->
+                <?php
+                    // Fetch stack_ids as array
+                    $stack_ids = json_decode($company['stack_ids'] ?? '[]', true);
+                    if (!is_array($stack_ids)) $stack_ids = [];
+                    $stacks = [];
+                    if (count($stack_ids) > 0) {
+                        $in = str_repeat('?,', count($stack_ids) - 1) . '?';
+                        $sql = "SELECT * FROM stacks WHERE id IN ($in) ORDER BY FIELD(id, " . implode(",", array_map('intval', $stack_ids)) . ")";
+                        $stmt = $pdo->prepare($sql);
+                        $stmt->execute($stack_ids);
+                        $stacks = $stmt->fetchAll();
+                    }
+                ?>
+
+
                 <!-- Competitive Analytics (Charts) -->
                 <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="100">
                     <h3 class="fw-bold mb-4">Performance Analytics</h3>
@@ -495,6 +511,25 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                         </p>
                     </div>
                 </div>
+
+                <?php if(count($stacks) > 0): ?>
+                    <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="120">
+                        <h3 class="fw-bold mb-4">Tech Stack & Tools</h3>
+                        <div class="row g-3 align-items-center">
+                            <?php foreach($stacks as $stack): ?>
+                            <div class="col-lg-4 mb-2">
+                                <div class="text-center gap-2">
+                                    <span style="font-size:1.7rem;"><i class="<?= htmlspecialchars($stack['icon_class'] ?? 'fas fa-code') ?> text-primary"></i></span><br>
+                                    <span class="fw-semibold small"><?= htmlspecialchars($stack['name']) ?></span>
+                                    <?php if(!empty($stack['category'])): ?>
+                                        <!-- <span class="badge bg-light text-dark border ms-1 small"><?= htmlspecialchars($stack['category']) ?></span> -->
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
                 
                 <!-- Profile Strength -->
                 <div class="info-card mb-4" data-aos="fade-left" data-aos-delay="100">
@@ -560,12 +595,29 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                 
                 <!-- Location Map (Placeholder logic) -->
                 <div class="info-card" data-aos="fade-left" data-aos-delay="300">
-                    <h4 class="fw-bold mb-4">Office Location</h4>
+                    <h4 class="fw-bold mb-4">Office Locations</h4>
                     <div class="bg-light rounded-3 p-3 mb-3">
                         <p class="fw-bold mb-2">Headquarters</p>
                         <p class="mb-2"><i class="fas fa-map-marker-alt text-primary me-2"></i> <?= nl2br(htmlspecialchars($company['address'])) ?></p>
                         <p class="mb-0"><?= htmlspecialchars($company['city_name']) ?></p>
                     </div>
+                    <?php
+                        // Fetch branch locations (excluding HQ)
+                        $branchStmt = $pdo->prepare("SELECT l.*, c.name as city_name FROM company_locations l LEFT JOIN cities c ON l.city_id = c.id WHERE l.company_id = ?");
+                        $branchStmt->execute([$company['id']]);
+                        $branches = $branchStmt->fetchAll();
+                    ?>
+                    <?php if(count($branches) > 0): ?>
+                        <div class="mb-3">
+                            <p class="fw-bold mb-2">Branches</p>
+                            <?php foreach($branches as $branch): ?>
+                                <div class="border rounded p-2 mb-2 bg-white">
+                                    <span class="fw-semibold"><i class="fas fa-map-marker-alt text-secondary me-1"></i> <?= htmlspecialchars($branch['city_name']) ?></span><br>
+                                    <span class="small text-muted"><?= nl2br(htmlspecialchars($branch['address'])) ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                     <a href="#" class="btn btn-outline-primary w-100">
                         <i class="fas fa-map me-2"></i> View Offices on Map
                     </a>

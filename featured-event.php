@@ -66,24 +66,56 @@ $duration_str = $duration->days > 0 ? $duration->days . " Days" : $duration->h .
     
     <?php include_once('links.php'); ?>
     <style>
-        /* Event Hero */
+                /* Article Hero */
         .event-hero {
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+        position: relative;
+            width: 100%;
+            height: 28rem;
+            display: flex;
+            align-items: center; /* Vertically center text */
+            justify-content: center; /* Horizontally center text */
+             overflow: hidden; /*Crucial: hides the messy edges caused by the blur */
             color: white;
-            padding: 120px 0 60px;
-            position: relative;
-            overflow: hidden;
         }
+
+        /* The Blurred Image Layer */
         .event-hero::before {
-            content: '';
+            content: "";
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.05"><polygon points="1000,100 1000,0 0,100"></polygon></svg>');
+            /* Replace with your image URL */
+            background-image: url('<?= htmlspecialchars($url_path . '/' . $event['banner_image_url']) ?>');
             background-size: cover;
+            background-position: center;
+            
+            /* 1. The Blur Effect */
+            filter: blur(5px); 
+            
+            /* 2. Scale Fix: When you blur, edges get white/faded. 
+               Scaling up slightly pushes those bad edges off-screen. */
+            transform: scale(1.1); 
+            
+            z-index: -2; /* Places it at the very back */
         }
+
+        /* The Dark Overlay Layer */
+        .event-hero::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            
+            /* Black overlay with 40% opacity */
+            background-color: rgba(52, 74, 98, 0.4); 
+            
+            z-index: -1; /* Places it above the image but behind the text */
+        }
+        
 
         .community-link {
             display: flex;
@@ -132,11 +164,12 @@ $duration_str = $duration->days > 0 ? $duration->days . " Days" : $duration->h .
             transform: translateY(-5px);
         }
         .ticket-card {
-            background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
+            /* background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent)); */
             color: white;
             border-radius: 16px;
             padding: 25px;
             text-align: center;
+            background-color: #0880f964;
         }
         .organizer-card {
             text-align: center;

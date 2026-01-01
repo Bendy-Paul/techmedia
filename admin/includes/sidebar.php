@@ -31,8 +31,13 @@
         <a href="news.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'news.php' ? 'active' : ''; ?>">
             <i class="fas fa-newspaper"></i> News / Blog
         </a>
+
         <a href="events.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'events.php' ? 'active' : ''; ?>">
             <i class="fas fa-calendar-alt"></i> Events
+        </a>
+        
+        <a href="jobs.php" class="nav-link <?= basename($_SERVER['PHP_SELF'])=='jobs.php'?'active':'' ?>">
+            <i class="fas fa-briefcase"></i> My Jobs
         </a>
 
         <div class="section-title">Settings</div>
@@ -40,6 +45,11 @@
         <a href="categories.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'categories.php' ? 'active' : ''; ?>">
             <i class="fas fa-tags"></i> Categories
         </a>
+
+        <a href="stacks.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'stacks.php' ? 'active' : ''; ?>">
+            <i class="fas fa-layer-group"></i> Tech Stacks
+        </a>
+
         <a href="locations.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'locations.php' ? 'active' : ''; ?>">
             <i class="fas fa-map-marker-alt"></i> Locations
         </a>
