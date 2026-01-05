@@ -1,0 +1,103 @@
+# Sitemap for techmedia (Generated January 5, 2026)
+
+404.html - Custom 404 error page
+about-us.php - About Us page with company information
+all-states.php - Lists all US states for navigation or filtering
+article.php - Displays a single article
+categories.php - Shows all categories for articles/events/companies
+contact-us.html - Contact form and company contact details
+event-ticker.php - Displays a ticker of upcoming events
+event.php - Displays a single event
+events.php - Lists all events
+featured-event.php - Highlights a featured event
+footer.php - Common footer for all pages
+get-listed.php - Form/page for companies to get listed
+header.php - Common header for all pages
+index.php - Homepage of the website
+job-details.php - Shows details for a specific job
+jobs.php - Lists all jobs
+links.php - Useful links or resources
+listed.php - Confirmation or list of listed companies
+login.php - User login page
+media-kit.html - Media kit and advertising info
+news.php - Lists all news articles
+note.txt - Miscellaneous notes or reminders
+premium-listed.php - Premium listing information or signup
+privacy-policy.html - Privacy policy page
+register.php - User registration page
+search-results.php - Displays search results
+states.php - Lists states or state-specific content
+terms-of-service.html - Terms of service page
+
+/admin/ - Admin dashboard and management
+  add-article.php - Admin: Add new article
+  add-company.php - Admin: Add new company
+  add-event.php - Admin: Add new event
+  add-job.php - Admin: Add new job
+  admin-create.php - Admin: Create admin user or resource
+  categories.php - Admin: Manage categories
+  companies.php - Admin: Manage companies
+  edit-article.php - Admin: Edit existing article
+  edit-company.php - Admin: Edit existing company
+  edit-event.php - Admin: Edit existing event
+  edit-job.php - Admin: Edit existing job
+  events.php - Admin: Manage events
+  index.php - Admin dashboard home
+  jobs.php - Admin: Manage jobs
+  locations.php - Admin: Manage locations
+  login.php - Admin login page
+  logout.php - Admin logout script
+  news.php - Admin: Manage news
+  reviews.php - Admin: Manage reviews
+  stacks.php - Admin: Manage technology stacks
+  /actions/ - Admin actions (CRUD operations)
+    approve-review.php - Approve user reviews
+    auth-login.php - Admin authentication logic
+    delete-article.php - Delete an article
+    delete-category.php - Delete a category
+    delete-company.php - Delete a company
+    delete-job.php - Delete a job
+    delete-location.php - Delete a location
+    delete-review.php - Delete a review
+    save-article.php - Save new article
+    save-category.php - Save new category
+    save-company.php - Save new company
+    save-event.php - Save new event
+    save-job.php - Save new job
+    save-location.php - Save new location
+    update-article.php - Update article details
+    update-company.php - Update company details
+    update-event.php - Update event details
+    update-job.php - Update job details
+    /hidden/ - Hidden admin resources
+      schema.sql - Database schema for admin features
+  /includes/ - Admin includes (shared code)
+    db.php - Database connection for admin
+    header.php - Admin header include
+    sidebar.php - Admin sidebar include
+
+/api/ - API endpoints for AJAX or external use
+  companies.php - API: Company data
+  events.php - API: Event data
+  news.php - API: News data
+
+/assets/ - Static assets (CSS, JS, images, videos)
+  /css/
+    states.css - Styles for state-related pages
+    styles.css - Main stylesheet
+  /images/ - Image assets
+  /js/
+    companies-filter.js - JS for filtering companies
+    events-filter.js - JS for filtering events
+    news-filter.js - JS for filtering news
+    states-companies.js - JS for state/company logic
+  /videos/ - Video assets
+
+/includes/ - Shared PHP includes
+  meta.php - Meta tags and SEO includes
+  wertyuytre.php - (the db.php hidden so people can't know)
+
+/uploads/ - Uploaded files
+  /articles/ - Uploaded article images/files
+  /companies/ - Uploaded company images/files
+  /events/ - Uploaded event images/files

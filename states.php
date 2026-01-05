@@ -56,6 +56,11 @@ function getCategoryName($id, $categories) {
     <title>Browse Tech Companies in <?php echo $state ? $state['name'] : 'All States'; ?> | TechMedia</title>
     <?php include_once('links.php'); ?>
     <link rel="stylesheet" href="<?= $url_path ?>/assets/css/states.css">
+    <style>
+        .pagination {
+    justify-content: center !important;
+}
+    </style>
 </head>
 
 <body data-state-slug="<?= htmlspecialchars($state['slug'] ?? '') ?>" data-state-name="<?= htmlspecialchars($state_name ?? '') ?>" data-state-id="<?= htmlspecialchars($state_id ?? '') ?>">
@@ -206,7 +211,7 @@ function getCategoryName($id, $categories) {
                 <?php endif; ?>
 
                 <div class="companies-grid" id="companies-grid"></div>
-                <div id="companies-pagination" class="mt-4"></div>
+                <div id="companies-pagination" class="mt-4 m-auto text-center"></div>
                     <?php if (count($companies) > 0): ?>
 
                     <?php else: ?>
@@ -248,6 +253,6 @@ function getCategoryName($id, $categories) {
 <script>
     window.TECHMEDIA_URL_PATH = '<?= $url_path ?>';
 </script>
-<script src="<?= $url_path ?>/assets/js/states-companies.js"></script>
+<script src="<?= $url_path ?>/assets/js/states-companies.js?3"></script>
 </body>
 </html>

@@ -54,11 +54,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <p class="company-description">
-                                ${company.description ? company.description.substring(0, 150) + (company.description.length > 150 ? '...' : '') : 'A leading company in ' + stateName + ' specializing in innovative solutions.'}
-                            </p>
-                        </div>
                         <div class="card-footer">
                             <a href="${url_path}/listed/${company.slug}" class="view-profile-btn">
                                 View Company Profile <i class="fas fa-arrow-right ml-2"></i>
@@ -101,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
             pagContainer.innerHTML = '';
             return;
         }
-        let html = '<nav class="pagination-nav"><ul class="pagination">';
+        let html = '<nav class="pagination-nav m-auto text-center"><ul class="pagination">';
         // Previous button
         html += `<li class="page-item${currentPage === 1 ? ' disabled' : ''}"><a class="page-link" href="#" data-page="${currentPage - 1}">&laquo;</a></li>`;
 
