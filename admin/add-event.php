@@ -22,6 +22,7 @@ $categories = $pdo->query("SELECT * FROM categories WHERE type = 'event' ORDER B
         <div class="row">
             <!-- Left Column -->
             <div class="col-md-8">
+                <?php csrf_field() ?>
                 <!-- Basic Info -->
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Event Details</h6></div>

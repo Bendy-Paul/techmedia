@@ -32,4 +32,6 @@ try {
     // In production, log this error to a file instead of showing it to the user
     throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
+
+include_once 'csrf_token.php';
 ?>

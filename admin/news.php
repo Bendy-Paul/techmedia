@@ -150,9 +150,13 @@ try {
                                     <a href="edit-article.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-secondary" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="actions/delete-article.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure? This cannot be undone.');" title="Delete">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
+                                    <form action="actions/delete-article.php" method="post">
+                                        <?php csrf_field() ?>
+                                        <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure? This cannot be undone.');" title="Delete">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

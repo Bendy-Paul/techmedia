@@ -44,6 +44,7 @@ try {
                 </div>
                 <div class="card-body">
                     <form action="actions/save-category.php" method="POST">
+                        <?php csrf_field() ?>
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Parent</label>
                             <select name="parent_id" class="form-select">
@@ -104,9 +105,13 @@ try {
                                 <td class="text-muted small"><?php echo htmlspecialchars($category['slug']); ?></td>
                                 <td class="text-end pe-4">
                                     <!-- Delete Button -->
-                                    <a href="actions/delete-category.php?id=<?php echo $category['id']; ?>" class="btn btn-sm btn-light text-danger" onclick="return confirm('Are you sure? Companies in this category will lose this tag.');">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
+                                    <form action="actions/delete-category.php" method="post" class="d-inline">
+                                        <?php csrf_field() ?>
+                                        <input type="hidden" name="id" value="<?php echo $category['id']; ?>">
+                                        <button type="submit" class="btn btn-sm btn-light text-danger" onclick="return confirm('Are you sure? Companies in this category will lose this tag.');">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

@@ -8,10 +8,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-if (isset($_GET['type']) && isset($_GET['id'])) {
+if (isset($_POST['type']) && isset($_POST['id']) && verify_csrf_token()) {
     
-    $type = $_GET['type'];
-    $id = (int)$_GET['id'];
+    $type = $_POST['type'];
+    $id = (int)$_POST['id'];
 
     try {
         if ($type === 'country') {

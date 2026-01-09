@@ -37,6 +37,8 @@ $companies = $pdo->query("SELECT id, name FROM companies ORDER BY name ASC")->fe
 
     <form action="actions/update-event.php" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id" value="<?= $event['id'] ?>">
+        <?php csrf_field() ?>
+
         
         <div class="row">
             <!-- Left Column -->

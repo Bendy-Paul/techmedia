@@ -30,6 +30,8 @@ $stmt_cat = $pdo->prepare("SELECT category_id FROM company_categories WHERE comp
 $stmt_cat->execute([$id]);
 $selected_cats = $stmt_cat->fetchAll(PDO::FETCH_COLUMN);
 ?>
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+
 
 <main class="main-content">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -39,6 +41,8 @@ $selected_cats = $stmt_cat->fetchAll(PDO::FETCH_COLUMN);
 
     <form action="actions/update-company.php" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id" value="<?= $company['id'] ?>">
+        <?php csrf_field() ?>
+
         
         <div class="row">
             <!-- Left -->
@@ -57,7 +61,18 @@ $selected_cats = $stmt_cat->fetchAll(PDO::FETCH_COLUMN);
                         </div>
                         <div class="mb-3">
                             <label class="small text-muted">Description</label>
-                            <textarea name="description" class="form-control" rows="4"><?= htmlspecialchars($company['description'] ?? '') ?></textarea>
+                            <textarea name="description" class="form-control" id="ckeditor-editor" rows="15"><?= htmlspecialchars($company['description'] ?? '') ?></textarea>
+                            <div class="form-text">You can use rich text formatting.</div>
+                            <!-- CKEditor 5 WYSIWYG Editor -->
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    ClassicEditor
+                                        .create(document.querySelector('#ckeditor-editor'))
+                                        .catch(error => {
+                                            console.error(error);
+                                        });
+                                });
+                            </script>
                         </div>
                     </div>
                 </div>

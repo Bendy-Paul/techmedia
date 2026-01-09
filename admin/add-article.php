@@ -27,6 +27,7 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
         <div class="row">
             <!-- Left Column: Content -->
             <div class="col-md-8">
+                <?php csrf_field() ?>
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
                         <div class="mb-3">

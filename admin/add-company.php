@@ -7,6 +7,8 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAl
 $cities = $pdo->query("SELECT * FROM cities ORDER BY name ASC")->fetchAll();
 $stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetchAll();
 ?>
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+
 
 <main class="main-content">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -18,9 +20,12 @@ $stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetch
         <div class="row">
             <!-- Left Column -->
             <div class="col-md-8">
+                <?php csrf_field() ?>
                 <!-- Basic Info -->
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Company Details</h6></div>
+                    <div class="card-header bg-white py-3">
+                        <h6 class="fw-bold mb-0">Company Details</h6>
+                    </div>
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted">Company Name *</label>
@@ -32,17 +37,30 @@ $stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetch
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted">Description</label>
-                            <textarea name="description" class="form-control" rows="4"></textarea>
+                            <textarea name="description" class="form-control" id="ckeditor-editor" rows="15"></textarea>
+                            <div class="form-text">You can use rich text formatting.</div>
+                            <!-- CKEditor 5 WYSIWYG Editor -->
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    ClassicEditor
+                                        .create(document.querySelector('#ckeditor-editor'))
+                                        .catch(error => {
+                                            console.error(error);
+                                        });
+                                });
+                            </script>
                         </div>
                     </div>
                 </div>
 
                 <!-- Tech Stack (New) -->
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Tech Stack & Tools</h6></div>
+                    <div class="card-header bg-white py-3">
+                        <h6 class="fw-bold mb-0">Tech Stack & Tools</h6>
+                    </div>
                     <div class="card-body">
                         <div class="row g-2" style="max-height: 200px; overflow-y: auto;">
-                            <?php foreach($stacks as $stack): ?>
+                            <?php foreach ($stacks as $stack): ?>
                                 <div class="col-md-3 col-6">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="stack_ids[]" value="<?= $stack['id'] ?>" id="stack_<?= $stack['id'] ?>">
@@ -75,10 +93,12 @@ $stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetch
                     </div>
                     <div class="card-body" id="projects_container"></div>
                 </div>
-                
+
                 <!-- Gallery Section (New) -->
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Company Gallery</h6></div>
+                    <div class="card-header bg-white py-3">
+                        <h6 class="fw-bold mb-0">Company Gallery</h6>
+                    </div>
                     <div class="card-body">
                         <input type="file" name="gallery[]" class="form-control" multiple accept="image/*">
                         <div class="form-text">Upload office photos or team pictures (Multiple allowed).</div>
@@ -90,13 +110,15 @@ $stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetch
             <div class="col-md-4">
                 <!-- HQ Location -->
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Headquarters</h6></div>
+                    <div class="card-header bg-white py-3">
+                        <h6 class="fw-bold mb-0">Headquarters</h6>
+                    </div>
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="small text-muted">City</label>
                             <select name="city_id" class="form-select">
                                 <option value="">Select...</option>
-                                <?php foreach($cities as $city): ?>
+                                <?php foreach ($cities as $city): ?>
                                     <option value="<?= $city['id'] ?>"><?= htmlspecialchars($city['name']) ?></option>
                                 <?php endforeach; ?>
                             </select>
@@ -105,11 +127,11 @@ $stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetch
                             <label class="small text-muted">Address</label>
                             <textarea name="address" class="form-control" rows="2"></textarea>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-muted">Categories</label>
                             <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
-                                <?php foreach($categories as $cat): ?>
+                                <?php foreach ($categories as $cat): ?>
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="categories[]" value="<?= $cat['id'] ?>" id="cat_<?= $cat['id'] ?>">
                                         <label class="form-check-label" for="cat_<?= $cat['id'] ?>">
@@ -124,7 +146,9 @@ $stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetch
 
                 <!-- Contact & Branding -->
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Contact & Info</h6></div>
+                    <div class="card-header bg-white py-3">
+                        <h6 class="fw-bold mb-0">Contact & Info</h6>
+                    </div>
                     <div class="card-body">
                         <input type="email" name="email" class="form-control mb-2" placeholder="Email">
                         <input type="text" name="phone" class="form-control mb-2" placeholder="Phone">
@@ -142,17 +166,19 @@ $stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetch
                             </div>
                         </div>
                         <input type="number" name="starting_cost" class="form-control mb-3" placeholder="Starting Price">
-                        
+
                         <label class="small text-muted">Logo</label>
                         <input type="file" name="logo" class="form-control mb-2">
                         <label class="small text-muted">Cover</label>
                         <input type="file" name="cover" class="form-control">
                     </div>
                 </div>
-                
+
                 <!-- Social Media Links (New) -->
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Social Links</h6></div>
+                    <div class="card-header bg-white py-3">
+                        <h6 class="fw-bold mb-0">Social Links</h6>
+                    </div>
                     <div class="card-body">
                         <div class="mb-2">
                             <div class="input-group input-group-sm">
@@ -177,7 +203,9 @@ $stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetch
 
                 <!-- Profile Stats (New) -->
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Profile Stats (Manual)</h6></div>
+                    <div class="card-header bg-white py-3">
+                        <h6 class="fw-bold mb-0">Profile Stats (Manual)</h6>
+                    </div>
                     <div class="card-body">
                         <div class="mb-2">
                             <label class="form-label small text-muted mb-0">Response Rate (%)</label>
@@ -217,9 +245,10 @@ $stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetch
 <script>
     // Include Cities Data for JS
     const citiesData = <?php echo json_encode($cities); ?>;
-    
+
     // Project Logic (Keep existing)
     let projectCount = 0;
+
     function addProject() {
         const html = `
             <div class="border rounded p-2 mb-2 position-relative" id="proj_${projectCount}">
@@ -233,9 +262,12 @@ $stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetch
 
     // Branch Logic
     let branchCount = 0;
+
     function addBranch() {
         let options = '<option value="">Select City...</option>';
-        citiesData.forEach(c => { options += `<option value="${c.id}">${c.name}</option>`; });
+        citiesData.forEach(c => {
+            options += `<option value="${c.id}">${c.name}</option>`;
+        });
 
         const html = `
             <div class="border rounded p-2 mb-2 position-relative bg-light" id="branch_${branchCount}">
@@ -246,7 +278,7 @@ $stacks = $pdo->query("SELECT * FROM stacks ORDER BY category, name ASC")->fetch
         document.getElementById('branches_container').insertAdjacentHTML('beforeend', html);
         branchCount++;
     }
-    
+
     // Init
     addProject();
     addBranch();

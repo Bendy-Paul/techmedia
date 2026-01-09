@@ -7,8 +7,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-if (isset($_GET['id'])) {
-    $id = (int)$_GET['id'];
+if (isset($_POST['id']) && verify_csrf_token()) {
+    $id = (int)$_POST['id'];
     try {
         $stmt = $pdo->prepare("DELETE FROM jobs WHERE id = ?");
         $stmt->execute([$id]);

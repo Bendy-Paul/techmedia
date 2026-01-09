@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && verify_csrf_token()) {
     $id = (int)$_POST['id'];
     
     // ... (Capture standard fields like name, email, etc. same as before) ...

@@ -189,8 +189,8 @@ $socials = json_decode($company['social_links'] ?? '{}', true);
                 <!-- About Company -->
                 <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="100">
                     <h3 class="fw-bold mb-4">About Our Company</h3>
-                    <div class="text-muted">
-                        <p><?= nl2br(htmlspecialchars($company['description'])) ?></p>
+                    <div class="article-content">
+                        <p><?= nl2br($company['description']) ?></p>
                     </div>
                 </div>
                 

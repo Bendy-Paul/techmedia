@@ -56,6 +56,7 @@ $tags = $pdo->query("SELECT id, name FROM tags ORDER BY name ASC")->fetchAll();
 
     <form action="actions/update-article.php" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id" value="<?= $article['id'] ?>">
+        <?php csrf_field(); ?>
         
         <div class="row">
             <div class="col-md-8">

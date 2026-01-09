@@ -112,7 +112,11 @@ try {
                             <td class="text-muted small"><?= date('M d, Y', strtotime($job['created_at'])) ?></td>
                             <td class="text-end pe-4">
                                 <a href="edit-job.php?id=<?= $job['id'] ?>" class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i></a>
-                                <a href="actions/delete-job.php?id=<?= $job['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this job?');"><i class="fas fa-trash-alt"></i></a>
+                                <form action="actions/delete-job.php" method="post"class="d-inline"> 
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="id" value="<?= $job['id'] ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this job?');"><i class="fas fa-trash-alt"></i></button>
+                                </form>
                             </td>
                         </tr>
                         <?php endforeach; ?>

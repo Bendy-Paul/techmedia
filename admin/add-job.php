@@ -16,6 +16,7 @@ $companies = $pdo->query("SELECT id, name FROM companies ORDER BY name ASC")->fe
     </div>
 
     <form action="actions/save-job.php" method="POST">
+        <?= csrf_field() ?>
         <div class="row">
             <div class="col-md-8">
                 <div class="card border-0 shadow-sm mb-4">

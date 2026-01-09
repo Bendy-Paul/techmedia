@@ -83,6 +83,7 @@ try {
                         </div>
                         <div class="card-body">
                             <form action="actions/save-location.php" method="POST">
+                                <?= csrf_field() ?>
                                 <input type="hidden" name="type" value="country">
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">Country Name</label>
@@ -125,9 +126,14 @@ try {
                                         <td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($country['sortname']); ?></span></td>
                                         <td>+<?php echo htmlspecialchars($country['phonecode']); ?></td>
                                         <td class="text-end pe-4">
-                                            <a href="actions/delete-location.php?type=country&id=<?php echo $country['id']; ?>" class="btn btn-sm btn-light text-danger" onclick="return confirm('Are you sure? This will delete ALL states and cities in this country!');">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </a>
+                                            <form action="actions/delete-location.php" method="post">
+                                                <?= csrf_field() ?>
+                                                <input type="hidden" name="type" value="country">
+                                                <input type="hidden" name="id" value="<?php echo $country['id']; ?>">
+                                                <button type="submit" class="btn btn-sm btn-light text-danger" onclick="return confirm('Are you sure? This will delete ALL states and cities in this country!');">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -150,6 +156,7 @@ try {
                         </div>
                         <div class="card-body">
                             <form action="actions/save-location.php" method="POST">
+                                <?= csrf_field() ?>
                                 <input type="hidden" name="type" value="state">
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">Select Country</label>
@@ -196,9 +203,14 @@ try {
                                         <td class="ps-4 fw-bold"><?php echo htmlspecialchars($state['name']); ?></td>
                                         <td><?php echo htmlspecialchars($state['country_name']); ?></td>
                                         <td class="text-end pe-4">
-                                            <a href="actions/delete-location.php?type=state&id=<?php echo $state['id']; ?>" class="btn btn-sm btn-light text-danger" onclick="return confirm('Delete this state and all its cities?');">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </a>
+                                            <form action="actions/delete-location.php" method="post" class="d-inline">
+                                                <?= csrf_field() ?>
+                                                <input type="hidden" name="id" value="<?php echo $state['id']; ?>">
+                                                <input type="hidden" name="type" value="state">
+                                                <button type="submit"class="btn btn-sm btn-light text-danger" onclick="return confirm('Delete this state and all its cities?');">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -221,6 +233,7 @@ try {
                         </div>
                         <div class="card-body">
                             <form action="actions/save-location.php" method="POST">
+                                <?= csrf_field() ?>
                                 <input type="hidden" name="type" value="city">
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">Select State</label>
@@ -271,9 +284,14 @@ try {
                                         <td><?php echo htmlspecialchars($city['state_name']); ?></td>
                                         <td><small class="text-muted"><?php echo htmlspecialchars($city['country_name']); ?></small></td>
                                         <td class="text-end pe-4">
-                                            <a href="actions/delete-location.php?type=city&id=<?php echo $city['id']; ?>" class="btn btn-sm btn-light text-danger" onclick="return confirm('Delete this city?');">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </a>
+                                            <formc action="actions/delete-location.php" method="post">
+                                                <?= csrf_field() ?>
+                                                <input type="hidden" name="type" value="city">
+                                                <input type="hidden" name="id" value="<?php echo $city['id']; ?>">
+                                                <button type="submit" class="btn btn-sm btn-light text-danger" onclick="return confirm('Delete this city?');">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </formc>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>

@@ -211,9 +211,13 @@ try {
                                     <a href="edit-company.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-secondary" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="actions/delete-company.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this company? All related data (reviews, events) will also be deleted.');" title="Delete">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
+                                    <form action="actions/delete-company.php" method="POST" class="d-inline">
+                                        <?php csrf_field() ?>
+                                        <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this company? All related data (reviews, events) will also be deleted.');" title="Delete">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

@@ -29,6 +29,8 @@ $companies = $pdo->query("SELECT id, name FROM companies ORDER BY name ASC")->fe
 
     <form action="actions/update-job.php" method="POST">
         <input type="hidden" name="id" value="<?= $job['id'] ?>">
+        <?php csrf_field() ?>
+
         
         <div class="row">
             <div class="col-md-8">

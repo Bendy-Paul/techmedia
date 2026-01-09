@@ -67,15 +67,15 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($company['name']) ?> | Premium Profile</title>
-    
+
     <?php include_once('links.php'); ?>
 
     <style>
-
         .premium-badge {
             background: linear-gradient(135deg, #f59e0b, #fbbf24);
             color: white;
@@ -89,15 +89,18 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
         }
 
 
-                /* Article Hero */
+        /* Article Hero */
         .profile-header {
-        position: relative;
+            position: relative;
             width: 100%;
             height: 28rem;
             display: flex;
-            align-items: center; /* Vertically center text */
-            justify-content: center; /* Horizontally center text */
-             overflow: hidden; /*Crucial: hides the messy edges caused by the blur */
+            align-items: center;
+            /* Vertically center text */
+            justify-content: center;
+            /* Horizontally center text */
+            overflow: hidden;
+            /*Crucial: hides the messy edges caused by the blur */
             color: white;
         }
 
@@ -110,18 +113,19 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             width: 100%;
             height: 100%;
             /* Replace with your image URL */
-            background-image: url('<?= htmlspecialchars($url_path."/".$company['logo_url']) ?>');
+            background-image: url('<?= htmlspecialchars($url_path . "/" . $company['logo_url']) ?>');
             background-size: cover;
             background-position: center;
-            
+
             /* 1. The Blur Effect */
-            filter: blur(5px); 
-            
+            filter: blur(5px);
+
             /* 2. Scale Fix: When you blur, edges get white/faded. 
                Scaling up slightly pushes those bad edges off-screen. */
-            transform: scale(1.1); 
-            
-            z-index: -2; /* Places it at the very back */
+            transform: scale(1.1);
+
+            z-index: -2;
+            /* Places it at the very back */
         }
 
         /* The Dark Overlay Layer */
@@ -132,13 +136,14 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             left: 0;
             width: 100%;
             height: 100%;
-            
+
             /* Black overlay with 40% opacity */
-            background-color: rgba(52, 74, 98, 0.4); 
-            
-            z-index: -1; /* Places it above the image but behind the text */
+            background-color: rgba(52, 74, 98, 0.4);
+
+            z-index: -1;
+            /* Places it above the image but behind the text */
         }
-        
+
         .company-logo {
             width: 140px;
             height: 140px;
@@ -160,7 +165,7 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             height: 100%;
             object-fit: contain;
         }
-        
+
         .verified-badge {
             position: absolute;
             bottom: -10px;
@@ -177,7 +182,7 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
             border: 3px solid white;
         }
-        
+
         .info-card {
             background: var(--bg-card);
             border-radius: 16px;
@@ -186,11 +191,11 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             padding: 25px;
             transition: transform 0.3s ease;
         }
-        
+
         .info-card:hover {
             transform: translateY(-5px);
         }
-        
+
         .category-badge {
             background: rgba(37, 99, 235, 0.1);
             color: white;
@@ -202,15 +207,16 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             margin-bottom: 8px;
             display: inline-block;
         }
-        
-        .chart-container, canvas {
+
+        .chart-container,
+        canvas {
             position: relative;
             margin: auto;
             text-align: center;
             height: 300px;
             /* width: 100%; */
         }
-        
+
         .social-icon {
             width: 40px;
             height: 40px;
@@ -223,13 +229,13 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             text-decoration: none;
             transition: all 0.3s ease;
         }
-        
+
         .social-icon:hover {
             background: var(--primary-accent);
             color: white;
             transform: translateY(-3px);
         }
-        
+
         .gallery-item {
             height: 200px;
             border-radius: 12px;
@@ -247,23 +253,23 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             height: 100%;
             object-fit: cover;
         }
-        
+
         .project-card {
             border-radius: 12px;
             overflow: hidden;
             background: #f8fafc;
             transition: transform 0.3s ease;
         }
-        
+
         .project-card:hover {
             transform: translateY(-5px);
         }
-        
+
         .article-card {
             border-left: 4px solid var(--primary-accent);
             padding-left: 20px;
         }
-        
+
         .video-container {
             height: 400px;
             border-radius: 16px;
@@ -277,6 +283,7 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation -->
     <?php include_once('header.php'); ?>
@@ -287,16 +294,16 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             <div class="row align-items-center">
                 <div class="col-md-2 text-center text-md-start">
                     <div class="company-logo" data-aos="zoom-in">
-                        <?php if(!empty($company['logo_url'])): ?>
-                            <img src="<?= htmlspecialchars($url_path."/".$company['logo_url']) ?>" alt="<?= htmlspecialchars($company['name']) ?>">
+                        <?php if (!empty($company['logo_url'])): ?>
+                            <img src="<?= htmlspecialchars($url_path . "/" . $company['logo_url']) ?>" alt="<?= htmlspecialchars($company['name']) ?>">
                         <?php else: ?>
                             <i class="fas fa-building"></i>
                         <?php endif; ?>
-                        
-                        <?php if($company['is_verified']): ?>
-                        <div class="verified-badge">
-                            <i class="fas fa-check"></i>
-                        </div>
+
+                        <?php if ($company['is_verified']): ?>
+                            <div class="verified-badge">
+                                <i class="fas fa-check"></i>
+                            </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -305,32 +312,32 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                     <p class="lead mb-3"><?= htmlspecialchars($company['tagline']) ?></p>
                     <div class="d-flex flex-wrap mb-3">
                         <!-- Display Categories dynamically -->
-                        <?php 
-                            $catStmt = $pdo->prepare("SELECT c.name FROM categories c JOIN company_categories cc ON c.id = cc.category_id WHERE cc.company_id = ?");
-                            $catStmt->execute([$company['id']]);
-                            $cats = $catStmt->fetchAll(PDO::FETCH_COLUMN);
-                            foreach($cats as $catName) {
-                                echo '<span class="category-badge">'.htmlspecialchars($catName).'</span>';
-                            }
+                        <?php
+                        $catStmt = $pdo->prepare("SELECT c.name FROM categories c JOIN company_categories cc ON c.id = cc.category_id WHERE cc.company_id = ?");
+                        $catStmt->execute([$company['id']]);
+                        $cats = $catStmt->fetchAll(PDO::FETCH_COLUMN);
+                        foreach ($cats as $catName) {
+                            echo '<span class="category-badge">' . htmlspecialchars($catName) . '</span>';
+                        }
                         ?>
                     </div>
                     <div class="d-flex gap-3">
-                        <?php if(!empty($socials['twitter'])): ?>
+                        <?php if (!empty($socials['twitter'])): ?>
                             <a href="<?= htmlspecialchars($socials['twitter']) ?>" class="social-icon"><i class="fab fa-twitter"></i></a>
                         <?php endif; ?>
-                        <?php if(!empty($socials['linkedin'])): ?>
+                        <?php if (!empty($socials['linkedin'])): ?>
                             <a href="<?= htmlspecialchars($socials['linkedin']) ?>" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
                         <?php endif; ?>
-                        <?php if(!empty($socials['facebook'])): ?>
+                        <?php if (!empty($socials['facebook'])): ?>
                             <a href="<?= htmlspecialchars($socials['facebook']) ?>" class="social-icon"><i class="fab fa-facebook-f"></i></a>
                         <?php endif; ?>
-                         <?php if(!empty($socials['instagram'])): ?>
+                        <?php if (!empty($socials['instagram'])): ?>
                             <a href="<?= htmlspecialchars($socials['instagram']) ?>" class="social-icon"><i class="fab fa-instagram"></i></a>
                         <?php endif; ?>
                     </div>
                 </div>
                 <div class="col-md-3 text-center text-md-end" data-aos="fade-left">
-                    <?php if(!empty($company['website_url'])): ?>
+                    <?php if (!empty($company['website_url'])): ?>
                         <a href="<?= htmlspecialchars($company['website_url']) ?>" target="_blank" class="btn btn-light mb-2">Visit Website</a>
                     <?php endif; ?>
                     <p class="mb-0"><i class="fas fa-map-marker-alt me-1"></i> <?= htmlspecialchars($company['city_name'] ?? '') ?>, <?= htmlspecialchars($company['country_name'] ?? 'Nigeria') ?></p>
@@ -345,25 +352,24 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
             <div class="col-lg-8">
                 <!-- Company Overview -->
                 <div class="info-card mb-4" data-aos="fade-up">
-                    <h3 class="fw-bold mb-4">Company Overview</h3>
-                    <div class="article-content text-muted">
-                        <p><?= nl2br(htmlspecialchars($company['description'])) ?></p>
+                    <div class="article-content">
+                        <p><?= $company['description'] ?></p>
                     </div>
                 </div>
 
                 <!-- Tech Stack & Tools -->
                 <?php
-                    // Fetch stack_ids as array
-                    $stack_ids = json_decode($company['stack_ids'] ?? '[]', true);
-                    if (!is_array($stack_ids)) $stack_ids = [];
-                    $stacks = [];
-                    if (count($stack_ids) > 0) {
-                        $in = str_repeat('?,', count($stack_ids) - 1) . '?';
-                        $sql = "SELECT * FROM stacks WHERE id IN ($in) ORDER BY FIELD(id, " . implode(",", array_map('intval', $stack_ids)) . ")";
-                        $stmt = $pdo->prepare($sql);
-                        $stmt->execute($stack_ids);
-                        $stacks = $stmt->fetchAll();
-                    }
+                // Fetch stack_ids as array
+                $stack_ids = json_decode($company['stack_ids'] ?? '[]', true);
+                if (!is_array($stack_ids)) $stack_ids = [];
+                $stacks = [];
+                if (count($stack_ids) > 0) {
+                    $in = str_repeat('?,', count($stack_ids) - 1) . '?';
+                    $sql = "SELECT * FROM stacks WHERE id IN ($in) ORDER BY FIELD(id, " . implode(",", array_map('intval', $stack_ids)) . ")";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute($stack_ids);
+                    $stacks = $stmt->fetchAll();
+                }
                 ?>
 
 
@@ -371,11 +377,11 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                 <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="100">
                     <h3 class="fw-bold mb-4">Performance Analytics</h3>
                     <?php
-                        // Use metrics from profile_stats JSON
-                        $response_rate = isset($stats['response_rate']) ? (float)$stats['response_rate'] : null;
-                        $completeness = isset($stats['completeness']) ? (float)$stats['completeness'] : null;
-                        $views = isset($company['views']) ? (int)$company['views'] : null;
-                        $projects_count = isset($projects) ? count($projects) : 0;
+                    // Use metrics from profile_stats JSON
+                    $response_rate = isset($stats['response_rate']) ? (float)$stats['response_rate'] : null;
+                    $completeness = isset($stats['completeness']) ? (float)$stats['completeness'] : null;
+                    $views = isset($company['views']) ? (int)$company['views'] : null;
+                    $projects_count = isset($projects) ? count($projects) : 0;
                     ?>
                     <div class="row">
                         <div class="col-md-6 mb-4">
@@ -416,42 +422,42 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Recent Projects -->
-                <?php if(count($projects) > 0): ?>
-                <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="200">
-                    <h3 class="fw-bold mb-4">Recent Projects</h3>
-                    <div class="row">
-                        <?php foreach($projects as $project): ?>
-                        <div class="col-md-6 mb-4">
-                            <div class="project-card p-3 h-100">
-                                <h5 class="fw-bold"><?= htmlspecialchars($project['title']) ?></h5>
-                                <p class="text-muted"><?= htmlspecialchars($project['description']) ?></p>
-                                <?php if(!empty($project['image_url'])): ?>
-                                    <img src="<?= htmlspecialchars($project['image_url']) ?>" class="img-fluid rounded mt-2" alt="Project Image">
-                                <?php endif; ?>
-                            </div>
+                <?php if (count($projects) > 0): ?>
+                    <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="200">
+                        <h3 class="fw-bold mb-4">Recent Projects</h3>
+                        <div class="row">
+                            <?php foreach ($projects as $project): ?>
+                                <div class="col-md-6 mb-4">
+                                    <div class="project-card p-3 h-100">
+                                        <h5 class="fw-bold"><?= htmlspecialchars($project['title']) ?></h5>
+                                        <p class="text-muted"><?= htmlspecialchars($project['description']) ?></p>
+                                        <?php if (!empty($project['image_url'])): ?>
+                                            <img src="<?= htmlspecialchars($project['image_url']) ?>" class="img-fluid rounded mt-2" alt="Project Image">
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Company Articles -->
+                <?php if (count($company_news) > 0): ?>
+                    <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="300">
+                        <h3 class="fw-bold mb-4">Company News & Insights</h3>
+                        <?php foreach ($company_news as $news): ?>
+                            <div class="article-card mb-4">
+                                <h5 class="fw-bold"><a href="article.php?slug=<?= $news['slug'] ?>" class="text-dark text-decoration-none"><?= htmlspecialchars($news['title']) ?></a></h5>
+                                <p class="text-muted"><?= htmlspecialchars(substr(strip_tags($news['content']), 0, 150)) ?>...</p>
+                                <span class="text-muted small">Published: <?= date('F j, Y', strtotime($news['published_at'])) ?></span>
+                            </div>
                         <?php endforeach; ?>
                     </div>
-                </div>
-                <?php endif; ?>
-                
-                <!-- Company Articles -->
-                <?php if(count($company_news) > 0): ?>
-                <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="300">
-                    <h3 class="fw-bold mb-4">Company News & Insights</h3>
-                    <?php foreach($company_news as $news): ?>
-                    <div class="article-card mb-4">
-                        <h5 class="fw-bold"><a href="article.php?slug=<?= $news['slug'] ?>" class="text-dark text-decoration-none"><?= htmlspecialchars($news['title']) ?></a></h5>
-                        <p class="text-muted"><?= htmlspecialchars(substr(strip_tags($news['content']), 0, 150)) ?>...</p>
-                        <span class="text-muted small">Published: <?= date('F j, Y', strtotime($news['published_at'])) ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
                 <?php endif; ?>
             </div>
-            
+
             <!-- Sidebar -->
             <div class="col-lg-4">
                 <!-- Contact Details -->
@@ -476,27 +482,27 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Year Started</h6>
                         <?php
-                            $thisYear = (int)date('Y');
-                            $companyYear = (int)($company['year_founded'] ?? 0);
-                            $companyAge = $companyYear ? ($thisYear - $companyYear) : null;
-                            $peerAges = [];
-                            if (isset($catIdsArr) && count($catIdsArr) > 0) {
-                                $in = str_repeat('?,', count($catIdsArr)-1) . '?';
-                                $sql = "SELECT DISTINCT c.year_founded FROM companies c JOIN company_categories cc ON c.id = cc.company_id WHERE cc.category_id IN ($in) AND c.id != ? AND c.year_founded IS NOT NULL AND c.year_founded > 1900";
-                                $params = array_merge($catIdsArr, [$company['id']]);
-                                $stmt = $pdo->prepare($sql);
-                                $stmt->execute($params);
-                                foreach($stmt as $row) {
-                                    $peerYear = (int)$row['year_founded'];
-                                    if($peerYear) $peerAges[] = $thisYear - $peerYear;
-                                }
+                        $thisYear = (int)date('Y');
+                        $companyYear = (int)($company['year_founded'] ?? 0);
+                        $companyAge = $companyYear ? ($thisYear - $companyYear) : null;
+                        $peerAges = [];
+                        if (isset($catIdsArr) && count($catIdsArr) > 0) {
+                            $in = str_repeat('?,', count($catIdsArr) - 1) . '?';
+                            $sql = "SELECT DISTINCT c.year_founded FROM companies c JOIN company_categories cc ON c.id = cc.company_id WHERE cc.category_id IN ($in) AND c.id != ? AND c.year_founded IS NOT NULL AND c.year_founded > 1900";
+                            $params = array_merge($catIdsArr, [$company['id']]);
+                            $stmt = $pdo->prepare($sql);
+                            $stmt->execute($params);
+                            foreach ($stmt as $row) {
+                                $peerYear = (int)$row['year_founded'];
+                                if ($peerYear) $peerAges[] = $thisYear - $peerYear;
                             }
-                            $avgPeerAge = count($peerAges) ? round(array_sum($peerAges)/count($peerAges),1) : null;
+                        }
+                        $avgPeerAge = count($peerAges) ? round(array_sum($peerAges) / count($peerAges), 1) : null;
                         ?>
                         <p class="mb-0">
-                            <?php if($companyYear): ?>
+                            <?php if ($companyYear): ?>
                                 <?= htmlspecialchars($companyYear) ?> (<?= $companyAge ?> yrs old)
-                                <?php if($avgPeerAge !== null): ?>
+                                <?php if ($avgPeerAge !== null): ?>
                                     <br><span class="small text-muted">Category avg: <?= $avgPeerAge ?> yrs</span>
                                 <?php endif; ?>
                             <?php else: ?>
@@ -512,54 +518,54 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                     </div>
                 </div>
 
-                <?php if(count($stacks) > 0): ?>
+                <?php if (count($stacks) > 0): ?>
                     <div class="info-card mb-4" data-aos="fade-up" data-aos-delay="120">
                         <h3 class="fw-bold mb-4">Tech Stack & Tools</h3>
                         <div class="row g-3 align-items-center">
-                            <?php foreach($stacks as $stack): ?>
-                            <div class="col-lg-4 mb-2">
-                                <div class="text-center gap-2">
-                                    <span style="font-size:1.7rem;"><i class="<?= htmlspecialchars($stack['icon_class'] ?? 'fas fa-code') ?> text-primary"></i></span><br>
-                                    <span class="fw-semibold small"><?= htmlspecialchars($stack['name']) ?></span>
-                                    <?php if(!empty($stack['category'])): ?>
-                                        <!-- <span class="badge bg-light text-dark border ms-1 small"><?= htmlspecialchars($stack['category']) ?></span> -->
-                                    <?php endif; ?>
+                            <?php foreach ($stacks as $stack): ?>
+                                <div class="col-lg-4 mb-2">
+                                    <div class="text-center gap-2">
+                                        <span style="font-size:1.7rem;"><i class="<?= htmlspecialchars($stack['icon_class'] ?? 'fas fa-code') ?> text-primary"></i></span><br>
+                                        <span class="fw-semibold small"><?= htmlspecialchars($stack['name']) ?></span>
+                                        <?php if (!empty($stack['category'])): ?>
+                                            <!-- <span class="badge bg-light text-dark border ms-1 small"><?= htmlspecialchars($stack['category']) ?></span> -->
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-                            </div>
                             <?php endforeach; ?>
                         </div>
                     </div>
                 <?php endif; ?>
-                
+
                 <!-- Profile Strength -->
                 <div class="info-card mb-4" data-aos="fade-left" data-aos-delay="100">
                     <h4 class="fw-bold mb-4">Profile Strength</h4>
                     <?php
-                        // Calculate profile strength (example: based on completeness of key fields)
-                        $fields = ['name','tagline','description','email','phone','website_url','year_founded','team_size','logo_url', 'address'];
-                        $filled = 0;
-                        foreach($fields as $f) if(!empty($company[$f])) $filled++;
-                        $profile_strength = round(($filled/count($fields))*100);
+                    // Calculate profile strength (example: based on completeness of key fields)
+                    $fields = ['name', 'tagline', 'description', 'email', 'phone', 'website_url', 'year_founded', 'team_size', 'logo_url', 'address'];
+                    $filled = 0;
+                    foreach ($fields as $f) if (!empty($company[$f])) $filled++;
+                    $profile_strength = round(($filled / count($fields)) * 100);
 
-                        // Get average profile strength for companies in the same categories
-                        $catIds = $pdo->prepare("SELECT category_id FROM company_categories WHERE company_id = ?");
-                        $catIds->execute([$company['id']]);
-                        $catIdsArr = $catIds->fetchAll(PDO::FETCH_COLUMN);
-                        $avgStrength = null;
-                        if (count($catIdsArr) > 0) {
-                            $in = str_repeat('?,', count($catIdsArr)-1) . '?';
-                            $sql = "SELECT c.id, c.name, c.logo_url, c.tagline, c.description, c.email, c.phone, c.website_url, c.year_founded, c.team_size, c.starting_cost, c.address FROM companies c JOIN company_categories cc ON c.id = cc.company_id WHERE cc.category_id IN ($in) AND c.id != ?";
-                            $params = array_merge($catIdsArr, [$company['id']]);
-                            $peers = $pdo->prepare($sql);
-                            $peers->execute($params);
-                            $peerStrengths = [];
-                            foreach($peers as $peer) {
-                                $peerFilled = 0;
-                                foreach($fields as $f) if(!empty($peer[$f])) $peerFilled++;
-                                $peerStrengths[] = round(($peerFilled/count($fields))*100);
-                            }
-                            $avgStrength = count($peerStrengths) ? round(array_sum($peerStrengths)/count($peerStrengths)) : null;
+                    // Get average profile strength for companies in the same categories
+                    $catIds = $pdo->prepare("SELECT category_id FROM company_categories WHERE company_id = ?");
+                    $catIds->execute([$company['id']]);
+                    $catIdsArr = $catIds->fetchAll(PDO::FETCH_COLUMN);
+                    $avgStrength = null;
+                    if (count($catIdsArr) > 0) {
+                        $in = str_repeat('?,', count($catIdsArr) - 1) . '?';
+                        $sql = "SELECT c.id, c.name, c.logo_url, c.tagline, c.description, c.email, c.phone, c.website_url, c.year_founded, c.team_size, c.starting_cost, c.address FROM companies c JOIN company_categories cc ON c.id = cc.company_id WHERE cc.category_id IN ($in) AND c.id != ?";
+                        $params = array_merge($catIdsArr, [$company['id']]);
+                        $peers = $pdo->prepare($sql);
+                        $peers->execute($params);
+                        $peerStrengths = [];
+                        foreach ($peers as $peer) {
+                            $peerFilled = 0;
+                            foreach ($fields as $f) if (!empty($peer[$f])) $peerFilled++;
+                            $peerStrengths[] = round(($peerFilled / count($fields)) * 100);
                         }
+                        $avgStrength = count($peerStrengths) ? round(array_sum($peerStrengths) / count($peerStrengths)) : null;
+                    }
                     ?>
                     <div class="mb-2">
                         <div class="progress" style="height: 28px; background: #e5e7eb;">
@@ -569,30 +575,30 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                         </div>
                     </div>
                     <div class="small text-muted">
-                        <?php if($avgStrength !== null): ?>
+                        <?php if ($avgStrength !== null): ?>
                             <span>Your profile is <b><?= $profile_strength ?>%</b> complete. Category average: <b><?= $avgStrength ?>%</b>.</span>
                         <?php else: ?>
                             <span>Your profile is <b><?= $profile_strength ?>%</b> complete.</span>
                         <?php endif; ?>
                     </div>
                 </div>
-                
+
                 <!-- Gallery -->
-                <?php if(count($gallery) > 0): ?>
-                <div class="info-card mb-4" data-aos="fade-left" data-aos-delay="200">
-                    <h4 class="fw-bold mb-4">Gallery</h4>
-                    <div class="row g-2">
-                        <?php foreach($gallery as $img): ?>
-                        <div class="col-6">
-                            <div class="gallery-item">
-                                <img src="<?= htmlspecialchars($img['image_url']) ?>" alt="Gallery" style="width: 100%; height: 100%; object-fit: cover;">
-                            </div>
+                <?php if (count($gallery) > 0): ?>
+                    <div class="info-card mb-4" data-aos="fade-left" data-aos-delay="200">
+                        <h4 class="fw-bold mb-4">Gallery</h4>
+                        <div class="row g-2">
+                            <?php foreach ($gallery as $img): ?>
+                                <div class="col-6">
+                                    <div class="gallery-item">
+                                        <img src="<?= htmlspecialchars($img['image_url']) ?>" alt="Gallery" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
-                        <?php endforeach; ?>
                     </div>
-                </div>
                 <?php endif; ?>
-                
+
                 <!-- Location Map (Placeholder logic) -->
                 <div class="info-card" data-aos="fade-left" data-aos-delay="300">
                     <h4 class="fw-bold mb-4">Office Locations</h4>
@@ -602,15 +608,15 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
                         <p class="mb-0"><?= htmlspecialchars($company['city_name']) ?></p>
                     </div>
                     <?php
-                        // Fetch branch locations (excluding HQ)
-                        $branchStmt = $pdo->prepare("SELECT l.*, c.name as city_name FROM company_locations l LEFT JOIN cities c ON l.city_id = c.id WHERE l.company_id = ?");
-                        $branchStmt->execute([$company['id']]);
-                        $branches = $branchStmt->fetchAll();
+                    // Fetch branch locations (excluding HQ)
+                    $branchStmt = $pdo->prepare("SELECT l.*, c.name as city_name FROM company_locations l LEFT JOIN cities c ON l.city_id = c.id WHERE l.company_id = ?");
+                    $branchStmt->execute([$company['id']]);
+                    $branches = $branchStmt->fetchAll();
                     ?>
-                    <?php if(count($branches) > 0): ?>
+                    <?php if (count($branches) > 0): ?>
                         <div class="mb-3">
                             <p class="fw-bold mb-2">Branches</p>
-                            <?php foreach($branches as $branch): ?>
+                            <?php foreach ($branches as $branch): ?>
                                 <div class="border rounded p-2 mb-2 bg-white">
                                     <span class="fw-semibold"><i class="fas fa-map-marker-alt text-secondary me-1"></i> <?= htmlspecialchars($branch['city_name']) ?></span><br>
                                     <span class="small text-muted"><?= nl2br(htmlspecialchars($branch['address'])) ?></span>
@@ -629,9 +635,10 @@ $stats = json_decode($company['profile_stats'] ?? '{}', true);
     <?php include_once('footer.php'); ?>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <script>
         // No charts needed for metrics cards
     </script>
 </body>
+
 </html>

@@ -4,7 +4,7 @@ require '../includes/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') { header("Location: ../login.php"); exit(); }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && verify_csrf_token()) {
     $id = (int)$_POST['id'];
     
     // Basic Fields

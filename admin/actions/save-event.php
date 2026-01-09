@@ -2,7 +2,7 @@
 session_start();
 require '../includes/db.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && verify_csrf_token()) {
     
     // Basic Data
     $title = trim($_POST['title']);

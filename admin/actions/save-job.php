@@ -2,12 +2,12 @@
 session_start();
 require '../includes/db.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin' ) {
     header("Location: ../login.php");
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && verify_csrf_token()) {
     
     $title = trim($_POST['title']);
     $desc = $_POST['description'];

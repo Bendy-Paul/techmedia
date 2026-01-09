@@ -20,4 +20,5 @@ try {
 }
 
 $url_path = 'http://localhost/techmedia';
+include_once 'csrf_token.php';
 ?>
