@@ -3,8 +3,8 @@ require 'includes/wertyuytre.php';
 session_start();
 
 if (isset($_SESSION['user_id'])) {
-    header("Location: index.php");
-    exit();
+    // header("Location: ../index.php");
+    // exit();
 }
 
 $error = '';
@@ -21,24 +21,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password_hash'])) {
-            if ($user['is_active'] == 0) {
-                $error = "Your account has been deactivated.";
-            } else {
+           
                 // Set Session
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_name'] = $user['full_name'];
                 $_SESSION['user_role'] = $user['role'];
+                $_SESSION['user_status'] = $user['is_active'];
 
                 // Redirect based on role
                 if ($user['role'] == 'admin') {
                     header("Location: admin/index.php");
                 } elseif ($user['role'] == 'company_owner') {
-                    header("Location: dashboard/index.php");
+                    header("Location: company-dashboard/index.php");
                 } else {
-                    header("Location: index.php");
+                    header("Location: user-dashboard.php"); 
                 }
                 exit();
-            }
+            
         } else {
             $error = "Invalid email or password.";
         }

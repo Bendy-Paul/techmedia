@@ -442,6 +442,14 @@ $categories = $pdo->query("
                         <a href="#" onclick="navigator.clipboard.writeText(window.location.href); alert('Link copied!'); return false;" class="social-btn"><i class="fas fa-link"></i></a>
                     </div>
                 </div>
+
+                <?php
+                // Include Reviews Section  
+                $item_type = 'article';
+                $item_id = $article['id'];
+                include_once(__DIR__ . '/includes/reviews.php');
+                ?>
+                
             </div>
 
             <!-- Sidebar -->

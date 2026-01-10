@@ -10,6 +10,10 @@ $categories = $pdo->query("SELECT DISTINCT * FROM categories WHERE type='company
 
 // Get selected state
 $slug = isset($_GET['slug']) ? $_GET['slug'] : null;
+if (!isset($_GET['slug'])) {
+    header("Location: all-states.php");
+    exit();
+}
 $selected_categories = isset($_GET['categories']) ? (array)$_GET['categories'] : [];
 
 $companies = [];
